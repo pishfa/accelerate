@@ -198,7 +198,7 @@ public class Initializer {
 
 			if (stack.isEmpty()) {
 				throw new IllegalArgumentException("First level element " + propName
-						+ " can not be a property of an object it must be a alias of a class");
+						+ " must be an alias of a class but no class with this alias is found.");
 			}
 			entityObj = PropertyUtils.getProperty(stack.peek(), propName);
 			if (entityObj == null) {

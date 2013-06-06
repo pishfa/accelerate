@@ -52,6 +52,10 @@ public @interface InitProperty {
 	 */
 	public String value() default "";
 
+	/**
+	 * 
+	 * @return an alias to be used in xml instead of this property original name
+	 */
 	public String alias() default "";
 
 	/**

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<config>
+<config xmlns="http://pishfa.co" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pishfa.co initializer-config.xsd">
 	<entity class="co.pishfa.accelerate.initializer.noannotation.Author">
 	</entity>
 	<entity class="co.pishfa.accelerate.initializer.noannotation.Category">

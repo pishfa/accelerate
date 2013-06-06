@@ -3,9 +3,11 @@
  */
 package co.pishfa.accelerate.initializer;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +17,9 @@ import javax.el.ExpressionFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
+import org.jdom2.Namespace;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaderXSDFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +34,7 @@ import de.odysseus.el.ExpressionFactoryImpl;
 public class InitializerFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(InitializerFactory.class);
+	private static final Namespace PISHFA_NS = Namespace.getNamespace("http://pishfa.co");
 
 	private final Map<String, InitEntityMetaData> aliasToInitEntity = new HashMap<>();
 	// TODO expression factory should be loaded using service discovery and it should be optional
@@ -160,10 +165,13 @@ public class InitializerFactory {
 		return initPropertyMetaData;
 	}
 
-	private void processConfigFile(InputStream configFile) throws JDOMException, IOException, ClassNotFoundException {
-		SAXBuilder builder = new SAXBuilder();
+	private void processConfigFile(InputStream configFile) throws JDOMException, IOException, ClassNotFoundException,
+			URISyntaxException {
+		File xsd = new File(getClass().getResource("/initializer-config.xsd").toURI());
+		XMLReaderXSDFactory xsdFactory = new XMLReaderXSDFactory(xsd);
+		SAXBuilder builder = new SAXBuilder(xsdFactory);
 		Element config = builder.build(configFile).getRootElement();
-		for (Element entityElem : config.getChildren("entity")) {
+		for (Element entityElem : config.getChildren("entity", PISHFA_NS)) {
 			String entityClazz = entityElem.getAttributeValue("class");
 			String entityAlias = entityElem.getAttributeValue("alias");
 			if (StringUtils.isEmpty(entityAlias)) {
@@ -193,7 +201,7 @@ public class InitializerFactory {
 			}
 			addInitEntity(initEntity);
 			// read properties of an entity
-			for (Element propertyElem : entityElem.getChildren("property")) {
+			for (Element propertyElem : entityElem.getChildren("property", PISHFA_NS)) {
 				String propName = propertyElem.getAttributeValue("name");
 				String propAlias = propertyElem.getAttributeValue("alias");
 				String propDefault = propertyElem.getAttributeValue("default");
