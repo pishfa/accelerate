@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<load>
+		<Author name="taha"/>
+	</load>
+	<Category name="development">
+		<Book name="test" author="@Author:taha" category="@parent(1)"/>
+		<include src="test_init_1_include.xml" />
+		<Book name="test3" author="@taha">
+			<Book name="test4" author="@taha" category="@parent"/>
+		</Book>
+		<Book name="test5" author="@ghasemi?"/>
+		<Book name="test6" author="@parent?"/>
+	</Category>
+</data>
