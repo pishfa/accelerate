@@ -1,7 +1,7 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer.noannotation;
+package co.pishfa.accelerate.initializer.xml;
 
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -45,6 +45,18 @@ public class InitializerTester {
 	public void seUpBefore() {
 		listener = mock(InitListener.class);
 		initializer = factory.create(listener);
+	}
+
+	@Test(expected = Exception.class)
+	public void testNonConformingConfig() throws Exception {
+		factory = new InitializerFactory(getClass().getResourceAsStream("/test_bad_config_1.xml"), null, false, true,
+				"name");
+	}
+
+	@Test(expected = Exception.class)
+	public void testNoXsdConfig() throws Exception {
+		factory = new InitializerFactory(getClass().getResourceAsStream("/test_bad_config_2.xml"), null, false, true,
+				"name");
 	}
 
 	/**

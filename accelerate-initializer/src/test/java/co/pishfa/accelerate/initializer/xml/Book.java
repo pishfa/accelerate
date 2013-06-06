@@ -1,7 +1,7 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer.noannotation;
+package co.pishfa.accelerate.initializer.xml;
 
 
 /**

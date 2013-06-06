@@ -1,13 +1,13 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer.noannotation;
+package co.pishfa.accelerate.initializer.xml;
 
 /**
  * @author Taha Ghasemi
  * 
  */
-public class Author {
+public class Category {
 
 	private String name;
 

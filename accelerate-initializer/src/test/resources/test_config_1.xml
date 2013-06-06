@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config xmlns="http://pishfa.co" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pishfa.co initializer-config.xsd">
-	<entity class="co.pishfa.accelerate.initializer.noannotation.Author">
+	<entity class="co.pishfa.accelerate.initializer.xml.Author">
 	</entity>
-	<entity class="co.pishfa.accelerate.initializer.noannotation.Category">
+	<entity class="co.pishfa.accelerate.initializer.xml.Category">
 	</entity>
-	<entity class="co.pishfa.accelerate.initializer.noannotation.Book" alias="book">
+	<entity class="co.pishfa.accelerate.initializer.xml.Book" alias="book">
 		<property name="name" dynamic="false" />
 		<property name="fullName" default="Book #{this.name}" />
 	</entity>
