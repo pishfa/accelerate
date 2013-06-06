@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+	<entity class="co.pishfa.accelerate.initializer.noannotation.Author">
+	</entity>
+	<entity class="co.pishfa.accelerate.initializer.noannotation.Category">
+	</entity>
+	<entity class="co.pishfa.accelerate.initializer.noannotation.Book" alias="book">
+		<property name="name" dynamic="false" />
+		<property name="fullName" default="Book #{this.name}" />
+	</entity>
+</config>

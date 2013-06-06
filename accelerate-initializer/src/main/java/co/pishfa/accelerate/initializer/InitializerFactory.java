@@ -51,6 +51,8 @@ public class InitializerFactory {
 	 *              &lt;/entity&gt;
 	 *            &lt;/config&gt;
 	 * </pre>
+	 * 
+	 *            . Note that you are responsible to closing this resource.
 	 * @param entityClasses
 	 *            optional list of classes for annotation processing
 	 * @param incremental
@@ -97,17 +99,19 @@ public class InitializerFactory {
 	public void processEntityClass(Class<?> entityClass) {
 		InitEntity initEntity = entityClass.getAnnotation(InitEntity.class);
 		String unique = null;
+		String alias = null;
 		if (initEntity != null) {
 			unique = StringUtils.defaultIfEmpty(initEntity.unique(), null);
+			alias = initEntity.alias();
 		}
-		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(entityClass.getSimpleName(), entityClass, unique);
+		alias = StringUtils.defaultIfEmpty(alias, entityClass.getSimpleName());
+		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(alias, entityClass, unique);
 		addInitEntity(initEntityMetaData);
 		addInitProperties(entityClass, initEntityMetaData);
 	}
 
 	/**
-	 * adds the init properties of given entityClass plus all its parents that annotated with {@link InitEntity} or
-	 * {@link Entity} or {@link MappedSuperclass}.
+	 * adds the init properties of given entityClass plus all its parents that annotated with {@link InitEntity} .
 	 */
 	protected void addInitProperties(Class<?> entityClass, InitEntityMetaData initEntityMetaData) {
 		Class<?> parent = entityClass.getSuperclass();
@@ -195,7 +199,7 @@ public class InitializerFactory {
 				String propDefault = propertyElem.getAttributeValue("default");
 				String propDynamic = propertyElem.getAttributeValue("dynamic");
 				InitPropertyMetaData initProperty = new InitPropertyMetaData(propName, StringUtils.defaultString(
-						propAlias, propName), propDefault, "true".equals(propDynamic));
+						propAlias, propName), propDefault, !"false".equals(propDynamic));
 				initEntity.addProperty(initProperty);
 			}
 		}

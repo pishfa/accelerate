@@ -20,7 +20,6 @@ public class InitEntityMetaData {
 	private final List<InitPropertyMetaData> properties = new ArrayList<InitPropertyMetaData>();
 
 	public InitEntityMetaData(String alias, Class<?> entityClass, String unique) {
-		super();
 		this.alias = alias;
 		this.entityClass = entityClass;
 		this.unique = unique;

@@ -1,21 +1,18 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.noannotation;
+
 
 /**
  * @author Taha Ghasemi
  * 
  */
-@InitEntity(alias = "book")
 public class Book {
 
-	@InitProperty(dynamic = false)
 	private String name;
 	private Author author;
 	private Category category;
-
-	@InitProperty("Book #{this.name}")
 	private String fullName;
 
 	public String getName() {

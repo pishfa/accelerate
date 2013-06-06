@@ -24,13 +24,19 @@ public @interface InitEntity {
 	 * @return additional properties for this entity. Can be used to override properties of parent or properties without
 	 *         a field
 	 */
-	public InitProperty[] value() default {};
+	InitProperty[] value() default {};
 
 	/**
 	 * 
 	 * @return the name of property or comma separated name of properties whose value(s) specify a unique instance of
 	 *         this entity. Can be *.
 	 */
-	public String unique() default "";
+	String unique() default "";
+
+	/**
+	 * @return the entity alias name which will be used in the xml. If not specified, the class simple name will be used
+	 *         as the alias.
+	 */
+	String alias() default "";
 
 }

@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data>
-	<Book name="test2" author="@Author:taha" category="@parent(1)"/>
+	<book name="test2" author="@Author:taha" category="@parent(1)"/>
 </data>

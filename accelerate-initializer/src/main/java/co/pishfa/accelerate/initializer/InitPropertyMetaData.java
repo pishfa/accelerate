@@ -15,8 +15,8 @@ public class InitPropertyMetaData {
 	private final boolean dynamic;
 
 	public InitPropertyMetaData(String name, String alias, String defaultValue, boolean dynamic) {
-		Validate.notNull(name);
-		Validate.notNull(alias);
+		Validate.notNull(name, "Name of property is required");
+		Validate.notNull(alias, "Alias of property is required");
 
 		this.name = name;
 		this.alias = alias;
