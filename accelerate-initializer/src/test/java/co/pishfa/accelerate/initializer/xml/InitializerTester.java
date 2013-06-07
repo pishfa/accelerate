@@ -6,8 +6,6 @@ package co.pishfa.accelerate.initializer.xml;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.io.InputStream;
-
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
@@ -35,10 +33,7 @@ public class InitializerTester {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		try (InputStream config = Thread.currentThread().getContextClassLoader()
-				.getResourceAsStream("test_config_1.xml")) {
-			factory = new InitializerFactory(config, null, false, true, "name");
-		}
+		factory = new InitializerFactory().configFile("test_config_1.xml").uniquePropertyName("name");
 	}
 
 	@Before
@@ -49,14 +44,12 @@ public class InitializerTester {
 
 	@Test(expected = Exception.class)
 	public void testNonConformingConfig() throws Exception {
-		factory = new InitializerFactory(getClass().getResourceAsStream("/test_bad_config_1.xml"), null, false, true,
-				"name");
+		new InitializerFactory().configFile("test_bad_config_1.xml");
 	}
 
 	@Test(expected = Exception.class)
 	public void testNoXsdConfig() throws Exception {
-		factory = new InitializerFactory(getClass().getResourceAsStream("/test_bad_config_2.xml"), null, false, true,
-				"name");
+		new InitializerFactory().configFile("test_bad_config_2.xml");
 	}
 
 	/**
@@ -70,7 +63,7 @@ public class InitializerTester {
 		author.setName("taha");
 		when(listener.findEntity(any(InitEntityMetaData.class), any(String[].class), any(Object[].class))).thenReturn(
 				author);
-		initializer.read(Thread.currentThread().getContextClassLoader().getResourceAsStream("test_init_1.xml"));
+		initializer.read(getClass().getResourceAsStream("/test_init_1.xml"));
 
 		BaseMatcher<Book> fullNameMatcher = new TypeSafeMatcher<Book>() {
 

@@ -6,9 +6,6 @@ package co.pishfa.accelerate.initializer;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.junit.Before;
@@ -31,8 +28,8 @@ public class InitializerTester {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		List<Class<?>> classes = Arrays.asList(Book.class, Author.class, Category.class);
-		factory = new InitializerFactory(null, classes, false, true, "name");
+		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class).uniquePropertyName(
+				"name");
 	}
 
 	@Before

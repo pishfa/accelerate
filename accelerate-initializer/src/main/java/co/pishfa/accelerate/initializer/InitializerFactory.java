@@ -4,10 +4,12 @@
 package co.pishfa.accelerate.initializer;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.net.URISyntaxException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +17,7 @@ import java.util.Map;
 import javax.el.ExpressionFactory;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.Namespace;
@@ -26,7 +29,14 @@ import org.slf4j.LoggerFactory;
 import de.odysseus.el.ExpressionFactoryImpl;
 
 /**
- * A thread-safe factory for {@link Initializer}. It also holds the configurations.
+ * A thread-safe factory for {@link Initializer}. It also holds the configurations. This factory has a fluent interface
+ * e.g you may use it in the following way to obtain an initializer instance:
+ * 
+ * <p>
+ * Initializer initializer = new
+ * InitializerFactory().entityClasses(Book.class,Category.class).configFile(config).uniquePropertyName
+ * ("name").create(initListener);
+ * </p>
  * 
  * @author Taha Ghasemi
  * 
@@ -44,46 +54,81 @@ public class InitializerFactory {
 	private String uniquePropertyName = "*";
 
 	/**
-	 * Configures this initializer factory.
-	 * 
-	 * @param configFile
-	 *            optional xml-file like this:
-	 * 
-	 *            <pre>
-	 *            &lt;config&gt;
-	 *            	&lt;entity class="org.foo.Bar"&gt;
-	 *            		&lt;property name="parent" default="@parent(1)" /&gt;
-	 *              &lt;/entity&gt;
-	 *            &lt;/config&gt;
-	 * </pre>
-	 * 
-	 *            . Note that you are responsible to closing this resource.
-	 * @param entityClasses
-	 *            optional list of classes for annotation processing
-	 * @param incremental
-	 *            if true, {@link Initializer} first tries to find objects by supplying unique values (which their
-	 *            property names are either specified here or per entity) to the listener and if it fails, then creates
-	 *            them
-	 * @param autoAnchor
-	 *            Initializer automatically creates an anchor like this for each entity
-	 *            EntityAlias:unique1_unique2_uniqe3, provided that all unique values (which their property names are
-	 *            either specified here or per entity) are not null.
-	 * @param uniquePropertyName
-	 *            comma separated list of property names that makes an instance of this entity unique. Could also be *.
-	 *            This is used in both auto-anchoring and loading of objects.
-	 * @throws Exception
+	 * Optional list of classes for annotation processing.
 	 */
-	public InitializerFactory(InputStream configFile, List<Class<?>> entityClasses, boolean incremental,
-			boolean autoAnchor, String uniquePropertyName) throws Exception {
-		this.incremental = incremental;
-		this.autoAnchor = autoAnchor;
+	public InitializerFactory entityClasses(Class<?>... entityClasses) {
+		Validate.notNull(entityClasses);
+		processEntityClasses(Arrays.asList(entityClasses));
+		return this;
+	}
+
+	/**
+	 * Optional list of classes for annotation processing.
+	 */
+	public InitializerFactory entityClasses(List<Class<?>> entityClasses) {
+		Validate.notNull(entityClasses);
+		processEntityClasses(entityClasses);
+		return this;
+	}
+
+	/**
+	 * The name of resource that represents xml-file based configuration which conforms to initializer-config.xsd. The
+	 * resource is loaded using Thread.currentThread().getContextClassLoader().getResourceAsStream.
+	 */
+	public InitializerFactory configFile(String resourceName) throws Exception {
+		Validate.notNull(resourceName);
+		try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
+			return configFile(is);
+		}
+	}
+
+	/**
+	 * Optional xml-file based configuration which conforms to initializer-config.xsd.
+	 */
+	public InitializerFactory configFile(File configFile) throws Exception {
+		Validate.notNull(configFile);
+		try (InputStream is = new FileInputStream(configFile)) {
+			return configFile(is);
+		}
+	}
+
+	/**
+	 * Optional xml-file based configuration which conforms to initializer-config.xsd. Note that you are responsible to
+	 * close this resource.
+	 */
+	public InitializerFactory configFile(InputStream configFile) throws Exception {
+		Validate.notNull(configFile);
+		processConfigFile(configFile);
+		return this;
+	}
+
+	/**
+	 * Comma separated list of property names that makes an instance of this entity unique. Could also be *. This is
+	 * used in both auto-anchoring and loading of objects. Default value is *.
+	 */
+	public InitializerFactory uniquePropertyName(String uniquePropertyName) {
 		this.uniquePropertyName = uniquePropertyName;
-		if (configFile != null) {
-			processConfigFile(configFile);
-		}
-		if (entityClasses != null) {
-			processEntityClasses(entityClasses);
-		}
+		return this;
+	}
+
+	/**
+	 * Initializer automatically creates an anchor like this for each entity EntityAlias:unique1_unique2_uniqe3,
+	 * provided that all unique values (which their property names are either specified here or per entity) are not
+	 * null. Default value is true.
+	 */
+	public InitializerFactory autoAnchor(boolean autoAnchor) {
+		this.autoAnchor = autoAnchor;
+		return this;
+	}
+
+	/**
+	 * If true, {@link Initializer} first tries to find objects by supplying unique values (which their property names
+	 * are either specified here or per entity) to the listener and if it fails, then creates them. Default value is
+	 * false.
+	 */
+	public InitializerFactory incremental(boolean incremental) {
+		this.incremental = incremental;
+		return this;
 	}
 
 	private void processEntityClasses(List<Class<?>> entityClasses) {
@@ -99,9 +144,8 @@ public class InitializerFactory {
 	/**
 	 * This is called whenever a new annotated type is scanned.
 	 * 
-	 * @param annotatedType
 	 */
-	public void processEntityClass(Class<?> entityClass) {
+	private void processEntityClass(Class<?> entityClass) {
 		InitEntity initEntity = entityClass.getAnnotation(InitEntity.class);
 		String unique = null;
 		String alias = null;
@@ -116,7 +160,7 @@ public class InitializerFactory {
 	}
 
 	/**
-	 * adds the init properties of given entityClass plus all its parents that annotated with {@link InitEntity} .
+	 * Adds the init properties of given entityClass plus all its parents that annotated with {@link InitEntity} .
 	 */
 	protected void addInitProperties(Class<?> entityClass, InitEntityMetaData initEntityMetaData) {
 		Class<?> parent = entityClass.getSuperclass();
