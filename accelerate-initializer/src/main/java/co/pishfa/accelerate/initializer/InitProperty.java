@@ -28,8 +28,8 @@ public @interface InitProperty {
 	public String name() default "";
 
 	/**
-	 * Default value for this property. If dynamic is set to be true (default), could be an EL. In the EL context the
-	 * following variables are available:
+	 * Default value for this property. If dynamic is set to true (default), can be an expression language (EL). In the
+	 * EL context the following variables are available:
 	 * <ul>
 	 * <li>this (refers to the attributes of the current element in xml file + those with default values)</li>
 	 * <li>parents (stack of parents, so parents.peek(1) is the first parent above the current element)</li>
@@ -60,7 +60,7 @@ public @interface InitProperty {
 
 	/**
 	 * 
-	 * @return true, if the value should be treated as an EL.
+	 * @return The value should be false, if the value should not be treated as an expression language (EL).
 	 */
 	public boolean dynamic() default true;
 

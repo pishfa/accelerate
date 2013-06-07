@@ -277,7 +277,7 @@ public class Initializer {
 			unique = factory.getUniquePropertyName();
 		}
 
-		if (StringUtils.isEmpty(unique) || "*".equals(unique)) {
+		if ("*".equals(unique)) {
 			StringBuilder ustr = new StringBuilder();
 			for (String name : allAttributes.keySet()) {
 				if (!name.startsWith("_")) {

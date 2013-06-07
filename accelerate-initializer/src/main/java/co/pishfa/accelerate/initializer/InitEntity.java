@@ -29,7 +29,7 @@ public @interface InitEntity {
 	/**
 	 * 
 	 * @return the name of property or comma separated name of properties whose value(s) specify a unique instance of
-	 *         this entity. Can be *.
+	 *         this entity. Can be *. By default, the uniquePropertyName specified in the factory will be used.
 	 */
 	String unique() default "";
 

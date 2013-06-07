@@ -39,9 +39,9 @@ public class InitializerFactory {
 	private final Map<String, InitEntityMetaData> aliasToInitEntity = new HashMap<>();
 	// TODO expression factory should be loaded using service discovery and it should be optional
 	private final ExpressionFactory engine = new ExpressionFactoryImpl();
-	private final boolean incremental;
-	private final boolean autoAnchor;
-	private final String uniquePropertyName;
+	private boolean incremental = false;
+	private boolean autoAnchor = true;
+	private String uniquePropertyName = "*";
 
 	/**
 	 * Configures this initializer factory.
