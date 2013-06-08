@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<Author name="taha" />
+	<Category name="cat">
+		<book title="test0" author="#{anchors['Author:taha']}" category="#{parents.peek(1)}"/>
+		<book title="test1" author="@taha" fullName="by #{this.author.name}"/>
+		<book title="test2" fullName="test#{num}" />
+		<book title="test3" fullName="test\#{num}" />
+	</Category>
+</data>

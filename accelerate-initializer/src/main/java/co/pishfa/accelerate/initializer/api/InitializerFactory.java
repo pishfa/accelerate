@@ -163,6 +163,9 @@ public class InitializerFactory {
 		aliasToInitEntity.put(alias, initEntity);
 	}
 
+	/**
+	 * Sets the javax.el.ExpressionFactory for evaluating dynamic expressions.
+	 */
 	public InitializerFactory expressionFactory(ExpressionFactory expressionFactory) {
 		this.expressionFactory = expressionFactory;
 		return this;

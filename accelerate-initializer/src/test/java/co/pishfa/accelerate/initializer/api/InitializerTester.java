@@ -5,6 +5,7 @@ package co.pishfa.accelerate.initializer.api;
 
 import static org.junit.Assert.*;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.Before;
@@ -73,5 +74,24 @@ public class InitializerTester {
 
 	protected Book getBook(Map<String, Object> anchores, String name) {
 		return (Book) anchores.get("book:" + name);
+	}
+
+	@Test
+	public void testEl() throws Exception {
+		Map<String, Object> vars = new HashMap<>();
+		vars.put("num", 5);
+		initializer = factory.create(listener, vars);
+		initializer.read("test_el.xml");
+		Map<String, Object> anchores = initializer.getAnchores();
+		Author taha = (Author) anchores.get("Author:taha");
+		Category cat = (Category) anchores.get("Category:cat");
+
+		assertEquals(taha, getBook(anchores, "test0").getAuthor());
+		assertEquals(cat, getBook(anchores, "test0").getCategory());
+
+		assertEquals("by taha", getBook(anchores, "test1").getFullName());
+		assertEquals("test5", getBook(anchores, "test2").getFullName());
+		assertEquals("test#{num}", getBook(anchores, "test3").getFullName());
+
 	}
 }

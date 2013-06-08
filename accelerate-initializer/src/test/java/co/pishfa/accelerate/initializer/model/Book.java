@@ -15,7 +15,7 @@ public class Book {
 	private Author author;
 	private Category category;
 
-	@InitProperty("Book #{this.title}")
+	@InitProperty("Book #{this.name}")
 	private String fullName;
 
 	public String getName() {
