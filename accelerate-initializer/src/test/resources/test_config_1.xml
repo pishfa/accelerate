@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<config xmlns="http://pishfa.co" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pishfa.co https://raw.github.com/pishfa/accelerate/master/accelerate-initializer/src/main/resources/initializer-config.xsd">
-	<entity class="co.pishfa.accelerate.initializer.xml.Author">
+<metadata xmlns="http://pishfa.co" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pishfa.co https://raw.github.com/pishfa/accelerate/master/accelerate-initializer/src/main/resources/initializer-metadata.xsd">
+	<entity class="co.pishfa.accelerate.initializer.model.Author" unique="name">
 	</entity>
-	<entity class="co.pishfa.accelerate.initializer.xml.Category">
+	<entity class="co.pishfa.accelerate.initializer.model.Category">
 	</entity>
-	<entity class="co.pishfa.accelerate.initializer.xml.Book" alias="book">
-		<property name="name" dynamic="false" />
-		<property name="fullName" default="Book #{this.name}" />
+	<entity class="co.pishfa.accelerate.initializer.model.Book" alias="book">
+		<property name="name" dynamic="false" alias="title"/>
+		<property name="fullName" default="Book #{this.title}" />
 	</entity>
-</config>
+</metadata>

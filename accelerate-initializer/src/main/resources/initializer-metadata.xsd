@@ -55,7 +55,7 @@
 		<xs:attribute type="xs:string" name="unique" use="optional">
 			<xs:annotation>
 				<xs:documentation source="description">
-					The name of property or comma separated name of properties whose value(s) specify a unique instance of this entity. Can be *. By default, the uniquePropertyName specified in the factory will be used.
+					The name of property or comma separated name of properties whose value(s) specify a unique instance of this entity. Can be * which means all properties with not null value. By default, the uniquePropertyName specified in the factory will be used. If the specified value is null, it means that the target entity should not participate in auto-anchoring or loading modes.
 				</xs:documentation>
 			</xs:annotation>
 		</xs:attribute>
@@ -68,7 +68,7 @@
 		</xs:attribute>
 	</xs:complexType>
 	
-	<xs:element name="config">
+	<xs:element name="metadata">
 		<xs:complexType>
 			<xs:sequence>
 				<xs:element name="entity" type="entityType" maxOccurs="unbounded" minOccurs="0"/>

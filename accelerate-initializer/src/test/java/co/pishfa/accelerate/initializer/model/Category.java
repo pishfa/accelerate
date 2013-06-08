@@ -1,13 +1,13 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.model;
 
 /**
  * @author Taha Ghasemi
  * 
  */
-public class Author {
+public class Category {
 
 	private String name;
 

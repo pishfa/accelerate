@@ -4,12 +4,12 @@
 		<Author name="taha"/>
 	</load>
 	<Category name="development">
-		<book name="test" author="@Author:taha" category="@parent(1)"/>
+		<book title="test" author="@Author:taha" category="@parent(1)"/>
 		<include src="test_init_1_include.xml" />
-		<book name="test3" author="@taha">
-			<book name="test4" author="@taha" category="@parent"/>
+		<book title="test3" author="@taha">
+			<book title="test4" author="@taha" category="@parent"/>
 		</book>
-		<book name="test5" author="@ghasemi?"/>
-		<book name="test6" author="@parent?"/>
+		<book title="test5" author="@ghasemi?"/>
+		<book title="test6" author="@parent?"/>
 	</Category>
 </data>

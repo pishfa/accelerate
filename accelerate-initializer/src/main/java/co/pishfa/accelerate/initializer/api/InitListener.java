@@ -1,4 +1,6 @@
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.api;
+
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 
 /**
  * A Receiver for {@link Initializer} events.

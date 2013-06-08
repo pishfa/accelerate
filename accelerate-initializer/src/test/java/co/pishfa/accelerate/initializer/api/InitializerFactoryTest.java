@@ -1,0 +1,60 @@
+package co.pishfa.accelerate.initializer.api;
+
+import static org.junit.Assert.*;
+
+import org.junit.Before;
+import org.junit.Test;
+
+import co.pishfa.accelerate.initializer.api.InitializerFactory;
+import co.pishfa.accelerate.initializer.model.Author;
+import co.pishfa.accelerate.initializer.model.Book;
+import co.pishfa.accelerate.initializer.model.Category;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
+import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
+
+public class InitializerFactoryTest {
+
+	@Before
+	public void setUp() throws Exception {
+	}
+
+	@Test(expected = Exception.class)
+	public void testNonConformingConfig() throws Exception {
+		new InitializerFactory().metadata("test_bad_config_1.xml");
+	}
+
+	@Test(expected = Exception.class)
+	public void testNoXsdConfig() throws Exception {
+		new InitializerFactory().metadata("test_bad_config_2.xml");
+	}
+
+	@Test
+	public void testXmlBasedConfig() throws Exception {
+		InitializerFactory factory = new InitializerFactory().metadata("test_config_1.xml");
+		checkInitEntites(factory);
+	}
+
+	@Test
+	public void testAnnotationBasedConfig() throws Exception {
+		InitializerFactory factory = new InitializerFactory().entityClasses(Author.class, Book.class, Category.class);
+		checkInitEntites(factory);
+	}
+
+	private void checkInitEntites(InitializerFactory factory) {
+		InitEntityMetaData author = factory.getInitEntityByAlias("Author");
+		assertNotNull(author);
+		assertEquals(Author.class, author.getEntityClass());
+
+		InitEntityMetaData book = factory.getInitEntityByAlias("book");
+		assertNotNull(book);
+		assertEquals(Book.class, book.getEntityClass());
+		assertEquals(2, book.getProperties().size());
+		InitPropertyMetaData name = book.getPropertiesByAlias().get("title");
+		assertNotNull(name);
+		assertEquals("name", name.getName());
+
+		InitPropertyMetaData fullName = book.getPropertiesByAlias().get("fullName");
+		assertNotNull(fullName);
+		assertEquals("Book #{this.title}", fullName.getDefaultValue());
+	}
+}

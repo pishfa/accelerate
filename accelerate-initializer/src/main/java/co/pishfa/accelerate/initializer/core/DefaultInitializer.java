@@ -1,7 +1,7 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.core;
 
 import java.beans.PropertyDescriptor;
 import java.io.File;
@@ -21,25 +21,28 @@ import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.collections.ArrayStack;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Validate;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import co.pishfa.accelerate.initializer.api.InitListener;
+import co.pishfa.accelerate.initializer.api.Initializer;
+import co.pishfa.accelerate.initializer.api.InitializerFactory;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
+import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 import de.odysseus.el.util.SimpleContext;
 
 /**
- * Builds an object graph from an xml file. The main purpose is to initialize the database from an xml file. The
- * initializer can be configured once and then be used for reading multiple xml files (the anchors are shared). This
- * class is not thread-safe.
  * 
- * @author Taha Ghasemi
+ * @author Taha Ghasemi <taha.ghasemi@gmail.com>
  * 
  */
-public class Initializer {
+public class DefaultInitializer implements Initializer {
 
-	private static final Logger log = LoggerFactory.getLogger(Initializer.class);
+	private static final Logger log = LoggerFactory.getLogger(DefaultInitializer.class);
 
 	// Special elements or attributes
 	private static final String LOAD_ELEMENT = "load";
@@ -57,9 +60,11 @@ public class Initializer {
 	private final InitializerFactory factory;
 	private final SimpleContext context = new SimpleContext();
 
-	public Initializer(InitializerFactory factory, InitListener listener, Map<String, Object> contextVars) {
+	public DefaultInitializer(InitializerFactory factory, InitListener listener, Map<String, Object> contextVars) {
+		Validate.notNull(factory);
+
 		this.factory = factory;
-		this.listener = listener;
+		this.listener = listener == null ? new BaseInitListener() : listener;
 		context.setVariable("parents", factory.getEngine().createValueExpression(stack, ArrayStack.class));
 		context.setVariable("anchors", factory.getEngine().createValueExpression(anchores, Map.class));
 		if (contextVars != null) {
@@ -70,18 +75,21 @@ public class Initializer {
 		}
 	}
 
+	@Override
 	public Object read(File file) throws Exception {
 		SAXBuilder builder = new SAXBuilder();
 		Element root = builder.build(file).getRootElement();
 		return read(root);
 	}
 
+	@Override
 	public Object read(InputStream in) throws Exception {
 		SAXBuilder builder = new SAXBuilder();
 		Element root = builder.build(in).getRootElement();
 		return read(root);
 	}
 
+	@Override
 	public Object read(Element dataElem) throws Exception {
 		Object lastEntity = null;
 		for (Element childElem : dataElem.getChildren()) {
@@ -219,9 +227,9 @@ public class Initializer {
 		Map<String, Object> allAttributes = getAllAttributes(initEntity, element, entityObj);
 
 		// Auto anchoring: it creates an anchor like this EntityAlias:unique1_unique2_uniqe3, provided that all unique
-		if (factory.isAutoAnchor()) {
-			if (!allAttributes.containsKey(_ANCHOR)) {
-				String[] uniqueProperties = getUniqueProperties(initEntity, allAttributes);
+		if (factory.isAutoAnchor() && !allAttributes.containsKey(_ANCHOR)) {
+			String[] uniqueProperties = getUniqueProperties(initEntity, allAttributes);
+			if (uniqueProperties != null) {
 				StringBuilder uniqeValue = new StringBuilder();
 				boolean allNotNull = true;
 				for (String uniqueProperty : uniqueProperties) {
@@ -256,8 +264,11 @@ public class Initializer {
 		}
 
 		Map<String, Object> allAttributes = getAllAttributes(initEntity, element, entityObj);
-
 		String[] properties = getUniqueProperties(initEntity, allAttributes);
+		if (properties == null) {
+			return entityObj;
+		}
+
 		Object[] values = new Object[properties.length];
 		for (int i = 0; i < properties.length; i++) {
 			values[i] = allAttributes.get(properties[i]);
@@ -272,15 +283,15 @@ public class Initializer {
 	 * 
 	 */
 	protected String[] getUniqueProperties(InitEntityMetaData initEntity, Map<String, Object> allAttributes) {
-		String unique = initEntity.getUnique();
-		if (StringUtils.isEmpty(unique) && allAttributes.containsKey(factory.getUniquePropertyName())) {
-			unique = factory.getUniquePropertyName();
+		String unique = StringUtils.defaultIfEmpty(initEntity.getUnique(), factory.getUniquePropertyName());
+		if (StringUtils.isEmpty(unique)) {
+			return null;
 		}
 
 		if ("*".equals(unique)) {
 			StringBuilder ustr = new StringBuilder();
 			for (String name : allAttributes.keySet()) {
-				if (!name.startsWith("_")) {
+				if (!isReservedAttribute(name)) {
 					ustr.append(",").append(name);
 				}
 			}
@@ -289,6 +300,10 @@ public class Initializer {
 
 		String[] properties = unique.split(",");
 		return properties;
+	}
+
+	public boolean isReservedAttribute(String name) {
+		return _ANCHOR.equals(name) || _ACTION.equals(name) || _IN_PARENT.equals(name) || _CHILD_ANCHOR.equals(name);
 	}
 
 	/**

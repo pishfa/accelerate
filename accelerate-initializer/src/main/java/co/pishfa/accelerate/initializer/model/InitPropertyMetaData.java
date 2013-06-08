@@ -1,9 +1,13 @@
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.model;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
+import co.pishfa.accelerate.initializer.core.DefaultInitializer;
+
 /**
- * Contains information about a property of entity during initialization. This class is used in {@link Initializer}.
+ * Contains information about a property of entity during initialization. This class is used in
+ * {@link DefaultInitializer}.
  * 
  * @author Taha Ghasemi
  * 
@@ -16,10 +20,8 @@ public class InitPropertyMetaData {
 
 	public InitPropertyMetaData(String name, String alias, String defaultValue, boolean dynamic) {
 		Validate.notNull(name, "Name of property is required");
-		Validate.notNull(alias, "Alias of property is required");
-
 		this.name = name;
-		this.alias = alias;
+		this.alias = StringUtils.isEmpty(alias) ? name : alias;
 		this.defaultValue = defaultValue;
 		this.dynamic = dynamic;
 	}

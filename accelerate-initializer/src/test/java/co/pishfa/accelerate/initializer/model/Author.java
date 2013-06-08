@@ -1,13 +1,14 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer.xml;
+package co.pishfa.accelerate.initializer.model;
 
 /**
  * @author Taha Ghasemi
  * 
  */
-public class Category {
+@InitEntity(unique = "name")
+public class Author {
 
 	private String name;
 

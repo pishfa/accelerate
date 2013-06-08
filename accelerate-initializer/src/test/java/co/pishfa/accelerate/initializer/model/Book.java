@@ -1,7 +1,10 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.model;
+
+import co.pishfa.accelerate.initializer.model.InitEntity;
+import co.pishfa.accelerate.initializer.model.InitProperty;
 
 /**
  * @author Taha Ghasemi
@@ -10,12 +13,12 @@ package co.pishfa.accelerate.initializer;
 @InitEntity(alias = "book")
 public class Book {
 
-	@InitProperty(dynamic = false)
+	@InitProperty(dynamic = false, alias = "title")
 	private String name;
 	private Author author;
 	private Category category;
 
-	@InitProperty("Book #{this.name}")
+	@InitProperty("Book #{this.title}")
 	private String fullName;
 
 	public String getName() {

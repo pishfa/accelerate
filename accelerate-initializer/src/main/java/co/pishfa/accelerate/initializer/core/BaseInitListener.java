@@ -1,4 +1,7 @@
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.core;
+
+import co.pishfa.accelerate.initializer.api.InitListener;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 
 /**
  * 

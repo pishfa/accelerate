@@ -1,7 +1,7 @@
 /**
  * 
  */
-package co.pishfa.accelerate.initializer;
+package co.pishfa.accelerate.initializer.model;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -9,8 +9,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import co.pishfa.accelerate.initializer.core.DefaultInitializer;
+
 /**
- * Specifies the initialization aspects of this property to be used in {@link Initializer}. Can be used in types that
+ * Specifies the initialization aspects of this property to be used in {@link DefaultInitializer}. Can be used in types that
  * annotated with {@link InitEntity} or {@link Entity}.
  * 
  * @author Taha Ghasemi
