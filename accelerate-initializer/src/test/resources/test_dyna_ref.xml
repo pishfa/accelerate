@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<Author name="taha" />
+	<Category name="cat">
+		<book title="test0" author="@Author:taha" category="@parent(1)"/>
+		<book title="test1" author="@taha">
+			<book title="test2" author="@taha" category="@parent"/>
+		</book>
+		<book title="test3" author="@ghasemi?"/>
+		<book title="test4" author="@parent?" category="@parent(2)?"/>
+	</Category>
+</data>

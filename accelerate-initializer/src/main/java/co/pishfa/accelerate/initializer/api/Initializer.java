@@ -2,6 +2,7 @@ package co.pishfa.accelerate.initializer.api;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.Map;
 
 import org.jdom2.Element;
 
@@ -15,10 +16,14 @@ import org.jdom2.Element;
  */
 public interface Initializer {
 
+	Object read(String resourceName) throws Exception;
+
 	Object read(File file) throws Exception;
 
 	Object read(InputStream in) throws Exception;
 
 	Object read(Element dataElem) throws Exception;
+
+	Map<String, Object> getAnchores();
 
 }

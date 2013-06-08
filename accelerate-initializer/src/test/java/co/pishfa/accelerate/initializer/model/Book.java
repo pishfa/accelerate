@@ -3,14 +3,11 @@
  */
 package co.pishfa.accelerate.initializer.model;
 
-import co.pishfa.accelerate.initializer.model.InitEntity;
-import co.pishfa.accelerate.initializer.model.InitProperty;
-
 /**
  * @author Taha Ghasemi
  * 
  */
-@InitEntity(alias = "book")
+@InitEntity(alias = "book", unique = "name")
 public class Book {
 
 	@InitProperty(dynamic = false, alias = "title")

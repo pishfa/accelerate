@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.el.ExpressionFactory;
-import javax.el.ValueExpression;
 
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -76,6 +75,13 @@ public class DefaultInitializer implements Initializer {
 				context.setVariable(entry.getKey(),
 						expressionFactory.createValueExpression(entry.getValue(), entry.getValue().getClass()));
 			}
+		}
+	}
+
+	@Override
+	public Object read(String resourceName) throws Exception {
+		try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
+			return read(is);
 		}
 	}
 
@@ -360,6 +366,10 @@ public class DefaultInitializer implements Initializer {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected Object getAttributeValue(Element element, String attrName, String attrValue, SimpleContext context,
 			Object entityObj, InitPropertyMetaData initProperty) throws Exception {
+		if (attrValue == null) {
+			return null;
+		}
+
 		// Detect the target property type
 		Class propertyType = null;
 		if (entityObj != null) {
@@ -369,74 +379,80 @@ public class DefaultInitializer implements Initializer {
 			}
 		}
 
-		Object value = null;
-		// check for dynamic references
-		if (attrValue.startsWith("@")) {
-			boolean optional = attrValue.endsWith("?");
-			if (optional) {
-				attrValue = attrValue.substring(0, attrValue.length() - 1);
+		Object value = attrValue;
+		if ((initProperty == null || initProperty.isDynamic())) {
+			if ("null".equals(attrValue)) {
+				value = null;
+			} else if (attrValue.startsWith("@")) {
+				// check for dynamic references
+				value = resolveDynamicReference(element, attrName, attrValue, propertyType);
+				propertyType = null; // no type conversion needed anymore
+			} else if (factory.getExpressionFactory() != null) {
+				value = factory.getExpressionFactory().createValueExpression(context, attrValue, propertyType)
+						.getValue(context);
+				propertyType = null; // no type conversion needed anymore
 			}
-			if (_ACTION.equals(attrName)) {
-				value = attrValue;
-			} else if (attrValue.startsWith("@parent(")) {
-				int arg = Integer.parseInt(attrValue.substring(8, attrValue.length() - 1));
-				try {
-					value = stack.peek(arg);
-				} catch (Exception e) {
-					if (!optional) {
-						throw new IllegalArgumentException("Parent index is not valid in stack: " + arg);
-					}
-				}
-			} else if (attrValue.equals("@parent")) {
-				// Finds the first parent with specified type
-				for (int level = 1; level < stack.size(); level++) {
-					Object parent = stack.peek(level);
-					if (propertyType.isAssignableFrom(parent.getClass())) {
-						value = parent;
-						break;
-					}
-				}
-				if (value == null && !optional) {
-					throw new IllegalArgumentException("Could not find an appropriate parent with type " + propertyType
-							+ " for " + attrName + " in " + element);
-				}
-			} else if (attrValue.equals("@child")) {
-				// now we should look into children to find the one with corresponding child-anchor
-				Element childElem = findChild(element, "child-anchor", attrName);
-				if (childElem == null) {
-					throw new IllegalArgumentException("No child with child-anchor = " + attrName + " in " + element);
-				}
-				value = processElement(null, childElem);
-			} else { // look into anchors
-				if (attrValue.indexOf(';') < 0) {
-					value = getAnchorValue(attrValue, propertyType, optional);
-				} else {
-					List<Object> list = new ArrayList<Object>();
-					for (String part : attrValue.split(";")) {
-						// Note that in this case, passing property type is not useful since it is of type List
-						list.add(getAnchorValue(part, null, optional));
-					}
-					value = list;
-				}
+		}
 
-			}
-		} else if (attrValue != null && !"null".equals(attrValue)) {
-			// Evaluate EL, if allowed
-			if (factory.getExpressionFactory() != null && (initProperty == null || initProperty.isDynamic())) {
-				ValueExpression valueExpression = factory.getExpressionFactory().createValueExpression(context,
-						attrValue, Object.class);
-				value = valueExpression.getValue(context);
+		if (value != null && propertyType != null) {
+			if (propertyType.isEnum()) {
+				value = Enum.valueOf(propertyType, attrValue.toString());
 			} else {
-				value = attrValue;
+				value = ConvertUtils.convert(attrValue, propertyType);
 			}
-			// Do type conversion
-			if (propertyType != null) {
-				if (propertyType.isEnum()) {
-					value = Enum.valueOf(propertyType, value.toString());
-				} else {
-					value = ConvertUtils.convert(value, propertyType);
+		}
+		return value;
+	}
+
+	protected Object resolveDynamicReference(Element element, String attrName, String attrValue, Class<?> propertyType) {
+		boolean optional = attrValue.endsWith("?");
+		if (optional) {
+			attrValue = attrValue.substring(0, attrValue.length() - 1);
+		}
+		Object value = null;
+		if (_ACTION.equals(attrName)) {
+			value = attrValue;
+		} else if (attrValue.startsWith("@parent(")) {
+			int arg = Integer.parseInt(attrValue.substring(8, attrValue.length() - 1));
+			try {
+				value = stack.peek(arg);
+			} catch (Exception e) {
+				if (!optional) {
+					throw new IllegalArgumentException("Parent index is not valid in stack: " + arg);
 				}
 			}
+		} else if (attrValue.equals("@parent")) {
+			// Finds the first parent with specified type
+			for (int level = 1; level < stack.size(); level++) {
+				Object parent = stack.peek(level);
+				if (propertyType.isAssignableFrom(parent.getClass())) {
+					value = parent;
+					break;
+				}
+			}
+			if (value == null && !optional) {
+				throw new IllegalArgumentException("Could not find an appropriate parent with type " + propertyType
+						+ " for " + attrName + " in " + element);
+			}
+		} else if (attrValue.equals("@child")) {
+			// now we should look into children to find the one with corresponding child-anchor
+			Element childElem = findChild(element, "child-anchor", attrName);
+			if (childElem == null) {
+				throw new IllegalArgumentException("No child with child-anchor = " + attrName + " in " + element);
+			}
+			value = processElement(null, childElem);
+		} else { // look into anchors
+			if (attrValue.indexOf(';') < 0) {
+				value = getAnchorValue(attrValue, propertyType, optional);
+			} else {
+				List<Object> list = new ArrayList<Object>();
+				for (String part : attrValue.split(";")) {
+					// Note that in this case, passing property type is not useful since it is of type List
+					list.add(getAnchorValue(part, null, optional));
+				}
+				value = list;
+			}
+
 		}
 		return value;
 	}
@@ -453,17 +469,17 @@ public class DefaultInitializer implements Initializer {
 			InitEntityMetaData initEntity = factory.getInitEntityByClass(propertyType);
 			if (initEntity != null) {
 				alias = initEntity.getAlias();
-			}
-
-			if (alias != null) {
-				value = anchores.get(alias + ":" + anchorName);
-				if (value != null) {
-					return value;
+				if (alias != null) {
+					value = anchores.get(alias + ":" + anchorName);
+					if (value != null) {
+						return value;
+					}
 				}
 			}
 
 			if (!optional) {
-				throw new IllegalArgumentException("Unknown anchor with name " + anchorName);
+				throw new IllegalArgumentException("Unknown anchor with name " + anchorName
+						+ (alias != null ? "or with name " + alias + ":" + anchorName : ""));
 			}
 			return null;
 		}
@@ -495,7 +511,7 @@ public class DefaultInitializer implements Initializer {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Exception occured while processing attribute " + attrName + " of element "
-					+ element.getName(), e);
+					+ element.getName() + ". Entity: " + entityObj + ". Attribute value: " + attrValue, e);
 		}
 
 	}
@@ -512,6 +528,11 @@ public class DefaultInitializer implements Initializer {
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public Map<String, Object> getAnchores() {
+		return anchores;
 	}
 
 }

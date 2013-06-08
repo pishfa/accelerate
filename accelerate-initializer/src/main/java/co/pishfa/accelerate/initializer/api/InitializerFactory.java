@@ -163,6 +163,11 @@ public class InitializerFactory {
 		aliasToInitEntity.put(alias, initEntity);
 	}
 
+	public InitializerFactory expressionFactory(ExpressionFactory expressionFactory) {
+		this.expressionFactory = expressionFactory;
+		return this;
+	}
+
 	/**
 	 * @return the expression engine
 	 */

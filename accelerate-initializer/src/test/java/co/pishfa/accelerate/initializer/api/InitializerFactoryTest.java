@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.model.Author;
 import co.pishfa.accelerate.initializer.model.Book;
 import co.pishfa.accelerate.initializer.model.Category;
@@ -29,13 +28,13 @@ public class InitializerFactoryTest {
 	}
 
 	@Test
-	public void testXmlBasedConfig() throws Exception {
+	public void testXmlBasedMetadata() throws Exception {
 		InitializerFactory factory = new InitializerFactory().metadata("test_config_1.xml");
 		checkInitEntites(factory);
 	}
 
 	@Test
-	public void testAnnotationBasedConfig() throws Exception {
+	public void testAnnotationBasedMetadata() throws Exception {
 		InitializerFactory factory = new InitializerFactory().entityClasses(Author.class, Book.class, Category.class);
 		checkInitEntites(factory);
 	}
