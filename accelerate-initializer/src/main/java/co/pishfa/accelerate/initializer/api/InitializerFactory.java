@@ -10,6 +10,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
+import java.util.ServiceLoader;
 
 import javax.el.ExpressionFactory;
 
@@ -22,7 +24,6 @@ import co.pishfa.accelerate.initializer.core.DefaultInitializer;
 import co.pishfa.accelerate.initializer.core.XmlMetaDataReader;
 import co.pishfa.accelerate.initializer.model.InitEntity;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
-import de.odysseus.el.ExpressionFactoryImpl;
 
 /**
  * A thread-safe factory for {@link Initializer}. It also holds the configurations. This factory has a fluent interface
@@ -42,11 +43,17 @@ public class InitializerFactory {
 	private static final Logger log = LoggerFactory.getLogger(InitializerFactory.class);
 
 	private final Map<String, InitEntityMetaData> aliasToInitEntity = new HashMap<>();
-	// TODO expression factory should be loaded using service discovery and it should be optional
-	private final ExpressionFactory engine = new ExpressionFactoryImpl();
+	private ExpressionFactory expressionFactory;
 	private boolean incremental = false;
 	private boolean autoAnchor = true;
 	private String uniquePropertyName = null;
+
+	public InitializerFactory() {
+		try {
+			expressionFactory = ServiceLoader.load(ExpressionFactory.class).iterator().next();
+		} catch (NoSuchElementException e) {
+		}
+	}
 
 	/**
 	 * List of entity classes for annotation processing. It is not required that the provided classes are annotated with
@@ -159,8 +166,8 @@ public class InitializerFactory {
 	/**
 	 * @return the expression engine
 	 */
-	public ExpressionFactory getEngine() {
-		return engine;
+	public ExpressionFactory getExpressionFactory() {
+		return expressionFactory;
 	}
 
 	/**

@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.el.ExpressionFactory;
 import javax.el.ValueExpression;
 
 import org.apache.commons.beanutils.BeanUtils;
@@ -65,12 +66,15 @@ public class DefaultInitializer implements Initializer {
 
 		this.factory = factory;
 		this.listener = listener == null ? new BaseInitListener() : listener;
-		context.setVariable("parents", factory.getEngine().createValueExpression(stack, ArrayStack.class));
-		context.setVariable("anchors", factory.getEngine().createValueExpression(anchores, Map.class));
+		ExpressionFactory expressionFactory = factory.getExpressionFactory();
+		if (expressionFactory != null) {
+			context.setVariable("parents", expressionFactory.createValueExpression(stack, ArrayStack.class));
+			context.setVariable("anchors", expressionFactory.createValueExpression(anchores, Map.class));
+		}
 		if (contextVars != null) {
 			for (Entry<String, Object> entry : contextVars.entrySet()) {
 				context.setVariable(entry.getKey(),
-						factory.getEngine().createValueExpression(entry.getValue(), entry.getValue().getClass()));
+						expressionFactory.createValueExpression(entry.getValue(), entry.getValue().getClass()));
 			}
 		}
 	}
@@ -316,7 +320,9 @@ public class DefaultInitializer implements Initializer {
 	private Map<String, Object> getAllAttributes(InitEntityMetaData initEntity, Element element, Object entityObj)
 			throws Exception {
 		Map<String, Object> attributes = new HashMap<String, Object>();
-		context.setVariable("this", factory.getEngine().createValueExpression(attributes, Map.class));
+		if (factory.getExpressionFactory() != null) {
+			context.setVariable("this", factory.getExpressionFactory().createValueExpression(attributes, Map.class));
+		}
 
 		for (Attribute attr : element.getAttributes()) {
 			String attrName = attr.getName();
@@ -416,9 +422,9 @@ public class DefaultInitializer implements Initializer {
 			}
 		} else if (attrValue != null && !"null".equals(attrValue)) {
 			// Evaluate EL, if allowed
-			if (initProperty == null || initProperty.isDynamic()) {
-				ValueExpression valueExpression = factory.getEngine().createValueExpression(context, attrValue,
-						Object.class);
+			if (factory.getExpressionFactory() != null && (initProperty == null || initProperty.isDynamic())) {
+				ValueExpression valueExpression = factory.getExpressionFactory().createValueExpression(context,
+						attrValue, Object.class);
 				value = valueExpression.getValue(context);
 			} else {
 				value = attrValue;
