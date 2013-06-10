@@ -3,9 +3,7 @@
  */
 package co.pishfa.accelerate.initializer.api;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -24,6 +22,7 @@ import co.pishfa.accelerate.initializer.core.DefaultInitializer;
 import co.pishfa.accelerate.initializer.core.XmlMetaDataReader;
 import co.pishfa.accelerate.initializer.model.InitEntity;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
+import co.pishfa.accelerate.initializer.util.Input;
 
 /**
  * A thread-safe factory for {@link Initializer}. It also holds the configurations. This factory has a fluent interface
@@ -82,39 +81,28 @@ public class InitializerFactory {
 	}
 
 	/**
-	 * The name of resource that represents xml-file based configuration which conforms to initializer-config.xsd. The
-	 * resource is loaded using Thread.currentThread().getContextClassLoader().getResourceAsStream. If an init entity
-	 * with the same alias is already exits, it will be overridden.
+	 * Xml-file based configuration which conforms to initializer-config.xsd. If an init entity with the same alias is
+	 * already exits, it will be overridden.
 	 */
-	public InitializerFactory metadata(String resourceName) throws Exception {
-		Validate.notNull(resourceName);
-		try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
-			return metadata(is);
+	public InitializerFactory metadata(String reasourceName) throws Exception {
+		Validate.notNull(reasourceName);
+		try (Reader in = Input.resource(reasourceName)) {
+			processMetadataFile(in);
 		}
+		return this;
 	}
 
 	/**
-	 * Optional xml-file based configuration which conforms to initializer-config.xsd. If an init entity with the same
-	 * alias is already exits, it will be overridden.
+	 * Xml-file based configuration which conforms to initializer-config.xsd. Note that you are responsible to close
+	 * this resource. If an init entity with the same alias is already exits, it will be overridden.
 	 */
-	public InitializerFactory metadata(File metadataFile) throws Exception {
-		Validate.notNull(metadataFile);
-		try (InputStream is = new FileInputStream(metadataFile)) {
-			return metadata(is);
-		}
-	}
-
-	/**
-	 * Optional xml-file based configuration which conforms to initializer-config.xsd. Note that you are responsible to
-	 * close this resource. If an init entity with the same alias is already exits, it will be overridden.
-	 */
-	public InitializerFactory metadata(InputStream metadataFile) throws Exception {
+	public InitializerFactory metadata(Reader metadataFile) throws Exception {
 		Validate.notNull(metadataFile);
 		processMetadataFile(metadataFile);
 		return this;
 	}
 
-	protected void processMetadataFile(InputStream metadataFile) throws Exception {
+	protected void processMetadataFile(Reader metadataFile) throws Exception {
 		new XmlMetaDataReader(this).processMetadata(metadataFile);
 	}
 

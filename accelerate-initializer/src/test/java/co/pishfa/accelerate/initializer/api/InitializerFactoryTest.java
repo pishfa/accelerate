@@ -54,6 +54,6 @@ public class InitializerFactoryTest {
 
 		InitPropertyMetaData fullName = book.getPropertiesByAlias().get("fullName");
 		assertNotNull(fullName);
-		assertEquals("Book #{this.title}", fullName.getDefaultValue());
+		assertEquals("Book #{this.name}", fullName.getDefaultValue());
 	}
 }

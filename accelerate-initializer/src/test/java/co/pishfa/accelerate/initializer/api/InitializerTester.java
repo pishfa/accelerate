@@ -6,6 +6,7 @@ package co.pishfa.accelerate.initializer.api;
 import static org.junit.Assert.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.Before;
@@ -92,6 +93,16 @@ public class InitializerTester {
 		assertEquals("by taha", getBook(anchores, "test1").getFullName());
 		assertEquals("test5", getBook(anchores, "test2").getFullName());
 		assertEquals("test#{num}", getBook(anchores, "test3").getFullName());
+	}
 
+	@Test
+	public void testFirstLevel() throws Exception {
+		Map<String, List<Object>> result = initializer.read("test_first_levels.xml");
+		assertEquals(2, result.size());
+		assertNotNull(result.get("Authors"));
+		assertNotNull(result.get("Author"));
+		assertEquals(3, result.get("Authors").size());
+		assertEquals(4, result.get("Author").size());
+		assertEquals("t1", ((Author) result.get("Authors").get(0)).getName());
 	}
 }

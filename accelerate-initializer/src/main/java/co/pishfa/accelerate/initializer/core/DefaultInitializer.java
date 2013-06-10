@@ -4,8 +4,7 @@
 package co.pishfa.accelerate.initializer.core;
 
 import java.beans.PropertyDescriptor;
-import java.io.File;
-import java.io.InputStream;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,6 +32,7 @@ import co.pishfa.accelerate.initializer.api.Initializer;
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
+import co.pishfa.accelerate.initializer.util.Input;
 import de.odysseus.el.util.SimpleContext;
 
 /**
@@ -59,6 +59,7 @@ public class DefaultInitializer implements Initializer {
 	private boolean insideLoad;
 	private final InitializerFactory factory;
 	private final SimpleContext context = new SimpleContext();
+	private final Map<String, List<Object>> result = new HashMap<>();
 
 	public DefaultInitializer(InitializerFactory factory, InitListener listener, Map<String, Object> contextVars) {
 		Validate.notNull(factory);
@@ -79,33 +80,31 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	@Override
-	public Object read(String resourceName) throws Exception {
-		try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(resourceName)) {
-			return read(is);
+	public Map<String, List<Object>> read(String resourceName) throws Exception {
+		try (Reader in = Input.resource(resourceName)) {
+			return read(in);
 		}
 	}
 
 	@Override
-	public Object read(File file) throws Exception {
-		SAXBuilder builder = new SAXBuilder();
-		Element root = builder.build(file).getRootElement();
-		return read(root);
-	}
-
-	@Override
-	public Object read(InputStream in) throws Exception {
+	public Map<String, List<Object>> read(Reader in) throws Exception {
 		SAXBuilder builder = new SAXBuilder();
 		Element root = builder.build(in).getRootElement();
 		return read(root);
 	}
 
 	@Override
-	public Object read(Element dataElem) throws Exception {
-		Object lastEntity = null;
+	public Map<String, List<Object>> read(Element dataElem) throws Exception {
 		for (Element childElem : dataElem.getChildren()) {
-			lastEntity = processElement(null, childElem);
+			List<Object> list = null;
+			list = result.get(childElem.getName());
+			if (list == null) {
+				list = new ArrayList<>();
+				result.put(childElem.getName(), list);
+			}
+			processElement(null, childElem, list);
 		}
-		return lastEntity;
+		return result;
 	}
 
 	/**
@@ -118,25 +117,26 @@ public class DefaultInitializer implements Initializer {
 	 *            element to be processed
 	 * @return
 	 */
-	protected Object processElement(InitEntityMetaData parentEntity, Element element) {
+	protected Object processElement(InitEntityMetaData parentEntity, Element element, List<Object> parentAsList) {
+		String name = element.getName();
 		try {
 			// Process special elements: include, load.
-			if (INCLUDE_ELEMENT.equals(element.getName())) {
+			if (INCLUDE_ELEMENT.equals(name)) {
 				String srcName = element.getAttributeValue("src");
-				// TODO a better resource loading is required like velociy
-				try (InputStream src = Thread.currentThread().getContextClassLoader().getResourceAsStream(srcName)) {
+				// TODO a better resource loading is required like velocity
+				try (Reader src = Input.resource(srcName)) {
 					if (src == null) {
 						throw new IllegalArgumentException("Could not find " + srcName + " in class path to include");
 					}
 					read(src);
 				}
 				return null;
-			} else if (LOAD_ELEMENT.equals(element.getName())) {
+			} else if (LOAD_ELEMENT.equals(name)) {
 				// Support nested load elements
 				boolean oldInsideLoad = insideLoad;
 				insideLoad = true;
 				try {
-					processChildren(element, null);
+					processChildren(element, null, null);
 					return null;
 				} finally {
 					insideLoad = oldInsideLoad;
@@ -150,11 +150,21 @@ public class DefaultInitializer implements Initializer {
 
 			// check whether it is a class alias or a property of an entity
 			// initEntiy is null when element is not a class alias
-			InitEntityMetaData initEntity = factory.getInitEntityByAlias(element.getName());
+			InitEntityMetaData initEntity = factory.getInitEntityByAlias(name);
 			Object entityObj = getObject(parentEntity, element, initEntity);
 			if (insideLoad) {
 				processAttributes(element, entityObj, initEntity);
 				return null;
+			}
+
+			// If path element
+			if (entityObj == null) {
+				processChildren(element, initEntity, parentAsList);
+				return null;
+			}
+			// If first level element or inside path element
+			if (parentAsList != null) {
+				parentAsList.add(entityObj);
 			}
 
 			stack.push(entityObj);
@@ -163,7 +173,7 @@ public class DefaultInitializer implements Initializer {
 				if (initEntity != null) {
 					listener.entityCreated(initEntity, entityObj);
 				}
-				processChildren(element, initEntity);
+				processChildren(element, initEntity, null);
 			} finally {
 				stack.pop();
 			}
@@ -174,21 +184,21 @@ public class DefaultInitializer implements Initializer {
 
 			return entityObj;
 		} catch (Exception e) {
-			log.error("Exception occured during processing of element " + element.getName(), e);
+			log.error("Exception occured during processing of element " + name, e);
 			return null;
 		}
 	}
 
 	/**
 	 * Creates or finds the object that corresponds to the given element whether it is an instance of a class or
-	 * property of an object.
+	 * property of an object or first level path element.
 	 * 
 	 * @param parentEntity
 	 * @param element
 	 * @param initEntity
 	 *            the corresponding initEntityDate definition to the element. It is null when element is not a class
 	 *            alias
-	 * @return
+	 * @return null in case of first level path element.
 	 * @throws Exception
 	 */
 	protected Object getObject(InitEntityMetaData parentEntity, Element element, InitEntityMetaData initEntity)
@@ -202,6 +212,9 @@ public class DefaultInitializer implements Initializer {
 			} finally {
 				stack.pop();
 			}
+		} else if (stack.isEmpty()) {
+			// First level path element
+			return null;
 		} else {
 			// property mode
 			String propName = element.getName();
@@ -214,10 +227,6 @@ public class DefaultInitializer implements Initializer {
 				}
 			}
 
-			if (stack.isEmpty()) {
-				throw new IllegalArgumentException("First level element " + propName
-						+ " must be an alias of a class but no class with this alias is found.");
-			}
 			entityObj = PropertyUtils.getProperty(stack.peek(), propName);
 			if (entityObj == null) {
 				throw new IllegalArgumentException("The property " + element.getName() + " of object " + stack.peek()
@@ -227,9 +236,9 @@ public class DefaultInitializer implements Initializer {
 		return entityObj;
 	}
 
-	protected void processChildren(Element element, InitEntityMetaData initEntity) {
+	protected void processChildren(Element element, InitEntityMetaData initEntity, List<Object> parentAsList) {
 		for (Element childElem : element.getChildren()) {
-			processElement(initEntity, childElem);
+			processElement(initEntity, childElem, parentAsList);
 		}
 	}
 
@@ -360,7 +369,8 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	/**
-	 * Resolves the value attrValue of attribute attrName to a concrete type within the given context.
+	 * Resolves the value attrValue of attribute attrName to a concrete type within the given context. Note that when
+	 * called from inside load, entityObj is null. initProperty also might be null.
 	 * 
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -388,7 +398,8 @@ public class DefaultInitializer implements Initializer {
 				value = resolveDynamicReference(element, attrName, attrValue, propertyType);
 				propertyType = null; // no type conversion needed anymore
 			} else if (factory.getExpressionFactory() != null) {
-				value = factory.getExpressionFactory().createValueExpression(context, attrValue, propertyType)
+				value = factory.getExpressionFactory()
+						.createValueExpression(context, attrValue, propertyType == null ? Object.class : propertyType)
 						.getValue(context);
 				propertyType = null; // no type conversion needed anymore
 			}
@@ -440,7 +451,7 @@ public class DefaultInitializer implements Initializer {
 			if (childElem == null) {
 				throw new IllegalArgumentException("No child with child-anchor = " + attrName + " in " + element);
 			}
-			value = processElement(null, childElem);
+			value = processElement(null, childElem, null);
 		} else { // look into anchors
 			if (attrValue.indexOf(';') < 0) {
 				value = getAnchorValue(attrValue, propertyType, optional);

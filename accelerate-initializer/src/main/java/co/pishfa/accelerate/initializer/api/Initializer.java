@@ -1,28 +1,26 @@
 package co.pishfa.accelerate.initializer.api;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.Reader;
+import java.util.List;
 import java.util.Map;
 
 import org.jdom2.Element;
 
 /**
  * Builds an object graph from an xml file. The main purpose is to initialize the database from an xml file. The
- * initializer can be configured once and then be used for reading multiple xml files (the anchors are shared). This
- * class is not thread-safe.
+ * initializer can be created once and then be used for reading multiple xml files (the anchors are shared). This class
+ * is not thread-safe.
  * 
  * @author Taha Ghasemi
  * 
  */
 public interface Initializer {
 
-	Object read(String resourceName) throws Exception;
+	Map<String, List<Object>> read(String resourceName) throws Exception;
 
-	Object read(File file) throws Exception;
+	Map<String, List<Object>> read(Reader reader) throws Exception;
 
-	Object read(InputStream in) throws Exception;
-
-	Object read(Element dataElem) throws Exception;
+	Map<String, List<Object>> read(Element root) throws Exception;
 
 	Map<String, Object> getAnchores();
 

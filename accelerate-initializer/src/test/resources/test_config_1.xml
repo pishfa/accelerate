@@ -6,6 +6,6 @@
 	</entity>
 	<entity class="co.pishfa.accelerate.initializer.model.Book" alias="book">
 		<property name="name" dynamic="false" alias="title"/>
-		<property name="fullName" default="Book #{this.title}" />
+		<property name="fullName" default="Book #{this.name}" />
 	</entity>
 </metadata>
