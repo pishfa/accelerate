@@ -12,8 +12,8 @@ import java.lang.annotation.Target;
 import co.pishfa.accelerate.initializer.core.DefaultInitializer;
 
 /**
- * Specifies the initialization aspects of this property to be used in {@link DefaultInitializer}. Can be used in types that
- * annotated with {@link InitEntity} or {@link Entity}.
+ * Specifies the initialization aspects of this property to be used in {@link DefaultInitializer}. Can be used in types
+ * that annotated with {@link InitEntity} or {@link Entity}.
  * 
  * @author Taha Ghasemi
  * 
@@ -24,8 +24,8 @@ import co.pishfa.accelerate.initializer.core.DefaultInitializer;
 public @interface InitProperty {
 
 	/**
-	 * @return the name of this property. If you place this annotation above the property itself this is not requried
-	 *         but if you put this above a class, you should set this too.
+	 * @return the name of this property in the class. If you place this annotation above the property itself this is
+	 *         not required but if you put this above a class, you should set this too.
 	 */
 	public String name() default "";
 

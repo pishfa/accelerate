@@ -72,7 +72,7 @@ public class AnnotationMetaDataReader {
 
 		InitEntity initEntity = entityClass.getAnnotation(InitEntity.class);
 		if (initEntity != null) {
-			for (InitProperty initProperty : initEntity.value()) {
+			for (InitProperty initProperty : initEntity.properties()) {
 				initEntityMetaData.addProperty(processInitProperty(null, initProperty, entityClass));
 			}
 		}

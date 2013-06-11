@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.commons.lang3.Validate;
+
 /**
  * 
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
@@ -13,8 +15,11 @@ import java.io.UnsupportedEncodingException;
 public class Input {
 
 	public static Reader resource(String name) throws UnsupportedEncodingException {
+		Validate.notNull(name, "resource name should not be null");
+
 		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(name);
-		return is == null ? null : new InputStreamReader(is, "utf-8");
+		Validate.notNull(is, "No resource with name " + name + " is found.");
+		return new InputStreamReader(is, "utf-8");
 	}
 
 }

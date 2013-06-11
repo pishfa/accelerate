@@ -26,6 +26,7 @@ public class InitializerTester {
 	private static InitializerFactory factory;
 	private InitListener listener;
 	private Initializer initializer;
+	private Map<String, Object> anchores;
 
 	/**
 	 * @throws java.lang.Exception
@@ -51,6 +52,22 @@ public class InitializerTester {
 		Author author = new Author();
 		author.setName("taha");
 		initializer.read("test_init_1.xml");
+	}
+
+	@Test
+	public void testSimple() throws Exception {
+		initializer.read("test_simple.xml");
+		anchores = initializer.getAnchores();
+		Author a1 = (Author) anchores.get("Author:a1");
+		assertNotNull(a1);
+		assertNotNull(anchores.get("Author:a2"));
+		Category c1 = (Category) anchores.get("Category:c1");
+		assertNotNull(c1);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> T get(String anchorName, Class<T> entityClass) {
+		return (T) anchores.get(anchorName);
 	}
 
 	@Test

@@ -3,9 +3,11 @@
 	<entity class="co.pishfa.accelerate.initializer.model.Author" unique="name">
 	</entity>
 	<entity class="co.pishfa.accelerate.initializer.model.Category">
+		<property name="category" default="@parent?"/>
 	</entity>
 	<entity class="co.pishfa.accelerate.initializer.model.Book" alias="book">
 		<property name="name" dynamic="false" alias="title"/>
 		<property name="fullName" default="Book #{this.name}" />
+		<property name="category" default="@parent?"/>
 	</entity>
 </metadata>

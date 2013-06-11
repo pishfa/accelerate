@@ -42,6 +42,8 @@ public class InitializerFactory {
 	private static final Logger log = LoggerFactory.getLogger(InitializerFactory.class);
 
 	private final Map<String, InitEntityMetaData> aliasToInitEntity = new HashMap<>();
+	private final Map<Class<?>, InitEntityMetaData> classToInitEntity = new HashMap<>();
+
 	private ExpressionFactory expressionFactory;
 	private boolean incremental = false;
 	private boolean autoAnchor = true;
@@ -85,25 +87,31 @@ public class InitializerFactory {
 	 * already exits, it will be overridden.
 	 */
 	public InitializerFactory metadata(String reasourceName) throws Exception {
-		Validate.notNull(reasourceName);
-		try (Reader in = Input.resource(reasourceName)) {
-			processMetadataFile(in);
-		}
+		processMetadataFile(Input.resource(reasourceName), true);
 		return this;
 	}
 
 	/**
 	 * Xml-file based configuration which conforms to initializer-config.xsd. Note that you are responsible to close
-	 * this resource. If an init entity with the same alias is already exits, it will be overridden.
+	 * this resource if autoClose if false. If an init entity with the same alias is already exits, it will be
+	 * overridden.
 	 */
-	public InitializerFactory metadata(Reader metadataFile) throws Exception {
+	public InitializerFactory metadata(Reader metadataFile, boolean autoClose) throws Exception {
 		Validate.notNull(metadataFile);
-		processMetadataFile(metadataFile);
+
+		processMetadataFile(metadataFile, autoClose);
 		return this;
+
 	}
 
-	protected void processMetadataFile(Reader metadataFile) throws Exception {
-		new XmlMetaDataReader(this).processMetadata(metadataFile);
+	protected void processMetadataFile(Reader metadataFile, boolean autoClose) throws Exception {
+		try {
+			new XmlMetaDataReader(this).processMetadata(metadataFile);
+		} finally {
+			if (autoClose) {
+				metadataFile.close();
+			}
+		}
 	}
 
 	/**
@@ -144,11 +152,13 @@ public class InitializerFactory {
 	 */
 	public void addInitEntity(InitEntityMetaData initEntity) {
 		Validate.notNull(initEntity);
+
 		String alias = initEntity.getAlias();
 		if (aliasToInitEntity.containsKey(alias)) {
 			log.warn("Duplicate entity alias {} this will override the previose one.", alias);
 		}
 		aliasToInitEntity.put(alias, initEntity);
+		classToInitEntity.put(initEntity.getEntityClass(), initEntity);
 	}
 
 	/**
@@ -207,12 +217,7 @@ public class InitializerFactory {
 	 * @return the InitEntityMetaData corresponding to the entityClass provided
 	 */
 	public InitEntityMetaData getInitEntityByClass(Class<?> entityClass) {
-		for (InitEntityMetaData initEntity : aliasToInitEntity.values()) {
-			if (entityClass.equals(initEntity.getEntityClass())) {
-				return initEntity;
-			}
-		}
-		return null;
+		return classToInitEntity.get(entityClass);
 
 	}
 

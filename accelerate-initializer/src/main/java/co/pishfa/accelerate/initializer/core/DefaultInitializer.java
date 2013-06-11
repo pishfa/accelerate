@@ -42,6 +42,19 @@ import de.odysseus.el.util.SimpleContext;
  */
 public class DefaultInitializer implements Initializer {
 
+	private static class ProcessEntity {
+		public InitEntityMetaData metadata;
+		public Element element;
+		public Object entity;
+	}
+
+	private static class ProcessProperty {
+		public InitPropertyMetaData metadata;
+		public Attribute attribute;
+		public String name;
+		public Object value;
+	}
+
 	private static final Logger log = LoggerFactory.getLogger(DefaultInitializer.class);
 
 	// Special elements or attributes
@@ -81,21 +94,29 @@ public class DefaultInitializer implements Initializer {
 
 	@Override
 	public Map<String, List<Object>> read(String resourceName) throws Exception {
-		try (Reader in = Input.resource(resourceName)) {
-			return read(in);
+		return read(Input.resource(resourceName), true);
+	}
+
+	@Override
+	public Map<String, List<Object>> read(Reader reader, boolean autoClose) throws Exception {
+		Validate.notNull(reader);
+
+		try {
+			SAXBuilder builder = new SAXBuilder();
+			Element root = builder.build(reader).getRootElement();
+			return read(root);
+		} finally {
+			if (autoClose) {
+				reader.close();
+			}
 		}
 	}
 
 	@Override
-	public Map<String, List<Object>> read(Reader in) throws Exception {
-		SAXBuilder builder = new SAXBuilder();
-		Element root = builder.build(in).getRootElement();
-		return read(root);
-	}
+	public Map<String, List<Object>> read(Element root) throws Exception {
+		Validate.notNull(root);
 
-	@Override
-	public Map<String, List<Object>> read(Element dataElem) throws Exception {
-		for (Element childElem : dataElem.getChildren()) {
+		for (Element childElem : root.getChildren()) {
 			List<Object> list = null;
 			list = result.get(childElem.getName());
 			if (list == null) {
@@ -124,12 +145,7 @@ public class DefaultInitializer implements Initializer {
 			if (INCLUDE_ELEMENT.equals(name)) {
 				String srcName = element.getAttributeValue("src");
 				// TODO a better resource loading is required like velocity
-				try (Reader src = Input.resource(srcName)) {
-					if (src == null) {
-						throw new IllegalArgumentException("Could not find " + srcName + " in class path to include");
-					}
-					read(src);
-				}
+				read(Input.resource(srcName), true);
 				return null;
 			} else if (LOAD_ELEMENT.equals(name)) {
 				// Support nested load elements
@@ -490,7 +506,7 @@ public class DefaultInitializer implements Initializer {
 
 			if (!optional) {
 				throw new IllegalArgumentException("Unknown anchor with name " + anchorName
-						+ (alias != null ? "or with name " + alias + ":" + anchorName : ""));
+						+ (alias != null ? " or with name " + alias + ":" + anchorName : ""));
 			}
 			return null;
 		}
@@ -502,8 +518,12 @@ public class DefaultInitializer implements Initializer {
 		try {
 			// check for special attributes
 			if (attrName.equals(_ANCHOR)) {
-				if (value.startsWith("parent") || value.equals("child") || StringUtils.containsAny(value, '@', '?')) {
+				if (value.startsWith("parent") || value.equals("child") || StringUtils.containsAny(value, '?')) {
 					throw new IllegalArgumentException("Illegal anchor name " + value);
+				}
+				// auto scoped named anchor, resolve to the real name
+				if (value.startsWith("@")) {
+
 				}
 				if (anchores.containsKey(value)) {
 					throw new IllegalArgumentException("Duplicate anchor name " + value);
@@ -544,6 +564,31 @@ public class DefaultInitializer implements Initializer {
 	@Override
 	public Map<String, Object> getAnchores() {
 		return anchores;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> T getObject(String anchorName, Class<T> entityClass) {
+		Validate.notNull(anchorName);
+
+		String name = getAbsoluteAnchorName(anchorName, entityClass);
+		return (T) getAnchores().get(name);
+	}
+
+	@Override
+	public Object putObject(String anchorName, Object entity) {
+		Validate.notNull(anchorName);
+		anchorName = getAbsoluteAnchorName(anchorName, entity.getClass());
+		return getAnchores().put(anchorName, entity);
+	}
+
+	protected String getAbsoluteAnchorName(String anchorName, Class<?> entityClass) {
+		if (anchorName.startsWith("@")) {
+			InitEntityMetaData initEntity = factory.getInitEntityByClass(entityClass);
+			Validate.notNull(initEntity, "Entity class is not defined " + entityClass);
+			anchorName = anchorName.replace("@", initEntity.getAlias() + ":");
+		}
+		return anchorName;
 	}
 
 }
