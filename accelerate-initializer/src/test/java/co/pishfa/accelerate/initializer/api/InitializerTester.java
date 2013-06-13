@@ -57,12 +57,35 @@ public class InitializerTester {
 	@Test
 	public void testSimple() throws Exception {
 		initializer.read("test_simple.xml");
-		anchores = initializer.getAnchores();
-		Author a1 = (Author) anchores.get("Author:a1");
+
+		Author a1 = initializer.getObject("Author:a1", Author.class);
 		assertNotNull(a1);
-		assertNotNull(anchores.get("Author:a2"));
-		Category c1 = (Category) anchores.get("Category:c1");
+		assertEquals("a1", a1.getName());
+
+		Category c1 = initializer.getObject("Category:c1", Category.class);
 		assertNotNull(c1);
+		assertNull(c1.getCategory());
+
+		Book b1 = initializer.getObject(":b1", Book.class);
+		assertNotNull(b1);
+		assertEquals("b1", b1.getName());
+		assertEquals(a1, b1.getAuthor());
+		assertEquals(c1, b1.getCategory());
+		assertEquals("Book b1", b1.getFullName());
+
+		Category c2 = initializer.getObject(":c2", Category.class);
+		assertNotNull(c2);
+		assertEquals(c1, c2.getCategory());
+	}
+
+	@Test
+	public void testAnchor() throws Exception {
+		initializer.read("test_anchors.xml");
+		anchores = initializer.getAnchores();
+		assertNotNull(anchores.get("a1"));
+		assertNotNull(anchores.get("Author:a2"));
+		assertNotNull(anchores.get("Author:a3"));
+		assertNotNull(anchores.get("Author:a4"));
 	}
 
 	@SuppressWarnings("unchecked")

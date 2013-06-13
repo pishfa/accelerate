@@ -43,14 +43,30 @@ import de.odysseus.el.util.SimpleContext;
 public class DefaultInitializer implements Initializer {
 
 	private static class ProcessEntity {
+		public ProcessEntity(ProcessEntity parent, InitEntityMetaData metadata, Element element, Object value) {
+			this.parent = parent;
+			this.metadata = metadata;
+			this.element = element;
+			this.value = value;
+		}
+
+		public ProcessEntity() {
+		}
+
+		public ProcessEntity parent;
 		public InitEntityMetaData metadata;
 		public Element element;
-		public Object entity;
+		public Object value;
 	}
 
 	private static class ProcessProperty {
-		public InitPropertyMetaData metadata;
-		public Attribute attribute;
+		public ProcessProperty(ProcessEntity entity, String name, Object value) {
+			this.entity = entity;
+			this.name = name;
+			this.value = value;
+		}
+
+		public ProcessEntity entity;
 		public String name;
 		public Object value;
 	}
@@ -138,7 +154,7 @@ public class DefaultInitializer implements Initializer {
 	 *            element to be processed
 	 * @return
 	 */
-	protected Object processElement(InitEntityMetaData parentEntity, Element element, List<Object> parentAsList) {
+	protected Object processElement(ProcessEntity parent, Element element, List<Object> parentAsList) {
 		String name = element.getName();
 		try {
 			// Process special elements: include, load.
@@ -152,7 +168,9 @@ public class DefaultInitializer implements Initializer {
 				boolean oldInsideLoad = insideLoad;
 				insideLoad = true;
 				try {
-					processChildren(element, null, null);
+					ProcessEntity loadEntity = new ProcessEntity();
+					loadEntity.element = element;
+					processChildren(loadEntity, null);
 					return null;
 				} finally {
 					insideLoad = oldInsideLoad;
@@ -160,22 +178,25 @@ public class DefaultInitializer implements Initializer {
 			}
 
 			// child anchors are previously processed.
-			if (parentEntity != null && !StringUtils.isEmpty(element.getAttributeValue(_CHILD_ANCHOR))) {
+			if (parent != null && !StringUtils.isEmpty(element.getAttributeValue(_CHILD_ANCHOR))) {
 				return null;
 			}
 
 			// check whether it is a class alias or a property of an entity
 			// initEntiy is null when element is not a class alias
 			InitEntityMetaData initEntity = factory.getInitEntityByAlias(name);
-			Object entityObj = getObject(parentEntity, element, initEntity);
+			ProcessEntity entity = new ProcessEntity(parent, initEntity, element, null);
+			Object entityObj = getObject(entity);
+			entity.value = entityObj;
+
 			if (insideLoad) {
-				processAttributes(element, entityObj, initEntity);
+				processAttributes(entity);
 				return null;
 			}
 
 			// If path element
 			if (entityObj == null) {
-				processChildren(element, initEntity, parentAsList);
+				processChildren(entity, parentAsList);
 				return null;
 			}
 			// If first level element or inside path element
@@ -185,11 +206,11 @@ public class DefaultInitializer implements Initializer {
 
 			stack.push(entityObj);
 			try {
-				processAttributes(element, entityObj, initEntity);
+				processAttributes(entity);
 				if (initEntity != null) {
 					listener.entityCreated(initEntity, entityObj);
 				}
-				processChildren(element, initEntity, null);
+				processChildren(entity, null);
 			} finally {
 				stack.pop();
 			}
@@ -217,14 +238,13 @@ public class DefaultInitializer implements Initializer {
 	 * @return null in case of first level path element.
 	 * @throws Exception
 	 */
-	protected Object getObject(InitEntityMetaData parentEntity, Element element, InitEntityMetaData initEntity)
-			throws Exception {
+	protected Object getObject(ProcessEntity entity) throws Exception {
 		Object entityObj = null;
-		if (initEntity != null) {
+		if (entity.metadata != null) {
 			// class mode
 			stack.push(null);
 			try {
-				entityObj = findOrCreateEntity(initEntity, element);
+				entityObj = findOrCreateEntity(entity);
 			} finally {
 				stack.pop();
 			}
@@ -233,11 +253,11 @@ public class DefaultInitializer implements Initializer {
 			return null;
 		} else {
 			// property mode
-			String propName = element.getName();
+			String propName = entity.element.getName();
 
 			// check for alias
-			if (parentEntity != null) {
-				InitPropertyMetaData initProperty = parentEntity.getPropertiesByAlias().get(propName);
+			if (entity.parent != null) {
+				InitPropertyMetaData initProperty = entity.parent.metadata.getPropertiesByAlias().get(propName);
 				if (initProperty != null) {
 					propName = initProperty.getName();
 				}
@@ -245,25 +265,25 @@ public class DefaultInitializer implements Initializer {
 
 			entityObj = PropertyUtils.getProperty(stack.peek(), propName);
 			if (entityObj == null) {
-				throw new IllegalArgumentException("The property " + element.getName() + " of object " + stack.peek()
-						+ " is null.");
+				throw new IllegalArgumentException("The property " + entity.element.getName() + " of object "
+						+ stack.peek() + " is null.");
 			}
 		}
 		return entityObj;
 	}
 
-	protected void processChildren(Element element, InitEntityMetaData initEntity, List<Object> parentAsList) {
-		for (Element childElem : element.getChildren()) {
-			processElement(initEntity, childElem, parentAsList);
+	protected void processChildren(ProcessEntity entity, List<Object> parentAsList) {
+		for (Element childElem : entity.element.getChildren()) {
+			processElement(entity, childElem, parentAsList);
 		}
 	}
 
-	protected void processAttributes(Element element, Object entityObj, InitEntityMetaData initEntity) throws Exception {
-		Map<String, Object> allAttributes = getAllAttributes(initEntity, element, entityObj);
+	protected void processAttributes(ProcessEntity entity) throws Exception {
+		Map<String, Object> allAttributes = getAllAttributes(entity);
 
 		// Auto anchoring: it creates an anchor like this EntityAlias:unique1_unique2_uniqe3, provided that all unique
 		if (factory.isAutoAnchor() && !allAttributes.containsKey(_ANCHOR)) {
-			String[] uniqueProperties = getUniqueProperties(initEntity, allAttributes);
+			String[] uniqueProperties = getUniqueProperties(entity.metadata, allAttributes);
 			if (uniqueProperties != null) {
 				StringBuilder uniqeValue = new StringBuilder();
 				boolean allNotNull = true;
@@ -277,13 +297,14 @@ public class DefaultInitializer implements Initializer {
 				}
 				if (allNotNull) {
 					uniqeValue.setCharAt(0, ':'); // convert the first _ to :
-					uniqeValue.insert(0, initEntity.getAlias());
+					uniqeValue.insert(0, entity.metadata.getAlias());
 					allAttributes.put(_ANCHOR, uniqeValue.toString());
 				}
 			}
 		}
 		for (Entry<String, Object> entry : allAttributes.entrySet()) {
-			processAttribute(element, initEntity, entityObj, entry.getKey(), entry.getValue());
+			ProcessProperty property = new ProcessProperty(entity, entry.getKey(), entry.getValue());
+			processAttribute(property);
 		}
 	}
 
@@ -292,14 +313,14 @@ public class DefaultInitializer implements Initializer {
 	 * then tries to find an entity with values of those attributes that uniquely identifies it. If it fails, the newly
 	 * created entity will be returned.
 	 */
-	protected Object findOrCreateEntity(InitEntityMetaData initEntity, Element element) throws Exception {
-		Object entityObj = initEntity.getEntityClass().newInstance();
+	protected Object findOrCreateEntity(ProcessEntity entity) throws Exception {
+		Object entityObj = entity.metadata.getEntityClass().newInstance();
 		if (!factory.isIncremental() && !insideLoad) {
 			return entityObj;
 		}
 
-		Map<String, Object> allAttributes = getAllAttributes(initEntity, element, entityObj);
-		String[] properties = getUniqueProperties(initEntity, allAttributes);
+		Map<String, Object> allAttributes = getAllAttributes(entity);
+		String[] properties = getUniqueProperties(entity.metadata, allAttributes);
 		if (properties == null) {
 			return entityObj;
 		}
@@ -309,7 +330,7 @@ public class DefaultInitializer implements Initializer {
 			values[i] = allAttributes.get(properties[i]);
 		}
 
-		Object res = listener.findEntity(initEntity, properties, values);
+		Object res = listener.findEntity(entity.metadata, properties, values);
 		return res == null ? entityObj : res;
 	}
 
@@ -348,35 +369,35 @@ public class DefaultInitializer implements Initializer {
 	 * @param entityObj
 	 *            TODO the instance is not important only its class is used for checking some fields types
 	 */
-	private Map<String, Object> getAllAttributes(InitEntityMetaData initEntity, Element element, Object entityObj)
-			throws Exception {
+	private Map<String, Object> getAllAttributes(ProcessEntity entity) throws Exception {
 		Map<String, Object> attributes = new HashMap<String, Object>();
 		if (factory.getExpressionFactory() != null) {
 			context.setVariable("this", factory.getExpressionFactory().createValueExpression(attributes, Map.class));
 		}
 
-		for (Attribute attr : element.getAttributes()) {
+		for (Attribute attr : entity.element.getAttributes()) {
 			String attrName = attr.getName();
 			String attrValue = attr.getValue();
 			// resolve aliases
 			InitPropertyMetaData prop = null;
-			if (initEntity != null) {
-				prop = initEntity.getPropertiesByAlias().get(attrName);
+			if (entity.metadata != null) {
+				prop = entity.metadata.getPropertiesByAlias().get(attrName);
 				if (prop != null) {
 					attrName = prop.getName();
 				}
 			}
-			attributes.put(attrName, getAttributeValue(element, attrName, attrValue, context, entityObj, prop));
+			attributes.put(attrName,
+					getAttributeValue(entity.element, attrName, attrValue, context, entity.value, prop));
 		}
 		// check for unset defaults
-		if (initEntity != null) {
-			for (InitPropertyMetaData property : initEntity.getProperties()) {
+		if (entity.metadata != null) {
+			for (InitPropertyMetaData property : entity.metadata.getProperties()) {
 				String attrName = property.getName();
 				if (!attributes.containsKey(attrName) && property.getDefaultValue() != null) {
 					attributes.put(
 							attrName,
-							getAttributeValue(element, attrName, property.getDefaultValue(), context, entityObj,
-									property));
+							getAttributeValue(entity.element, attrName, property.getDefaultValue(), context,
+									entity.value, property));
 				}
 			}
 		}
@@ -512,44 +533,41 @@ public class DefaultInitializer implements Initializer {
 		}
 	}
 
-	protected void processAttribute(Element element, InitEntityMetaData initEntity, Object entityObj, String attrName,
-			Object attrValue) throws Exception {
-		String value = String.valueOf(attrValue);
+	protected void processAttribute(ProcessProperty property) throws Exception {
+		String value = String.valueOf(property.value);
 		try {
 			// check for special attributes
-			if (attrName.equals(_ANCHOR)) {
+			if (property.name.equals(_ANCHOR)) {
 				if (value.startsWith("parent") || value.equals("child") || StringUtils.containsAny(value, '?')) {
 					throw new IllegalArgumentException("Illegal anchor name " + value);
 				}
-				// auto scoped named anchor, resolve to the real name
-				if (value.startsWith("@")) {
-
-				}
+				value = getAbsoluteAnchorName(value, property.entity.metadata.getEntityClass());
 				if (anchores.containsKey(value)) {
 					throw new IllegalArgumentException("Duplicate anchor name " + value);
 				}
-				anchores.put(value, entityObj);
-			} else if (attrName.equals(_ACTION)) {
+				anchores.put(value, property.entity.value);
+			} else if (property.name.equals(_ACTION)) {
 				int index = value.indexOf('.');
 				int arg = Integer.parseInt(value.substring(8, index - 1)); // -1 for )
 				Object target = stack.peek(arg);
-				MethodUtils.invokeMethod(target, value.substring(index + 1), entityObj);
-			} else if (attrName.equals(_IN_PARENT)) {
+				MethodUtils.invokeMethod(target, value.substring(index + 1), property.entity.value);
+			} else if (property.name.equals(_IN_PARENT)) {
 				Object parent = stack.get(stack.size() - 2);
-				BeanUtils.setProperty(parent, value, entityObj);
+				BeanUtils.setProperty(parent, value, property.entity.value);
 			} else {
-				setPropertyValue(element, entityObj, attrName, attrValue);
+				setPropertyValue(property);
 			}
 		} catch (Exception e) {
-			throw new RuntimeException("Exception occured while processing attribute " + attrName + " of element "
-					+ element.getName() + ". Entity: " + entityObj + ". Attribute value: " + attrValue, e);
+			throw new RuntimeException("Exception occured while processing attribute " + property.name + " of element "
+					+ property.entity.element.getName() + ". Entity: " + property.entity.value + ". Attribute value: "
+					+ property.value, e);
 		}
 
 	}
 
-	protected void setPropertyValue(Element element, Object entityObj, String attrName, Object value)
-			throws IllegalAccessException, InvocationTargetException, NoSuchMethodException {
-		BeanUtils.setProperty(entityObj, attrName, value);
+	protected void setPropertyValue(ProcessProperty property) throws IllegalAccessException, InvocationTargetException,
+			NoSuchMethodException {
+		BeanUtils.setProperty(property.entity.value, property.name, property.value);
 	}
 
 	protected Element findChild(Element element, String attrName, String attrValue) {
@@ -583,10 +601,10 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	protected String getAbsoluteAnchorName(String anchorName, Class<?> entityClass) {
-		if (anchorName.startsWith("@")) {
+		if (anchorName.startsWith(":")) {
 			InitEntityMetaData initEntity = factory.getInitEntityByClass(entityClass);
 			Validate.notNull(initEntity, "Entity class is not defined " + entityClass);
-			anchorName = anchorName.replace("@", initEntity.getAlias() + ":");
+			anchorName = initEntity.getAlias() + anchorName;
 		}
 		return anchorName;
 	}

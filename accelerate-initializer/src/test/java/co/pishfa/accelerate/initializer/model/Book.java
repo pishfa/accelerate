@@ -23,6 +23,8 @@ public class Book {
 
 	private List<Author> authors;
 
+	private int edition;
+
 	public String getName() {
 		return name;
 	}
@@ -61,6 +63,14 @@ public class Book {
 
 	public void setAuthors(List<Author> authors) {
 		this.authors = authors;
+	}
+
+	public int getEdition() {
+		return edition;
+	}
+
+	public void setEdition(int edition) {
+		this.edition = edition;
 	}
 
 }

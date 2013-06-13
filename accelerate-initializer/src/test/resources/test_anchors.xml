@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<Authors>
+		<Author _anchor_="a1" name="a1" />
+		<Author _anchor_="Author:a2" name="a2" />
+		<Author _anchor_=":a3" name="a3" />
+		<Author name="a4" />
+	</Authors>
+</data>
