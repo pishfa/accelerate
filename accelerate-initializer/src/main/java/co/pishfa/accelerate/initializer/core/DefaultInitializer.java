@@ -4,13 +4,15 @@
 package co.pishfa.accelerate.initializer.core;
 
 import java.beans.PropertyDescriptor;
-import java.io.Reader;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.el.ExpressionFactory;
 
@@ -33,7 +35,6 @@ import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 import co.pishfa.accelerate.initializer.util.Input;
-import de.odysseus.el.util.SimpleContext;
 
 /**
  * 
@@ -42,7 +43,7 @@ import de.odysseus.el.util.SimpleContext;
  */
 public class DefaultInitializer implements Initializer {
 
-	private static class ProcessEntity {
+	public static class ProcessEntity {
 		public ProcessEntity(ProcessEntity parent, InitEntityMetaData metadata, Element element, Object value) {
 			this.parent = parent;
 			this.metadata = metadata;
@@ -57,18 +58,135 @@ public class DefaultInitializer implements Initializer {
 		public InitEntityMetaData metadata;
 		public Element element;
 		public Object value;
+		public Map<String, ProcessProperty> properties = new HashMap<>();
+
+		public ProcessEntity getParent() {
+			return parent;
+		}
+
+		public InitEntityMetaData getMetadata() {
+			return metadata;
+		}
+
+		public Element getElement() {
+			return element;
+		}
+
+		public Object getValue() {
+			return value;
+		}
+
+		public Map<String, ProcessProperty> getProperties() {
+			return properties;
+		}
+
 	}
 
-	private static class ProcessProperty {
-		public ProcessProperty(ProcessEntity entity, String name, Object value) {
+	public static class ProcessProperty {
+		public ProcessProperty(ProcessEntity entity, InitPropertyMetaData metadata, String name, String rawValue,
+				Object value) {
 			this.entity = entity;
+			this.metadata = metadata;
 			this.name = name;
+			this.rawValue = rawValue;
 			this.value = value;
 		}
 
 		public ProcessEntity entity;
+		public InitPropertyMetaData metadata;
 		public String name;
+		public String rawValue;
 		public Object value;
+
+		public ProcessEntity getEntity() {
+			return entity;
+		}
+
+		public InitPropertyMetaData getMetadata() {
+			return metadata;
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public String getRawValue() {
+			return rawValue;
+		}
+
+		public Object getValue() {
+			return value;
+		}
+
+	}
+
+	public static class PropertiesMap implements Map<String, Object> {
+
+		private final Map<String, ProcessProperty> properties;
+
+		public PropertiesMap(Map<String, ProcessProperty> properties) {
+			this.properties = properties;
+		}
+
+		@Override
+		public int size() {
+			return properties.size();
+		}
+
+		@Override
+		public boolean isEmpty() {
+			return properties.isEmpty();
+		}
+
+		@Override
+		public boolean containsKey(Object key) {
+			return properties.containsKey(key);
+		}
+
+		@Override
+		public boolean containsValue(Object value) {
+			return false;
+		}
+
+		@Override
+		public Object get(Object key) {
+			ProcessProperty prop = properties.get(key);
+			return prop == null ? null : prop.value;
+		}
+
+		@Override
+		public Object put(String key, Object value) {
+			return null;
+		}
+
+		@Override
+		public Object remove(Object key) {
+			return null;
+		}
+
+		@Override
+		public void putAll(Map<? extends String, ? extends Object> m) {
+		}
+
+		@Override
+		public void clear() {
+		}
+
+		@Override
+		public Set<String> keySet() {
+			return null;
+		}
+
+		@Override
+		public Collection<Object> values() {
+			return null;
+		}
+
+		@Override
+		public Set<java.util.Map.Entry<String, Object>> entrySet() {
+			return null;
+		}
+
 	}
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultInitializer.class);
@@ -95,17 +213,22 @@ public class DefaultInitializer implements Initializer {
 
 		this.factory = factory;
 		this.listener = listener == null ? new BaseInitListener() : listener;
-		ExpressionFactory expressionFactory = factory.getExpressionFactory();
-		if (expressionFactory != null) {
-			context.setVariable("parents", expressionFactory.createValueExpression(stack, ArrayStack.class));
-			context.setVariable("anchors", expressionFactory.createValueExpression(anchores, Map.class));
-		}
+
+		putInContext("parents", stack);
+		putInContext("anchors", anchores);
 		if (contextVars != null) {
 			for (Entry<String, Object> entry : contextVars.entrySet()) {
-				context.setVariable(entry.getKey(),
-						expressionFactory.createValueExpression(entry.getValue(), entry.getValue().getClass()));
+				putInContext(entry.getKey(), entry.getValue());
 			}
 		}
+	}
+
+	private void putInContext(String name, Object obj) {
+		ExpressionFactory expressionFactory = factory.getExpressionFactory();
+		if (expressionFactory != null) {
+			context.setVariable(name, expressionFactory.createValueExpression(obj, Object.class));
+		}
+
 	}
 
 	@Override
@@ -114,16 +237,16 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	@Override
-	public Map<String, List<Object>> read(Reader reader, boolean autoClose) throws Exception {
-		Validate.notNull(reader);
+	public Map<String, List<Object>> read(InputStream input, boolean autoClose) throws Exception {
+		Validate.notNull(input);
 
 		try {
 			SAXBuilder builder = new SAXBuilder();
-			Element root = builder.build(reader).getRootElement();
+			Element root = builder.build(input).getRootElement();
 			return read(root);
 		} finally {
 			if (autoClose) {
-				reader.close();
+				input.close();
 			}
 		}
 	}
@@ -205,6 +328,8 @@ public class DefaultInitializer implements Initializer {
 			}
 
 			stack.push(entityObj);
+			putInContext("entity", entity);
+			putInContext("this", new PropertiesMap(entity.properties));
 			try {
 				processAttributes(entity);
 				if (initEntity != null) {
@@ -279,16 +404,16 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	protected void processAttributes(ProcessEntity entity) throws Exception {
-		Map<String, Object> allAttributes = getAllAttributes(entity);
+		getAllAttributes(entity);
 
 		// Auto anchoring: it creates an anchor like this EntityAlias:unique1_unique2_uniqe3, provided that all unique
-		if (factory.isAutoAnchor() && !allAttributes.containsKey(_ANCHOR)) {
-			String[] uniqueProperties = getUniqueProperties(entity.metadata, allAttributes);
+		if (factory.isAutoAnchor() && !entity.properties.containsKey(_ANCHOR)) {
+			String[] uniqueProperties = getUniqueProperties(entity);
 			if (uniqueProperties != null) {
 				StringBuilder uniqeValue = new StringBuilder();
 				boolean allNotNull = true;
 				for (String uniqueProperty : uniqueProperties) {
-					Object propertyValue = allAttributes.get(uniqueProperty);
+					Object propertyValue = entity.properties.get(uniqueProperty).value;
 					if (propertyValue == null) {
 						allNotNull = false;
 						break;
@@ -298,12 +423,12 @@ public class DefaultInitializer implements Initializer {
 				if (allNotNull) {
 					uniqeValue.setCharAt(0, ':'); // convert the first _ to :
 					uniqeValue.insert(0, entity.metadata.getAlias());
-					allAttributes.put(_ANCHOR, uniqeValue.toString());
+					entity.properties.put(_ANCHOR,
+							new ProcessProperty(entity, null, _ANCHOR, null, uniqeValue.toString()));
 				}
 			}
 		}
-		for (Entry<String, Object> entry : allAttributes.entrySet()) {
-			ProcessProperty property = new ProcessProperty(entity, entry.getKey(), entry.getValue());
+		for (ProcessProperty property : entity.properties.values()) {
 			processAttribute(property);
 		}
 	}
@@ -319,15 +444,15 @@ public class DefaultInitializer implements Initializer {
 			return entityObj;
 		}
 
-		Map<String, Object> allAttributes = getAllAttributes(entity);
-		String[] properties = getUniqueProperties(entity.metadata, allAttributes);
+		getAllAttributes(entity);
+		String[] properties = getUniqueProperties(entity);
 		if (properties == null) {
 			return entityObj;
 		}
 
 		Object[] values = new Object[properties.length];
 		for (int i = 0; i < properties.length; i++) {
-			values[i] = allAttributes.get(properties[i]);
+			values[i] = entity.properties.get(properties[i]).value;
 		}
 
 		Object res = listener.findEntity(entity.metadata, properties, values);
@@ -338,15 +463,15 @@ public class DefaultInitializer implements Initializer {
 	 * finds the unifying attributes. By default, it is factory.getUniquePropertyName().
 	 * 
 	 */
-	protected String[] getUniqueProperties(InitEntityMetaData initEntity, Map<String, Object> allAttributes) {
-		String unique = StringUtils.defaultIfEmpty(initEntity.getUnique(), factory.getUniquePropertyName());
+	protected String[] getUniqueProperties(ProcessEntity entity) {
+		String unique = StringUtils.defaultIfEmpty(entity.metadata.getUnique(), factory.getUniquePropertyName());
 		if (StringUtils.isEmpty(unique)) {
 			return null;
 		}
 
 		if ("*".equals(unique)) {
 			StringBuilder ustr = new StringBuilder();
-			for (String name : allAttributes.keySet()) {
+			for (String name : entity.properties.keySet()) {
 				if (!isReservedAttribute(name)) {
 					ustr.append(",").append(name);
 				}
@@ -365,15 +490,8 @@ public class DefaultInitializer implements Initializer {
 	/**
 	 * Get the values of all attributes for this element whether they are explicitly mentioned in the attributes of the
 	 * element or they have default value in the initEntity.
-	 * 
-	 * @param entityObj
-	 *            TODO the instance is not important only its class is used for checking some fields types
 	 */
-	private Map<String, Object> getAllAttributes(ProcessEntity entity) throws Exception {
-		Map<String, Object> attributes = new HashMap<String, Object>();
-		if (factory.getExpressionFactory() != null) {
-			context.setVariable("this", factory.getExpressionFactory().createValueExpression(attributes, Map.class));
-		}
+	private void getAllAttributes(ProcessEntity entity) throws Exception {
 
 		for (Attribute attr : entity.element.getAttributes()) {
 			String attrName = attr.getName();
@@ -386,67 +504,71 @@ public class DefaultInitializer implements Initializer {
 					attrName = prop.getName();
 				}
 			}
-			attributes.put(attrName,
-					getAttributeValue(entity.element, attrName, attrValue, context, entity.value, prop));
+
+			ProcessProperty property = new ProcessProperty(entity, prop, attrName, attrValue, null);
+			property.value = getAttributeValue(property);
+			entity.properties.put(attrName, property);
 		}
+
 		// check for unset defaults
 		if (entity.metadata != null) {
-			for (InitPropertyMetaData property : entity.metadata.getProperties()) {
-				String attrName = property.getName();
-				if (!attributes.containsKey(attrName) && property.getDefaultValue() != null) {
-					attributes.put(
-							attrName,
-							getAttributeValue(entity.element, attrName, property.getDefaultValue(), context,
-									entity.value, property));
+			for (InitPropertyMetaData prop : entity.metadata.getProperties()) {
+				String attrName = prop.getName();
+				if (!entity.properties.containsKey(attrName) && prop.getDefaultValue() != null) {
+					ProcessProperty property = new ProcessProperty(entity, prop, attrName, prop.getDefaultValue(), null);
+					property.value = getAttributeValue(property);
+					entity.properties.put(attrName, property);
 				}
 			}
 		}
 
-		return attributes;
 	}
 
 	/**
 	 * Resolves the value attrValue of attribute attrName to a concrete type within the given context. Note that when
-	 * called from inside load, entityObj is null. initProperty also might be null.
+	 * called from inside load, entity is null.
 	 * 
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	protected Object getAttributeValue(Element element, String attrName, String attrValue, SimpleContext context,
-			Object entityObj, InitPropertyMetaData initProperty) throws Exception {
-		if (attrValue == null) {
+	protected Object getAttributeValue(ProcessProperty property) throws Exception {
+		if (property.rawValue == null) {
 			return null;
 		}
 
 		// Detect the target property type
 		Class propertyType = null;
-		if (entityObj != null) {
-			PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(entityObj, attrName);
+		if (property.entity.value != null && !isReservedAttribute(property.name)) {
+			PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(property.entity.value, property.name);
 			if (descriptor != null) {
 				propertyType = descriptor.getPropertyType();
+			} else {
+				throw new RuntimeException("No property with name " + property.name + " is found in "
+						+ property.entity.value.getClass());
 			}
 		}
 
-		Object value = attrValue;
-		if ((initProperty == null || initProperty.isDynamic())) {
-			if ("null".equals(attrValue)) {
+		Object value = property.rawValue;
+		if ((property.metadata == null || property.metadata.isDynamic())) {
+			if ("null".equals(property.rawValue)) {
 				value = null;
-			} else if (attrValue.startsWith("@")) {
+			} else if (property.rawValue.startsWith("@")) {
 				// check for dynamic references
-				value = resolveDynamicReference(element, attrName, attrValue, propertyType);
+				value = resolveDynamicReference(property.entity.element, property.name, property.rawValue, propertyType);
 				propertyType = null; // no type conversion needed anymore
 			} else if (factory.getExpressionFactory() != null) {
-				value = factory.getExpressionFactory()
-						.createValueExpression(context, attrValue, propertyType == null ? Object.class : propertyType)
-						.getValue(context);
+				value = factory
+						.getExpressionFactory()
+						.createValueExpression(context, property.rawValue,
+								propertyType == null ? Object.class : propertyType).getValue(context);
 				propertyType = null; // no type conversion needed anymore
 			}
 		}
 
 		if (value != null && propertyType != null) {
 			if (propertyType.isEnum()) {
-				value = Enum.valueOf(propertyType, attrValue.toString());
+				value = Enum.valueOf(propertyType, property.rawValue.toString());
 			} else {
-				value = ConvertUtils.convert(attrValue, propertyType);
+				value = ConvertUtils.convert(property.rawValue, propertyType);
 			}
 		}
 		return value;
@@ -473,14 +595,14 @@ public class DefaultInitializer implements Initializer {
 			// Finds the first parent with specified type
 			for (int level = 1; level < stack.size(); level++) {
 				Object parent = stack.peek(level);
-				if (propertyType.isAssignableFrom(parent.getClass())) {
+				if (propertyType != null && propertyType.isAssignableFrom(parent.getClass())) {
 					value = parent;
 					break;
 				}
 			}
 			if (value == null && !optional) {
 				throw new IllegalArgumentException("Could not find an appropriate parent with type " + propertyType
-						+ " for " + attrName + " in " + element);
+						+ " for property " + attrName + " in " + element);
 			}
 		} else if (attrValue.equals("@child")) {
 			// now we should look into children to find the one with corresponding child-anchor

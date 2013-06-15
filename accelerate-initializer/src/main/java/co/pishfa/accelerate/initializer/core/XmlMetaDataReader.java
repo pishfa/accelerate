@@ -1,7 +1,7 @@
 package co.pishfa.accelerate.initializer.core;
 
 import java.io.File;
-import java.io.Reader;
+import java.io.InputStream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
@@ -34,15 +34,15 @@ public class XmlMetaDataReader {
 		this.factory = factory;
 	}
 
-	public void processMetadata(Reader metadata) throws Exception {
-		Element root = getRootElement(metadata);
+	public void processMetadata(InputStream input) throws Exception {
+		Element root = getRootElement(input);
 		for (Element entityElement : root.getChildren("entity", PISHFA_NS)) {
 			InitEntityMetaData initEntity = processEntityElement(entityElement);
 			factory.addInitEntity(initEntity);
 		}
 	}
 
-	private Element getRootElement(Reader configFile) throws Exception {
+	private Element getRootElement(InputStream configFile) throws Exception {
 		File xsd = new File(getClass().getResource(INITIALIZER_METADATA_XSD).toURI());
 		XMLReaderXSDFactory xsdFactory = new XMLReaderXSDFactory(xsd);
 		SAXBuilder builder = new SAXBuilder(xsdFactory);

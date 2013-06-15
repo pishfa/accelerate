@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<book title="b1" mainAuthor.name="a1" />
+	
+	<!-- 
+	<book title="b2">
+		<mainAuthor name="a2" />
+	</book>	
+	 -->
+</data>

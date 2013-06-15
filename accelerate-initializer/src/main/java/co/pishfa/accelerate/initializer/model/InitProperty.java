@@ -36,6 +36,7 @@ public @interface InitProperty {
 	 * <li>this (refers to the attributes of the current element in xml file + those with default values)</li>
 	 * <li>parents (stack of parents, so parents.peek(1) is the first parent above the current element)</li>
 	 * <li>anchors (map of anchors)</li>
+	 * <li>entity (refers to the current ProcessEntity</li>
 	 * </ul>
 	 * The following shorthand notations could also be used:
 	 * <ul>

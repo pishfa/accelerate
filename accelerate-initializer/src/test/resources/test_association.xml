@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<Author name="a1" />
+	<book title="b1" author="@a1" />
+	
+	<Author name="a2">
+		<book title="b2" author="@parent" />
+	</Author>
+	
+	<book title="b3">
+		<Author name="a3" _in-parent_="author" />
+	</book>
+	
+	<!-- 
+	<book title="b4">
+		<author>
+			<Author name="a4" />
+		</author>
+	</book>
+	 -->
+	
+</data>

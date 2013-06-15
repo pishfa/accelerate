@@ -3,13 +3,11 @@
  */
 package co.pishfa.accelerate.initializer.api;
 
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.ServiceLoader;
 
 import javax.el.ExpressionFactory;
 
@@ -50,10 +48,7 @@ public class InitializerFactory {
 	private String uniquePropertyName = null;
 
 	public InitializerFactory() {
-		try {
-			expressionFactory = ServiceLoader.load(ExpressionFactory.class).iterator().next();
-		} catch (NoSuchElementException e) {
-		}
+		expressionFactory = ExpressionFactory.newInstance();
 	}
 
 	/**
@@ -92,11 +87,11 @@ public class InitializerFactory {
 	}
 
 	/**
-	 * Xml-file based configuration which conforms to initializer-config.xsd. Note that you are responsible to close
-	 * this resource if autoClose if false. If an init entity with the same alias is already exits, it will be
-	 * overridden.
+	 * Xml-file based configuration which conforms to initializer-config.xsd. The encoding is determined from xml
+	 * declaration. Note that you are responsible to close this resource if autoClose if false. If an init entity with
+	 * the same alias is already exits, it will be overridden.
 	 */
-	public InitializerFactory metadata(Reader metadataFile, boolean autoClose) throws Exception {
+	public InitializerFactory metadata(InputStream metadataFile, boolean autoClose) throws Exception {
 		Validate.notNull(metadataFile);
 
 		processMetadataFile(metadataFile, autoClose);
@@ -104,12 +99,12 @@ public class InitializerFactory {
 
 	}
 
-	protected void processMetadataFile(Reader metadataFile, boolean autoClose) throws Exception {
+	protected void processMetadataFile(InputStream input, boolean autoClose) throws Exception {
 		try {
-			new XmlMetaDataReader(this).processMetadata(metadataFile);
+			new XmlMetaDataReader(this).processMetadata(input);
 		} finally {
 			if (autoClose) {
-				metadataFile.close();
+				input.close();
 			}
 		}
 	}

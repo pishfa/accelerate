@@ -1,6 +1,6 @@
 package co.pishfa.accelerate.initializer.api;
 
-import java.io.Reader;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -24,11 +24,12 @@ public interface Initializer {
 	Map<String, List<Object>> read(String resourceName) throws Exception;
 
 	/**
-	 * Reads data from the given reader. Note if autoClose is false, you are responsible for closing this reader.
+	 * Reads data from the given inputStream. The encoding is detected from xml declaration. Note if autoClose is false,
+	 * you are responsible for closing this reader.
 	 * 
 	 * @return
 	 */
-	Map<String, List<Object>> read(Reader reader, boolean autoClose) throws Exception;
+	Map<String, List<Object>> read(InputStream input, boolean autoClose) throws Exception;
 
 	Map<String, List<Object>> read(Element root) throws Exception;
 

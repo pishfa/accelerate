@@ -79,6 +79,30 @@ public class InitializerTester {
 	}
 
 	@Test
+	public void testAssociation() throws Exception {
+		initializer.read("test_association.xml");
+		assertNotNull(initializer.getObject(":b1", Book.class).getAuthor());
+		assertEquals(initializer.getObject(":a1", Author.class), initializer.getObject(":b1", Book.class).getAuthor());
+
+		assertNotNull(initializer.getObject(":b2", Book.class).getAuthor());
+		assertEquals(initializer.getObject(":a2", Author.class), initializer.getObject(":b2", Book.class).getAuthor());
+
+		assertNotNull(initializer.getObject(":b3", Book.class).getAuthor());
+		assertEquals(initializer.getObject(":a3", Author.class), initializer.getObject(":b3", Book.class).getAuthor());
+
+		// assertNotNull(initializer.getObject(":b4", Book.class).getAuthor());
+		// assertEquals(initializer.getObject(":a4", Author.class), initializer.getObject(":b4",
+		// Book.class).getAuthor());
+	}
+
+	@Test
+	public void testCompund() throws Exception {
+		initializer.read("test_compound.xml");
+		assertEquals("a1", initializer.getObject(":b1", Book.class).getMainAuthor().getName());
+		// assertEquals("a2", initializer.getObject(":b2", Book.class).getMainAuthor().getName());
+	}
+
+	@Test
 	public void testAnchor() throws Exception {
 		initializer.read("test_anchors.xml");
 		anchores = initializer.getAnchores();
@@ -145,4 +169,5 @@ public class InitializerTester {
 		assertEquals(4, result.get("Author").size());
 		assertEquals("t1", ((Author) result.get("Authors").get(0)).getName());
 	}
+
 }

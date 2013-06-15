@@ -1,10 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <data>
-	<Authors>
-		<Author name="t1" />
-		<Author name="t2" />
-	</Authors>
-	<Books>
-		<Book 
-	</Books>
+	<Author name="a11" />
+	<Author name="a12" />
+	
+	<book title="b1" authors="@a11;@a12" />
+	
+	<!-- 
+	<book title="b2">
+		<authors>
+			<Author name="a21" />
+			<Author name="a22" />
+		</authors>
+	</book>
+	-->
+	
 </data>
