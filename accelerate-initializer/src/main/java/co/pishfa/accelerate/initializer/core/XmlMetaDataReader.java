@@ -53,8 +53,8 @@ public class XmlMetaDataReader {
 	protected InitEntityMetaData processEntityElement(Element entityElement) throws ClassNotFoundException {
 		String entityClazz = entityElement.getAttributeValue("class");
 		String entityAlias = entityElement.getAttributeValue("alias");
-		String entityUnique = entityElement.getAttributeValue("unique");
-		InitEntityMetaData initEntity = new InitEntityMetaData(entityAlias, Class.forName(entityClazz), entityUnique);
+		String entityKey = entityElement.getAttributeValue("key");
+		InitEntityMetaData initEntity = new InitEntityMetaData(entityAlias, Class.forName(entityClazz), entityKey);
 		String inherits = entityElement.getAttributeValue("inherits");
 		if (!StringUtils.isEmpty(inherits)) {
 			for (String inherit : inherits.split(",")) {

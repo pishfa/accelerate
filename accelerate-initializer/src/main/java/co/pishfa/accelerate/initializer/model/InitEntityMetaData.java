@@ -22,17 +22,17 @@ public class InitEntityMetaData {
 
 	private String alias;
 	private Class<?> entityClass;
-	private String unique;
+	private String key;
 	private Map<String, InitPropertyMetaData> propertiesByAlias = new HashMap<String, InitPropertyMetaData>();
 
 	private final List<InitPropertyMetaData> properties = new ArrayList<InitPropertyMetaData>();
 
-	public InitEntityMetaData(String alias, Class<?> entityClass, String unique) {
+	public InitEntityMetaData(String alias, Class<?> entityClass, String key) {
 		Validate.notNull(entityClass);
 
 		this.entityClass = entityClass;
 		this.alias = StringUtils.isEmpty(alias) ? entityClass.getSimpleName() : alias;
-		this.unique = unique;
+		this.key = key;
 	}
 
 	public String getAlias() {
@@ -59,12 +59,12 @@ public class InitEntityMetaData {
 		this.propertiesByAlias = properteis;
 	}
 
-	public String getUnique() {
-		return unique;
+	public String getKey() {
+		return key;
 	}
 
-	public void setUnique(String unique) {
-		this.unique = unique;
+	public void setKey(String unique) {
+		this.key = unique;
 	}
 
 	public List<InitPropertyMetaData> getProperties() {

@@ -21,7 +21,7 @@ import co.pishfa.accelerate.initializer.model.Category;
  * @author Taha Ghasemi
  * 
  */
-public class InitializerTester {
+public class InitializerXmlTester {
 
 	private static InitializerFactory factory;
 	private InitListener listener;
@@ -33,7 +33,7 @@ public class InitializerTester {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class).uniquePropertyName(
+		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class).keyPropertyName(
 				"name");
 	}
 

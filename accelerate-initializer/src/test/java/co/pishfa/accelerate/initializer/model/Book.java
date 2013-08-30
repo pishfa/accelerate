@@ -9,10 +9,11 @@ import java.util.List;
  * @author Taha Ghasemi
  * 
  */
-@InitEntity(alias = "book", unique = "name")
+@InitEntity(alias = "book")
 public class Book {
 
 	@InitProperty(dynamic = false, alias = "title")
+	@InitKey
 	private String name;
 	private Author author;
 	@InitProperty("@parent?")

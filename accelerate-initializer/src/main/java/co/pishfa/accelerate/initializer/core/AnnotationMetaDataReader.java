@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.model.InitEntity;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
+import co.pishfa.accelerate.initializer.model.InitKey;
 import co.pishfa.accelerate.initializer.model.InitProperty;
 import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 
@@ -50,15 +51,31 @@ public class AnnotationMetaDataReader {
 	 */
 	protected void processEntityClass(Class<?> entityClass) {
 		InitEntity initEntity = entityClass.getAnnotation(InitEntity.class);
-		String unique = null;
+		String key = null;
 		String alias = null;
 		if (initEntity != null) {
-			unique = StringUtils.defaultIfEmpty(initEntity.unique(), null);
+			key = findEntityKeys(entityClass);
 			alias = initEntity.alias();
 		}
-		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(alias, entityClass, unique);
+		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(alias, entityClass, key);
 		factory.addInitEntity(initEntityMetaData);
 		addInitProperties(entityClass, initEntityMetaData);
+	}
+
+	protected String findEntityKeys(Class<?> entityClass) {
+		StringBuilder keyParts = new StringBuilder();
+		// find keys
+		boolean first = true;
+		for (Field field : entityClass.getDeclaredFields()) {
+			if (!first) {
+				keyParts.append(',');
+			}
+			if (field.getAnnotation(InitKey.class) != null) {
+				keyParts.append(field.getName());
+				first = false;
+			}
+		}
+		return first ? null : keyParts.toString();
 	}
 
 	/**

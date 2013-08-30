@@ -7,9 +7,10 @@ package co.pishfa.accelerate.initializer.model;
  * @author Taha Ghasemi
  * 
  */
-@InitEntity(unique = "name")
+@InitEntity
 public class Author {
 
+	@InitKey
 	private String name;
 
 	public String getName() {

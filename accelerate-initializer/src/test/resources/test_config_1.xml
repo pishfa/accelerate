@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <metadata xmlns="http://pishfa.co" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pishfa.co https://raw.github.com/pishfa/accelerate/master/accelerate-initializer/src/main/resources/initializer-metadata.xsd">
-	<entity class="co.pishfa.accelerate.initializer.model.Author" unique="name">
+	<entity class="co.pishfa.accelerate.initializer.model.Author" key="name">
 	</entity>
 	<entity class="co.pishfa.accelerate.initializer.model.Category">
 		<property name="category" default="@parent?"/>

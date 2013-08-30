@@ -45,7 +45,7 @@ public class InitializerFactory {
 	private ExpressionFactory expressionFactory;
 	private boolean incremental = false;
 	private boolean autoAnchor = true;
-	private String uniquePropertyName = null;
+	private String keyPropertyName = null;
 
 	public InitializerFactory() {
 		expressionFactory = ExpressionFactory.newInstance();
@@ -115,8 +115,8 @@ public class InitializerFactory {
 	 * value is null, it means that the target entity should not participate in auto-anchoring or loading modes. Default
 	 * value is null.
 	 */
-	public InitializerFactory uniquePropertyName(String uniquePropertyName) {
-		this.uniquePropertyName = uniquePropertyName;
+	public InitializerFactory keyPropertyName(String keyPropertyName) {
+		this.keyPropertyName = keyPropertyName;
 		return this;
 	}
 
@@ -185,8 +185,8 @@ public class InitializerFactory {
 		return autoAnchor;
 	}
 
-	public String getUniquePropertyName() {
-		return uniquePropertyName;
+	public String getKeyPropertyName() {
+		return keyPropertyName;
 	}
 
 	public Initializer create(InitListener listener, Map<String, Object> contextVars) {

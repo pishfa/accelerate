@@ -29,15 +29,6 @@ public @interface InitEntity {
 	InitProperty[] properties() default {};
 
 	/**
-	 * 
-	 * @return the name of property or comma separated name of properties whose value(s) specify a unique instance of
-	 *         this entity. Can be * which means all properties with not null value. By default, the uniquePropertyName
-	 *         specified in the factory will be used. If the specified value is null, it means that the target entity
-	 *         should not participate in auto-anchoring or loading modes.
-	 */
-	String unique() default "";
-
-	/**
 	 * @return the entity alias name which will be used in the xml to refer to that entity.. If not specified, the class
 	 *         simple name will be used as the alias.
 	 */

@@ -406,14 +406,14 @@ public class DefaultInitializer implements Initializer {
 	protected void processAttributes(ProcessEntity entity) throws Exception {
 		getAllAttributes(entity);
 
-		// Auto anchoring: it creates an anchor like this EntityAlias:unique1_unique2_uniqe3, provided that all unique
+		// Auto anchoring: it creates an anchor like this EntityAlias:key1_key2_key3, provided that all key
 		if (factory.isAutoAnchor() && !entity.properties.containsKey(_ANCHOR)) {
-			String[] uniqueProperties = getUniqueProperties(entity);
-			if (uniqueProperties != null) {
+			String[] keyProperties = getKeyProperties(entity);
+			if (keyProperties != null) {
 				StringBuilder uniqeValue = new StringBuilder();
 				boolean allNotNull = true;
-				for (String uniqueProperty : uniqueProperties) {
-					Object propertyValue = entity.properties.get(uniqueProperty).value;
+				for (String keyProperty : keyProperties) {
+					Object propertyValue = entity.properties.get(keyProperty).value;
 					if (propertyValue == null) {
 						allNotNull = false;
 						break;
@@ -445,7 +445,7 @@ public class DefaultInitializer implements Initializer {
 		}
 
 		getAllAttributes(entity);
-		String[] properties = getUniqueProperties(entity);
+		String[] properties = getKeyProperties(entity);
 		if (properties == null) {
 			return entityObj;
 		}
@@ -463,23 +463,23 @@ public class DefaultInitializer implements Initializer {
 	 * finds the unifying attributes. By default, it is factory.getUniquePropertyName().
 	 * 
 	 */
-	protected String[] getUniqueProperties(ProcessEntity entity) {
-		String unique = StringUtils.defaultIfEmpty(entity.metadata.getUnique(), factory.getUniquePropertyName());
-		if (StringUtils.isEmpty(unique)) {
+	protected String[] getKeyProperties(ProcessEntity entity) {
+		String key = StringUtils.defaultIfEmpty(entity.metadata.getKey(), factory.getKeyPropertyName());
+		if (StringUtils.isEmpty(key)) {
 			return null;
 		}
 
-		if ("*".equals(unique)) {
+		if ("*".equals(key)) {
 			StringBuilder ustr = new StringBuilder();
 			for (String name : entity.properties.keySet()) {
 				if (!isReservedAttribute(name)) {
 					ustr.append(",").append(name);
 				}
 			}
-			unique = ustr.deleteCharAt(0).toString();
+			key = ustr.deleteCharAt(0).toString();
 		}
 
-		String[] properties = unique.split(",");
+		String[] properties = key.split(",");
 		return properties;
 	}
 
@@ -613,12 +613,12 @@ public class DefaultInitializer implements Initializer {
 			value = processElement(null, childElem, null);
 		} else { // look into anchors
 			if (attrValue.indexOf(';') < 0) {
-				value = getAnchorValue(attrValue, propertyType, optional);
+				value = getAnchorValue(attrValue.substring(1), propertyType, optional);
 			} else {
 				List<Object> list = new ArrayList<Object>();
 				for (String part : attrValue.split(";")) {
 					// Note that in this case, passing property type is not useful since it is of type List
-					list.add(getAnchorValue(part, null, optional));
+					list.add(getAnchorValue(part.substring(1), null, optional));
 				}
 				value = list;
 			}
@@ -627,8 +627,8 @@ public class DefaultInitializer implements Initializer {
 		return value;
 	}
 
-	private Object getAnchorValue(String attrValue, Class<?> propertyType, boolean optional) {
-		String anchorName = attrValue.substring(1);
+	private Object getAnchorValue(String anchorName, Class<?> propertyType, boolean optional) {
+		anchorName = getAbsoluteAnchorName(anchorName, propertyType);
 		Object value = anchores.get(anchorName);
 		if (value != null) {
 			return value;
@@ -710,9 +710,7 @@ public class DefaultInitializer implements Initializer {
 	@Override
 	public <T> T getObject(String anchorName, Class<T> entityClass) {
 		Validate.notNull(anchorName);
-
-		String name = getAbsoluteAnchorName(anchorName, entityClass);
-		return (T) getAnchores().get(name);
+		return (T) getAnchorValue(anchorName, entityClass, true);
 	}
 
 	@Override
@@ -729,6 +727,16 @@ public class DefaultInitializer implements Initializer {
 			anchorName = initEntity.getAlias() + anchorName;
 		}
 		return anchorName;
+	}
+
+	@Override
+	public Map<String, List<Object>> read(Class<?> data) {
+		return null;
+	}
+
+	@Override
+	public <T> T getObject(Class<?> dataClass, Class<T> entityClass) {
+		return null;
 	}
 
 }
