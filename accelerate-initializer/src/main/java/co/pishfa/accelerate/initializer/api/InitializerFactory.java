@@ -205,6 +205,7 @@ public class InitializerFactory {
 	 * @return the InitEntityMetaData with the given alias.
 	 */
 	public InitEntityMetaData getInitEntityByAlias(String alias) {
+		// null key is allowed
 		return aliasToInitEntity.get(alias);
 	}
 
@@ -212,6 +213,7 @@ public class InitializerFactory {
 	 * @return the InitEntityMetaData corresponding to the entityClass provided
 	 */
 	public InitEntityMetaData getInitEntityByClass(Class<?> entityClass) {
+		// null key is allowed
 		return classToInitEntity.get(entityClass);
 
 	}

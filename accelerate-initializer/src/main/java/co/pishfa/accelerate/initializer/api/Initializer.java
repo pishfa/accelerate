@@ -41,13 +41,13 @@ public interface Initializer {
 	/**
 	 * Reads data from a set of annotations defined in the provided class.
 	 * 
-	 * @return
+	 * @return a map from first level data classes to the list of defined entities for that data class
 	 */
-	Map<String, List<Object>> read(Class<?> data);
+	Map<Class<?>, List<Object>> read(Class<?> data);
 
 	/**
 	 * 
-	 * @return all anchores by their name
+	 * @return all anchors by their name
 	 */
 	Map<String, Object> getAnchores();
 
@@ -61,11 +61,23 @@ public interface Initializer {
 
 	/**
 	 * @param anchorName
+	 *            the entity anchor name.
+	 * @return the entity with provided anchorName. Null if no such entity exists.
+	 */
+	Object getObject(String anchorName);
+
+	/**
+	 * @param anchorName
 	 *            the entity anchor name. Can be relative name such as 'name' which resolves based on the provided
 	 *            entityClass.
 	 * @return the entity with provided anchorName. Null if no such entity exists.
 	 */
 	<T> T getObject(String anchorName, Class<T> entityClass);
+
+	/**
+	 * @return the entity which corresponds to the given data class. Null if no such entity exists.
+	 */
+	Object getObject(Class<?> dataClass);
 
 	/**
 	 * @return the entity which corresponds to the given data class. Null if no such entity exists.

@@ -45,25 +45,26 @@ public class InitializerAnnotationTester {
 	public void testSimple() throws Exception {
 		initializer.read(TestSimple.class);
 
-		Author a1 = initializer.getObject("Author:a1", Author.class);
+		Author a1 = initializer.getObject(TestSimple.Authors.A1.class, Author.class);
 		assertNotNull(a1);
-		assertEquals("a1", a1.getName());
+		assertEquals("A1", a1.getName());
 
-		Author a1_a = initializer.getObject(TestSimple.Authors.A1.class, Author.class);
+		Author a1_a = initializer.getObject("Author:A1", Author.class);
+
 		assertEquals(a1, a1_a);
 
-		Category c1 = initializer.getObject("Category:c1", Category.class);
+		Category c1 = initializer.getObject(TestSimple.C1.class, Category.class);
 		assertNotNull(c1);
 		assertNull(c1.getCategory());
 
-		Book b1 = initializer.getObject(":b1", Book.class);
+		Book b1 = initializer.getObject(TestSimple.C1.B1.class, Book.class);
 		assertNotNull(b1);
 		assertEquals("b1", b1.getName());
 		assertEquals(a1, b1.getAuthor());
 		assertEquals(c1, b1.getCategory());
 		assertEquals("Book b1", b1.getFullName());
 
-		Category c2 = initializer.getObject(":c2", Category.class);
+		Category c2 = initializer.getObject(TestSimple.C1.C2.class, Category.class);
 		assertNotNull(c2);
 		assertEquals(c1, c2.getCategory());
 	}

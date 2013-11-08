@@ -48,11 +48,11 @@ public class InitializerFactoryTest {
 		assertNotNull(book);
 		assertEquals(Book.class, book.getEntityClass());
 		assertEquals(3, book.getProperties().size());
-		InitPropertyMetaData name = book.getPropertiesByAlias().get("title");
+		InitPropertyMetaData name = book.getProperty("title");
 		assertNotNull(name);
 		assertEquals("name", name.getName());
 
-		InitPropertyMetaData fullName = book.getPropertiesByAlias().get("fullName");
+		InitPropertyMetaData fullName = book.getProperty("fullName");
 		assertNotNull(fullName);
 		assertEquals("Book #{this.name}", fullName.getDefaultValue());
 	}

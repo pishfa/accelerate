@@ -4,25 +4,31 @@ import co.pishfa.accelerate.initializer.annotation.Author;
 import co.pishfa.accelerate.initializer.annotation.Book;
 import co.pishfa.accelerate.initializer.annotation.Category;
 
+/**
+ * 
+ * @author Taha Ghasemi <taha.ghasemi@gmail.com>
+ * 
+ */
 public interface TestSimple {
 
 	interface Authors {
-		@Author(name = "a1")
+		@Author
 		interface A1 {
 		}
 
-		@Author(name = "a2")
+		@Author
 		interface A2 {
 		}
 	}
 
-	@Category(name = "c1")
+	@Category
 	interface C1 {
+
 		@Book(title = "b1", edition = "2", author = Authors.A1.class)
 		interface B1 {
 		}
 
-		@Category(name = "c2")
+		@Category
 		interface C2 {
 			@Book(title = "b2")
 			interface B2 {

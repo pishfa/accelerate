@@ -73,7 +73,7 @@ public class SimpleContext extends ELContext {
 	private ELResolver resolver;
 
 	/**
-	 * Create a context.
+	 * Creates a context.
 	 */
 	public SimpleContext() {
 		this(null);

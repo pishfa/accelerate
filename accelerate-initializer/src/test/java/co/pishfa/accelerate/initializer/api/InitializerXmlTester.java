@@ -61,6 +61,8 @@ public class InitializerXmlTester {
 		Author a1 = initializer.getObject("Author:a1", Author.class);
 		assertNotNull(a1);
 		assertEquals("a1", a1.getName());
+		assertEquals(a1, initializer.getObject(":a1", Author.class));
+		assertEquals(a1, initializer.getObject("Author:a1"));
 
 		Category c1 = initializer.getObject("Category:c1", Category.class);
 		assertNotNull(c1);

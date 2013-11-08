@@ -15,7 +15,9 @@ public class Book {
 	@InitProperty(dynamic = false, alias = "title")
 	@InitKey
 	private String name;
+
 	private Author author;
+
 	@InitProperty("@parent?")
 	private Category category;
 

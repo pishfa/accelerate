@@ -51,8 +51,8 @@ public class InitEntityMetaData {
 		this.entityClass = entityClass;
 	}
 
-	public Map<String, InitPropertyMetaData> getPropertiesByAlias() {
-		return propertiesByAlias;
+	public InitPropertyMetaData getProperty(String propertyAlias) {
+		return propertiesByAlias.get(propertyAlias);
 	}
 
 	public void setPropertiesByAlias(Map<String, InitPropertyMetaData> properteis) {

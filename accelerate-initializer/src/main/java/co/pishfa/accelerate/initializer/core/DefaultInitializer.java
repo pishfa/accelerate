@@ -5,7 +5,9 @@ package co.pishfa.accelerate.initializer.core;
 
 import java.beans.PropertyDescriptor;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -32,6 +34,7 @@ import org.slf4j.LoggerFactory;
 import co.pishfa.accelerate.initializer.api.InitListener;
 import co.pishfa.accelerate.initializer.api.Initializer;
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
+import co.pishfa.accelerate.initializer.model.InitAnnotation;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 import co.pishfa.accelerate.initializer.util.Input;
@@ -43,47 +46,176 @@ import co.pishfa.accelerate.initializer.util.Input;
  */
 public class DefaultInitializer implements Initializer {
 
-	public static class ProcessEntity {
-		public ProcessEntity(ProcessEntity parent, InitEntityMetaData metadata, Element element, Object value) {
-			this.parent = parent;
-			this.metadata = metadata;
-			this.element = element;
-			this.value = value;
-		}
-
-		public ProcessEntity() {
-		}
+	private abstract class ProcessEntity {
 
 		public ProcessEntity parent;
 		public InitEntityMetaData metadata;
-		public Element element;
 		public Object value;
 		public Map<String, ProcessProperty> properties = new HashMap<>();
 
-		public ProcessEntity getParent() {
-			return parent;
-		}
+		public abstract String getEntityName();
 
-		public InitEntityMetaData getMetadata() {
-			return metadata;
-		}
+		public abstract Map<String, Object> getAttributes();
 
-		public Element getElement() {
-			return element;
-		}
+		public abstract Object getAttributeValue(String string);
 
-		public Object getValue() {
-			return value;
-		}
+		public abstract List<? extends ProcessEntity> getChildren();
 
-		public Map<String, ProcessProperty> getProperties() {
+		/**
+		 * finds the unifying attributes. By default, it is factory.getUniquePropertyName().
+		 * 
+		 */
+		protected String[] getKeyProperties() {
+			String key = StringUtils.defaultIfEmpty(metadata.getKey(), factory.getKeyPropertyName());
+			if (StringUtils.isEmpty(key)) {
+				return null;
+			}
+
+			if ("*".equals(key)) {
+				StringBuilder ustr = new StringBuilder();
+				for (String name : properties.keySet()) {
+					if (!isReservedAttribute(name)) {
+						ustr.append(",").append(name);
+					}
+				}
+				key = ustr.deleteCharAt(0).toString();
+			}
+
+			String[] properties = key.split(",");
 			return properties;
+		}
+
+		public abstract String getTypeName();
+	}
+
+	private class XmlProcessEntity extends ProcessEntity {
+		private final Element element;
+
+		public XmlProcessEntity(Element element) {
+			this.element = element;
+			this.metadata = factory.getInitEntityByAlias(getEntityName());
+		}
+
+		@Override
+		public String getEntityName() {
+			return element.getName();
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			Map<String, Object> res = new HashMap<>();
+			for (Attribute attr : element.getAttributes()) {
+				res.put(attr.getName(), attr.getValue());
+			}
+			return res;
+		}
+
+		@Override
+		public String getAttributeValue(String name) {
+			return element.getAttributeValue(name);
+		}
+
+		@Override
+		public List<XmlProcessEntity> getChildren() {
+			List<XmlProcessEntity> result = new ArrayList<>();
+			for (Element child : element.getChildren()) {
+				XmlProcessEntity childEntity = new XmlProcessEntity(child);
+				childEntity.parent = this;
+				result.add(childEntity);
+			}
+			return result;
+		}
+
+		@Override
+		public String getTypeName() {
+			return null;
+		}
+	}
+
+	private class AnnotationProcessEntity extends ProcessEntity {
+		private final Class<?> data;
+		private Annotation dataAnnotation;
+
+		public AnnotationProcessEntity(Class<?> data) {
+			this.data = data;
+			// finds the init annotation above data
+			for (Annotation annotation : data.getAnnotations()) {
+				if (annotation.annotationType().isAnnotationPresent(InitAnnotation.class)) {
+					this.dataAnnotation = annotation;
+					break;
+				}
+			}
+			setDataMetadata();
+		}
+
+		@Override
+		public Map<String, Object> getAttributes() {
+			Map<String, Object> result = new HashMap<>();
+			for (Method method : dataAnnotation.annotationType().getDeclaredMethods()) {
+				try {
+					result.put(method.getName(), method.invoke(dataAnnotation));
+				} catch (Exception e) {
+					log.error("", e);
+				}
+			}
+			return result;
+		}
+
+		@Override
+		public String getEntityName() {
+			Class<?> entityClass = dataAnnotation.annotationType().getAnnotation(InitAnnotation.class).value();
+			return entityClass == null ? dataAnnotation.annotationType().getSimpleName() : entityClass.getSimpleName();
+		}
+
+		@Override
+		public Object getAttributeValue(String name) {
+			try {
+				return dataAnnotation.annotationType().getMethod(name).invoke(dataAnnotation);
+			} catch (Exception e) {
+			}
+			return null;
+		}
+
+		@Override
+		public List<AnnotationProcessEntity> getChildren() {
+			List<AnnotationProcessEntity> result = new ArrayList<>();
+			for (Class<?> child : data.getDeclaredClasses()) {
+				AnnotationProcessEntity childEntity = new AnnotationProcessEntity(child);
+				childEntity.parent = this;
+				result.add(childEntity);
+			}
+			return result;
+		}
+
+		private void setDataMetadata() {
+			if (dataAnnotation == null) {
+				this.metadata = null;
+			} else {
+				InitAnnotation initAnnotation = dataAnnotation.annotationType().getAnnotation(InitAnnotation.class);
+				if (initAnnotation.value() != Object.class) {
+					this.metadata = factory.getInitEntityByClass(initAnnotation.value());
+					if (this.metadata == null) {
+						log.warn("No meta data found for class " + initAnnotation.value());
+					}
+				} else {
+					String alias = dataAnnotation.annotationType().getSimpleName();
+					this.metadata = factory.getInitEntityByAlias(alias);
+					if (this.metadata == null) {
+						log.warn("No meta data found with alias " + alias);
+					}
+				}
+			}
+		}
+
+		@Override
+		public String getTypeName() {
+			return data.getSimpleName();
 		}
 
 	}
 
-	public static class ProcessProperty {
-		public ProcessProperty(ProcessEntity entity, InitPropertyMetaData metadata, String name, String rawValue,
+	private static class ProcessProperty {
+		public ProcessProperty(ProcessEntity entity, InitPropertyMetaData metadata, String name, Object rawValue,
 				Object value) {
 			this.entity = entity;
 			this.metadata = metadata;
@@ -95,29 +227,8 @@ public class DefaultInitializer implements Initializer {
 		public ProcessEntity entity;
 		public InitPropertyMetaData metadata;
 		public String name;
-		public String rawValue;
+		public Object rawValue;
 		public Object value;
-
-		public ProcessEntity getEntity() {
-			return entity;
-		}
-
-		public InitPropertyMetaData getMetadata() {
-			return metadata;
-		}
-
-		public String getName() {
-			return name;
-		}
-
-		public String getRawValue() {
-			return rawValue;
-		}
-
-		public Object getValue() {
-			return value;
-		}
-
 	}
 
 	public static class PropertiesMap implements Map<String, Object> {
@@ -206,7 +317,6 @@ public class DefaultInitializer implements Initializer {
 	private boolean insideLoad;
 	private final InitializerFactory factory;
 	private final SimpleContext context = new SimpleContext();
-	private final Map<String, List<Object>> result = new HashMap<>();
 
 	public DefaultInitializer(InitializerFactory factory, InitListener listener, Map<String, Object> contextVars) {
 		Validate.notNull(factory);
@@ -255,14 +365,15 @@ public class DefaultInitializer implements Initializer {
 	public Map<String, List<Object>> read(Element root) throws Exception {
 		Validate.notNull(root);
 
+		Map<String, List<Object>> result = new HashMap<>();
 		for (Element childElem : root.getChildren()) {
-			List<Object> list = null;
-			list = result.get(childElem.getName());
+			List<Object> list = result.get(childElem.getName());
 			if (list == null) {
 				list = new ArrayList<>();
 				result.put(childElem.getName(), list);
 			}
-			processElement(null, childElem, list);
+			XmlProcessEntity entity = new XmlProcessEntity(childElem);
+			processEntity(entity, list);
 		}
 		return result;
 	}
@@ -273,27 +384,27 @@ public class DefaultInitializer implements Initializer {
 	 * 
 	 * @param parentEntity
 	 *            null if no parent is present.
-	 * @param element
+	 * @param entity
 	 *            element to be processed
 	 * @return
 	 */
-	protected Object processElement(ProcessEntity parent, Element element, List<Object> parentAsList) {
-		String name = element.getName();
+	protected Object processEntity(ProcessEntity entity, List<Object> parentAsList) {
+		String name = entity.getEntityName();
 		try {
 			// Process special elements: include, load.
 			if (INCLUDE_ELEMENT.equals(name)) {
-				String srcName = element.getAttributeValue("src");
+				String srcName = String.valueOf(entity.getAttributeValue("src"));
 				// TODO a better resource loading is required like velocity
-				read(Input.resource(srcName), true);
+				if (srcName != null) {
+					read(Input.resource(srcName), true);
+				}
 				return null;
 			} else if (LOAD_ELEMENT.equals(name)) {
 				// Support nested load elements
 				boolean oldInsideLoad = insideLoad;
 				insideLoad = true;
 				try {
-					ProcessEntity loadEntity = new ProcessEntity();
-					loadEntity.element = element;
-					processChildren(loadEntity, null);
+					processChildren(entity, null);
 					return null;
 				} finally {
 					insideLoad = oldInsideLoad;
@@ -301,14 +412,13 @@ public class DefaultInitializer implements Initializer {
 			}
 
 			// child anchors are previously processed.
-			if (parent != null && !StringUtils.isEmpty(element.getAttributeValue(_CHILD_ANCHOR))) {
+			if (entity.parent != null && entity.getAttributeValue(_CHILD_ANCHOR) != null) {
 				return null;
 			}
 
 			// check whether it is a class alias or a property of an entity
 			// initEntiy is null when element is not a class alias
-			InitEntityMetaData initEntity = factory.getInitEntityByAlias(name);
-			ProcessEntity entity = new ProcessEntity(parent, initEntity, element, null);
+
 			Object entityObj = getObject(entity);
 			entity.value = entityObj;
 
@@ -332,16 +442,16 @@ public class DefaultInitializer implements Initializer {
 			putInContext("this", new PropertiesMap(entity.properties));
 			try {
 				processAttributes(entity);
-				if (initEntity != null) {
-					listener.entityCreated(initEntity, entityObj);
+				if (entity.metadata != null) {
+					listener.entityCreated(entity.metadata, entityObj);
 				}
 				processChildren(entity, null);
 			} finally {
 				stack.pop();
 			}
 
-			if (initEntity != null) {
-				listener.entityFinished(initEntity, entityObj);
+			if (entity.metadata != null) {
+				listener.entityFinished(entity.metadata, entityObj);
 			}
 
 			return entityObj;
@@ -355,8 +465,6 @@ public class DefaultInitializer implements Initializer {
 	 * Creates or finds the object that corresponds to the given element whether it is an instance of a class or
 	 * property of an object or first level path element.
 	 * 
-	 * @param parentEntity
-	 * @param element
 	 * @param initEntity
 	 *            the corresponding initEntityDate definition to the element. It is null when element is not a class
 	 *            alias
@@ -378,11 +486,11 @@ public class DefaultInitializer implements Initializer {
 			return null;
 		} else {
 			// property mode
-			String propName = entity.element.getName();
+			String propName = entity.getEntityName();
 
 			// check for alias
-			if (entity.parent != null) {
-				InitPropertyMetaData initProperty = entity.parent.metadata.getPropertiesByAlias().get(propName);
+			if (entity.parent != null && entity.parent.metadata != null) {
+				InitPropertyMetaData initProperty = entity.parent.metadata.getProperty(propName);
 				if (initProperty != null) {
 					propName = initProperty.getName();
 				}
@@ -390,7 +498,7 @@ public class DefaultInitializer implements Initializer {
 
 			entityObj = PropertyUtils.getProperty(stack.peek(), propName);
 			if (entityObj == null) {
-				throw new IllegalArgumentException("The property " + entity.element.getName() + " of object "
+				throw new IllegalArgumentException("The property " + entity.getEntityName() + " of object "
 						+ stack.peek() + " is null.");
 			}
 		}
@@ -398,17 +506,17 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	protected void processChildren(ProcessEntity entity, List<Object> parentAsList) {
-		for (Element childElem : entity.element.getChildren()) {
-			processElement(entity, childElem, parentAsList);
+		for (ProcessEntity childElem : entity.getChildren()) {
+			processEntity(childElem, parentAsList);
 		}
 	}
 
 	protected void processAttributes(ProcessEntity entity) throws Exception {
-		getAllAttributes(entity);
+		computeAllAttributes(entity);
 
 		// Auto anchoring: it creates an anchor like this EntityAlias:key1_key2_key3, provided that all key
 		if (factory.isAutoAnchor() && !entity.properties.containsKey(_ANCHOR)) {
-			String[] keyProperties = getKeyProperties(entity);
+			String[] keyProperties = entity.getKeyProperties();
 			if (keyProperties != null) {
 				StringBuilder uniqeValue = new StringBuilder();
 				boolean allNotNull = true;
@@ -428,6 +536,10 @@ public class DefaultInitializer implements Initializer {
 				}
 			}
 		}
+		// When data defined using annotations all entities are placed in anchores by their full class name
+		if (entity instanceof AnnotationProcessEntity) {
+			putObject(((AnnotationProcessEntity) entity).data.getName(), entity.value);
+		}
 		for (ProcessProperty property : entity.properties.values()) {
 			processAttribute(property);
 		}
@@ -444,8 +556,8 @@ public class DefaultInitializer implements Initializer {
 			return entityObj;
 		}
 
-		getAllAttributes(entity);
-		String[] properties = getKeyProperties(entity);
+		computeAllAttributes(entity);
+		String[] properties = entity.getKeyProperties();
 		if (properties == null) {
 			return entityObj;
 		}
@@ -459,47 +571,23 @@ public class DefaultInitializer implements Initializer {
 		return res == null ? entityObj : res;
 	}
 
-	/**
-	 * finds the unifying attributes. By default, it is factory.getUniquePropertyName().
-	 * 
-	 */
-	protected String[] getKeyProperties(ProcessEntity entity) {
-		String key = StringUtils.defaultIfEmpty(entity.metadata.getKey(), factory.getKeyPropertyName());
-		if (StringUtils.isEmpty(key)) {
-			return null;
-		}
-
-		if ("*".equals(key)) {
-			StringBuilder ustr = new StringBuilder();
-			for (String name : entity.properties.keySet()) {
-				if (!isReservedAttribute(name)) {
-					ustr.append(",").append(name);
-				}
-			}
-			key = ustr.deleteCharAt(0).toString();
-		}
-
-		String[] properties = key.split(",");
-		return properties;
-	}
-
 	public boolean isReservedAttribute(String name) {
 		return _ANCHOR.equals(name) || _ACTION.equals(name) || _IN_PARENT.equals(name) || _CHILD_ANCHOR.equals(name);
 	}
 
 	/**
-	 * Get the values of all attributes for this element whether they are explicitly mentioned in the attributes of the
-	 * element or they have default value in the initEntity.
+	 * Compute the values of all attributes for this entity whether they are explicitly mentioned in the attributes of
+	 * the entity or they have default value in the initEntity.
 	 */
-	private void getAllAttributes(ProcessEntity entity) throws Exception {
+	private void computeAllAttributes(ProcessEntity entity) throws Exception {
 
-		for (Attribute attr : entity.element.getAttributes()) {
-			String attrName = attr.getName();
-			String attrValue = attr.getValue();
+		for (Entry<String, Object> attr : entity.getAttributes().entrySet()) {
+			String attrName = attr.getKey();
+			Object attrValue = attr.getValue();
 			// resolve aliases
 			InitPropertyMetaData prop = null;
 			if (entity.metadata != null) {
-				prop = entity.metadata.getPropertiesByAlias().get(attrName);
+				prop = entity.metadata.getProperty(attrName);
 				if (prop != null) {
 					attrName = prop.getName();
 				}
@@ -548,33 +636,42 @@ public class DefaultInitializer implements Initializer {
 		}
 
 		Object value = property.rawValue;
+
+		// Resolve dynamic values, if allowed
 		if ((property.metadata == null || property.metadata.isDynamic())) {
-			if ("null".equals(property.rawValue)) {
+			String valueAsStr = String.valueOf(value);
+			if ("null".equals(valueAsStr)) {
 				value = null;
-			} else if (property.rawValue.startsWith("@")) {
+			} else if (valueAsStr.startsWith("@")) {
 				// check for dynamic references
-				value = resolveDynamicReference(property.entity.element, property.name, property.rawValue, propertyType);
-				propertyType = null; // no type conversion needed anymore
-			} else if (factory.getExpressionFactory() != null) {
-				value = factory
-						.getExpressionFactory()
-						.createValueExpression(context, property.rawValue,
-								propertyType == null ? Object.class : propertyType).getValue(context);
-				propertyType = null; // no type conversion needed anymore
+				value = resolveDynamicReference(property.entity, property.name, valueAsStr, propertyType);
+				propertyType = null; // no type conversion is needed anymore
+			} else if (value instanceof String && factory.getExpressionFactory() != null) {
+				value = factory.getExpressionFactory()
+						.createValueExpression(context, valueAsStr, propertyType == null ? Object.class : propertyType)
+						.getValue(context);
+				propertyType = null; // no type conversion is needed anymore
 			}
 		}
 
 		if (value != null && propertyType != null) {
+			// resolve dynamic reference in annotations
+			if (value instanceof Class<?> && !propertyType.isLocalClass()) {
+				value = getObject((Class<?>) value);
+			}
+
 			if (propertyType.isEnum()) {
-				value = Enum.valueOf(propertyType, property.rawValue.toString());
+				value = Enum.valueOf(propertyType, String.valueOf(value));
 			} else {
-				value = ConvertUtils.convert(property.rawValue, propertyType);
+				value = ConvertUtils.convert(value, propertyType);
 			}
 		}
+
 		return value;
 	}
 
-	protected Object resolveDynamicReference(Element element, String attrName, String attrValue, Class<?> propertyType) {
+	protected Object resolveDynamicReference(ProcessEntity entity, String attrName, String attrValue,
+			Class<?> propertyType) {
 		boolean optional = attrValue.endsWith("?");
 		if (optional) {
 			attrValue = attrValue.substring(0, attrValue.length() - 1);
@@ -602,15 +699,18 @@ public class DefaultInitializer implements Initializer {
 			}
 			if (value == null && !optional) {
 				throw new IllegalArgumentException("Could not find an appropriate parent with type " + propertyType
-						+ " for property " + attrName + " in " + element);
+						+ " for property " + attrName + " in " + entity.getEntityName());
 			}
 		} else if (attrValue.equals("@child")) {
 			// now we should look into children to find the one with corresponding child-anchor
-			Element childElem = findChild(element, "child-anchor", attrName);
-			if (childElem == null) {
-				throw new IllegalArgumentException("No child with child-anchor = " + attrName + " in " + element);
+			ProcessEntity childEntity = findChild(entity, "child-anchor", attrName);
+			if (childEntity == null) {
+				throw new IllegalArgumentException("No child with child-anchor = " + attrName + " in "
+						+ entity.getEntityName());
 			}
-			value = processElement(null, childElem, null);
+			value = processEntity(childEntity, null);
+		} else if (attrValue.equals("@type.name")) {
+			value = entity.getTypeName();
 		} else { // look into anchors
 			if (attrValue.indexOf(';') < 0) {
 				value = getAnchorValue(attrValue.substring(1), propertyType, optional);
@@ -681,7 +781,7 @@ public class DefaultInitializer implements Initializer {
 			}
 		} catch (Exception e) {
 			throw new RuntimeException("Exception occured while processing attribute " + property.name + " of element "
-					+ property.entity.element.getName() + ". Entity: " + property.entity.value + ". Attribute value: "
+					+ property.entity.getEntityName() + ". Entity: " + property.entity.value + ". Attribute value: "
 					+ property.value, e);
 		}
 
@@ -692,10 +792,10 @@ public class DefaultInitializer implements Initializer {
 		BeanUtils.setProperty(property.entity.value, property.name, property.value);
 	}
 
-	protected Element findChild(Element element, String attrName, String attrValue) {
-		for (Element childElem : element.getChildren()) {
-			if (attrValue.equals(childElem.getAttributeValue(attrName))) {
-				return childElem;
+	protected ProcessEntity findChild(ProcessEntity entity, String attrName, String attrValue) {
+		for (ProcessEntity childEntity : entity.getChildren()) {
+			if (attrValue.equals(childEntity.getAttributeValue(attrName))) {
+				return childEntity;
 			}
 		}
 		return null;
@@ -704,6 +804,11 @@ public class DefaultInitializer implements Initializer {
 	@Override
 	public Map<String, Object> getAnchores() {
 		return anchores;
+	}
+
+	@Override
+	public Object getObject(String anchorName) {
+		return getObject(anchorName, Object.class);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -716,6 +821,8 @@ public class DefaultInitializer implements Initializer {
 	@Override
 	public Object putObject(String anchorName, Object entity) {
 		Validate.notNull(anchorName);
+		Validate.notNull(entity);
+
 		anchorName = getAbsoluteAnchorName(anchorName, entity.getClass());
 		return getAnchores().put(anchorName, entity);
 	}
@@ -730,13 +837,43 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	@Override
-	public Map<String, List<Object>> read(Class<?> data) {
-		return null;
+	public Map<Class<?>, List<Object>> read(Class<?> data) {
+		Validate.notNull(data);
+
+		Map<Class<?>, List<Object>> result = new HashMap<>();
+		AnnotationProcessEntity processEntity = new AnnotationProcessEntity(data);
+
+		for (AnnotationProcessEntity child : processEntity.getChildren()) {
+			// If no metadata treat it as grouping element
+			if (child.metadata == null) {
+				List<Object> list = result.get(child.data);
+				if (list == null) {
+					list = new ArrayList<>();
+					result.put(child.data, list);
+				}
+				processChildren(child, list);
+			} else {
+				List<Object> list = result.get(child.metadata.getEntityClass());
+				if (list == null) {
+					list = new ArrayList<>();
+					result.put(child.metadata.getEntityClass(), list);
+				}
+				processEntity(child, list);
+			}
+		}
+		return result;
 	}
 
 	@Override
+	public Object getObject(Class<?> dataClass) {
+		Validate.notNull(dataClass);
+		return getObject(dataClass.getName());
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
 	public <T> T getObject(Class<?> dataClass, Class<T> entityClass) {
-		return null;
+		return (T) getObject(dataClass);
 	}
 
 }
