@@ -16,6 +16,15 @@ import org.jdom2.Element;
  */
 public interface Initializer {
 
+	// Special elements or attributes
+	public static final String LOAD_ELEMENT = "load";
+	public static final String INCLUDE_ELEMENT = "include";
+	public static final String _IN_PARENT = "_in-parent_";
+	public static final String _ACTION = "_action_";
+	public static final String _ANCHOR = "_anchor_";
+	// TODO is not supported yet
+	public static final String _CHILD_ANCHOR = "_child-anchor_";
+
 	/**
 	 * Reads data from specified resource.
 	 * 

@@ -9,7 +9,7 @@ import java.util.List;
  * @author Taha Ghasemi
  * 
  */
-@InitEntity(alias = "book")
+@InitEntity(alias = "book", properties = { @InitProperty(name = "_in-parent_", value = "books?") })
 public class Book {
 
 	@InitProperty(dynamic = false, alias = "title")

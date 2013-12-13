@@ -25,7 +25,8 @@ public @interface InitProperty {
 
 	/**
 	 * @return the name of this property in the class. If you place this annotation above the property itself this is
-	 *         not required but if you put this above a class, you should set this too.
+	 *         not required but if you put this above a class, you should set this too. It can also be the name of
+	 *         special attributes: _anchor_,_in-parent_,_action_.
 	 */
 	public String name() default "";
 

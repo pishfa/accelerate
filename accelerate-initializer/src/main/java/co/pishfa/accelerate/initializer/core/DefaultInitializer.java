@@ -302,15 +302,6 @@ public class DefaultInitializer implements Initializer {
 
 	private static final Logger log = LoggerFactory.getLogger(DefaultInitializer.class);
 
-	// Special elements or attributes
-	private static final String LOAD_ELEMENT = "load";
-	private static final String INCLUDE_ELEMENT = "include";
-	private static final String _IN_PARENT = "_in-parent_";
-	private static final String _ACTION = "_action_";
-	private static final String _ANCHOR = "_anchor_";
-	// TODO is not supported yet
-	private static final String _CHILD_ANCHOR = "_child-anchor_";
-
 	private final Map<String, Object> anchores = new HashMap<>();
 	private final ArrayStack stack = new ArrayStack();
 	private final InitListener listener;
@@ -774,8 +765,30 @@ public class DefaultInitializer implements Initializer {
 				Object target = stack.peek(arg);
 				MethodUtils.invokeMethod(target, value.substring(index + 1), property.entity.value);
 			} else if (property.name.equals(_IN_PARENT)) {
-				Object parent = stack.get(stack.size() - 2);
-				BeanUtils.setProperty(parent, value, property.entity.value);
+				Object parent = stack.size() >= 2 ? stack.get(stack.size() - 2) : null;
+				boolean optional = value.endsWith("?");
+				if (parent != null) {
+					if (optional) {
+						value = value.substring(0, value.length() - 1);
+					}
+					// Check whether the in_parent refers to a collection so we should add instead of set
+					PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(parent, value);
+					if (List.class.isAssignableFrom(descriptor.getPropertyType())) {
+						Object parentProp = PropertyUtils.getProperty(parent, value);
+						if (parentProp != null) {
+							((List<Object>) parentProp).add(property.entity.value);
+						} else {
+							// We should create one
+							List<Object> list = new ArrayList<>();
+							list.add(property.entity.value);
+							BeanUtils.setProperty(parent, value, list);
+						}
+					} else {
+						BeanUtils.setProperty(parent, value, property.entity.value);
+					}
+				} else if (!optional) {
+					throw new RuntimeException("non-optional in_parent is specified but the parent is null");
+				}
 			} else {
 				setPropertyValue(property);
 			}

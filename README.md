@@ -1,7 +1,7 @@
 Accelerate
 ==========
 
-Aims to accelerate development of JSF-CDI-JPA based projects.
+Aims to accelerate development of small-to-medium-sized JSF-CDI-JPA based projects.
 
 # Initializer
 

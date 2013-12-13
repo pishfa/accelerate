@@ -24,6 +24,10 @@
 	</scm>
 	
 	<properties>
+		<!-- Explicitly declaring the source encoding eliminates the following 
+			message: [WARNING] Using platform encoding (UTF-8 actually) to copy filtered 
+			resources, i.e. build is platform dependent! -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compile.source>1.7</maven.compile.source>
 		<maven.compile.target>1.7</maven.compile.target>
 	</properties>

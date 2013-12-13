@@ -56,6 +56,8 @@ public class InitializerAnnotationTester {
 		Category c1 = initializer.getObject(TestSimple.C1.class, Category.class);
 		assertNotNull(c1);
 		assertNull(c1.getCategory());
+		assertEquals(1, c1.getBooks().size());
+		assertEquals(1, c1.getChildren().size());
 
 		Book b1 = initializer.getObject(TestSimple.C1.B1.class, Book.class);
 		assertNotNull(b1);
@@ -63,10 +65,12 @@ public class InitializerAnnotationTester {
 		assertEquals(a1, b1.getAuthor());
 		assertEquals(c1, b1.getCategory());
 		assertEquals("Book b1", b1.getFullName());
+		assertEquals(b1, c1.getBooks().get(0));
 
 		Category c2 = initializer.getObject(TestSimple.C1.C2.class, Category.class);
 		assertNotNull(c2);
 		assertEquals(c1, c2.getCategory());
+		assertEquals(c2, c1.getChildren().get(0));
 	}
 
 }
