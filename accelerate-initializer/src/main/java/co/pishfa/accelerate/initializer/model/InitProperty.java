@@ -51,6 +51,9 @@ public @interface InitProperty {
 	 * <li>(on of the above)? : makes the find procedure optional. For instance parent(1)? means set to parent(1) if
 	 * exists otherwise set it to null</li>
 	 * </ul>
+	 * .
+	 * <p>
+	 * If the name of this property is _anchor_ and its value is "", then no anchor is computed for this entity.
 	 * 
 	 * @return
 	 */

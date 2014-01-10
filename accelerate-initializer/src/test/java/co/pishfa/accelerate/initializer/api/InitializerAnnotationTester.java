@@ -32,7 +32,7 @@ public class InitializerAnnotationTester {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class).keyPropertyName(
+		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class).key(
 				"name");
 	}
 

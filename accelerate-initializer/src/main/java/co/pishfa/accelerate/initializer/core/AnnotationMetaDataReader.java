@@ -54,7 +54,7 @@ public class AnnotationMetaDataReader {
 		String key = null;
 		String alias = null;
 		if (initEntity != null) {
-			key = findEntityKeys(entityClass);
+			key = StringUtils.isEmpty(initEntity.key()) ? findEntityKeys(entityClass) : initEntity.key();
 			alias = initEntity.alias();
 		}
 		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(alias, entityClass, key);

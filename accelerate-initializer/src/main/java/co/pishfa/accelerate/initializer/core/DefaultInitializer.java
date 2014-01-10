@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -66,8 +67,8 @@ public class DefaultInitializer implements Initializer {
 		 * 
 		 */
 		protected String[] getKeyProperties() {
-			String key = StringUtils.defaultIfEmpty(metadata.getKey(), factory.getKeyPropertyName());
-			if (StringUtils.isEmpty(key)) {
+			String key = StringUtils.defaultIfEmpty(metadata.getKey(), factory.getKey());
+			if ("-".equals(key) || StringUtils.isEmpty(key)) {
 				return null;
 			}
 
@@ -512,7 +513,8 @@ public class DefaultInitializer implements Initializer {
 				StringBuilder uniqeValue = new StringBuilder();
 				boolean allNotNull = true;
 				for (String keyProperty : keyProperties) {
-					Object propertyValue = entity.properties.get(keyProperty).value;
+					ProcessProperty property = entity.properties.get(keyProperty);
+					Object propertyValue = property == null ? null : property.value;
 					if (propertyValue == null) {
 						allNotNull = false;
 						break;
@@ -673,7 +675,13 @@ public class DefaultInitializer implements Initializer {
 		} else if (attrValue.startsWith("@parent(")) {
 			int arg = Integer.parseInt(attrValue.substring(8, attrValue.length() - 1));
 			try {
-				value = stack.peek(arg);
+				Object parent = stack.peek(arg);
+				if (!optional) {
+					value = parent; // no other choice
+				} else if (propertyType != null && propertyType.isAssignableFrom(parent.getClass())) {
+					// only assign it, if applies
+					value = parent;
+				}
 			} catch (Exception e) {
 				if (!optional) {
 					throw new IllegalArgumentException("Parent index is not valid in stack: " + arg);
@@ -707,9 +715,16 @@ public class DefaultInitializer implements Initializer {
 				value = getAnchorValue(attrValue.substring(1), propertyType, optional);
 			} else {
 				List<Object> list = new ArrayList<Object>();
+				// Note that in this case, passing property type is not useful since it is of type List
+				Class<?> genericType = null;
+				try {
+					genericType = (Class<?>) ((ParameterizedType) entity.value.getClass().getDeclaredField(attrName)
+							.getGenericType()).getActualTypeArguments()[0];
+				} catch (Exception e) {
+
+				}
 				for (String part : attrValue.split(";")) {
-					// Note that in this case, passing property type is not useful since it is of type List
-					list.add(getAnchorValue(part.substring(1), null, optional));
+					list.add(getAnchorValue(part.substring(1), genericType, optional));
 				}
 				value = list;
 			}
@@ -746,6 +761,10 @@ public class DefaultInitializer implements Initializer {
 		}
 	}
 
+	/**
+	 * Processes the attribute after its value is calculated.
+	 */
+	@SuppressWarnings("unchecked")
 	protected void processAttribute(ProcessProperty property) throws Exception {
 		String value = String.valueOf(property.value);
 		try {
@@ -754,11 +773,15 @@ public class DefaultInitializer implements Initializer {
 				if (value.startsWith("parent") || value.equals("child") || StringUtils.containsAny(value, '?')) {
 					throw new IllegalArgumentException("Illegal anchor name " + value);
 				}
-				value = getAbsoluteAnchorName(value, property.entity.metadata.getEntityClass());
-				if (anchores.containsKey(value)) {
-					throw new IllegalArgumentException("Duplicate anchor name " + value);
+				// empty anchor value, means no anchor. This can be used by entity types to turn off, auto anchoring per
+				// entity type.
+				if (!StringUtils.isEmpty(value)) {
+					value = getAbsoluteAnchorName(value, property.entity.metadata.getEntityClass());
+					if (anchores.containsKey(value)) {
+						throw new IllegalArgumentException("Duplicate anchor name " + value);
+					}
+					anchores.put(value, property.entity.value);
 				}
-				anchores.put(value, property.entity.value);
 			} else if (property.name.equals(_ACTION)) {
 				int index = value.indexOf('.');
 				int arg = Integer.parseInt(value.substring(8, index - 1)); // -1 for )
@@ -773,6 +796,15 @@ public class DefaultInitializer implements Initializer {
 					}
 					// Check whether the in_parent refers to a collection so we should add instead of set
 					PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(parent, value);
+					if (descriptor == null) {
+						if (!optional) {
+							throw new RuntimeException(
+									"non-optional in_parent is specified but the parent does not have property "
+											+ value);
+						} else {
+							return;
+						}
+					}
 					if (List.class.isAssignableFrom(descriptor.getPropertyType())) {
 						Object parentProp = PropertyUtils.getProperty(parent, value);
 						if (parentProp != null) {
@@ -843,7 +875,8 @@ public class DefaultInitializer implements Initializer {
 	protected String getAbsoluteAnchorName(String anchorName, Class<?> entityClass) {
 		if (anchorName.startsWith(":")) {
 			InitEntityMetaData initEntity = factory.getInitEntityByClass(entityClass);
-			Validate.notNull(initEntity, "Entity class is not defined " + entityClass);
+			Validate.notNull(initEntity, "Entity class is not defined for " + entityClass
+					+ " To be used in absolute anchor name");
 			anchorName = initEntity.getAlias() + anchorName;
 		}
 		return anchorName;

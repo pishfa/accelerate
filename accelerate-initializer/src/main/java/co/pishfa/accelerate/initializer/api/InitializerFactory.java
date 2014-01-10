@@ -45,7 +45,7 @@ public class InitializerFactory {
 	private ExpressionFactory expressionFactory;
 	private boolean incremental = false;
 	private boolean autoAnchor = true;
-	private String keyPropertyName = null;
+	private String key = null;
 
 	public InitializerFactory() {
 		expressionFactory = ExpressionFactory.newInstance();
@@ -112,11 +112,12 @@ public class InitializerFactory {
 	/**
 	 * Comma separated list of property names that make an instance of this entity unique. Can be * which means all
 	 * properties with not null value. This is used in both auto-anchoring and loading of objects. If the specified
-	 * value is null, it means that the target entity should not participate in auto-anchoring or loading modes. Default
-	 * value is null.
+	 * value is null or empty, it means that entities by default should not participate in auto-anchoring or loading
+	 * modes unless they provide their own anchoring. Default value is null. Each entity type may override this property
+	 * by using key attribute.
 	 */
-	public InitializerFactory keyPropertyName(String keyPropertyName) {
-		this.keyPropertyName = keyPropertyName;
+	public InitializerFactory key(String key) {
+		this.key = key;
 		return this;
 	}
 
@@ -185,8 +186,8 @@ public class InitializerFactory {
 		return autoAnchor;
 	}
 
-	public String getKeyPropertyName() {
-		return keyPropertyName;
+	public String getKey() {
+		return key;
 	}
 
 	public Initializer create(InitListener listener, Map<String, Object> contextVars) {
