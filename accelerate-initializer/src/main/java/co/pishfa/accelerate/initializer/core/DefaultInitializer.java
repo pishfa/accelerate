@@ -404,7 +404,7 @@ public class DefaultInitializer implements Initializer {
 			}
 
 			// child anchors are previously processed.
-			if (entity.parent != null && entity.getAttributeValue(_CHILD_ANCHOR) != null) {
+			if (entity.parent != null && entity.getAttributeValue(CHILD_ANCHOR) != null) {
 				return null;
 			}
 
@@ -507,7 +507,7 @@ public class DefaultInitializer implements Initializer {
 		computeAllAttributes(entity);
 
 		// Auto anchoring: it creates an anchor like this EntityAlias:key1_key2_key3, provided that all key
-		if (factory.isAutoAnchor() && !entity.properties.containsKey(_ANCHOR)) {
+		if (factory.isAutoAnchor() && !entity.properties.containsKey(ANCHOR)) {
 			String[] keyProperties = entity.getKeyProperties();
 			if (keyProperties != null) {
 				StringBuilder uniqeValue = new StringBuilder();
@@ -524,8 +524,8 @@ public class DefaultInitializer implements Initializer {
 				if (allNotNull) {
 					uniqeValue.setCharAt(0, ':'); // convert the first _ to :
 					uniqeValue.insert(0, entity.metadata.getAlias());
-					entity.properties.put(_ANCHOR,
-							new ProcessProperty(entity, null, _ANCHOR, null, uniqeValue.toString()));
+					entity.properties.put(ANCHOR,
+							new ProcessProperty(entity, null, ANCHOR, null, uniqeValue.toString()));
 				}
 			}
 		}
@@ -565,7 +565,7 @@ public class DefaultInitializer implements Initializer {
 	}
 
 	public boolean isReservedAttribute(String name) {
-		return _ANCHOR.equals(name) || _ACTION.equals(name) || _IN_PARENT.equals(name) || _CHILD_ANCHOR.equals(name);
+		return ANCHOR.equals(name) || ACTION.equals(name) || IN_PARENT.equals(name) || CHILD_ANCHOR.equals(name);
 	}
 
 	/**
@@ -610,7 +610,7 @@ public class DefaultInitializer implements Initializer {
 	 * called from inside load, entity is null.
 	 * 
 	 */
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "rawtypes" })
 	protected Object getAttributeValue(ProcessProperty property) throws Exception {
 		if (property.rawValue == null) {
 			return null;
@@ -628,8 +628,28 @@ public class DefaultInitializer implements Initializer {
 			}
 		}
 
-		Object value = property.rawValue;
+		if (propertyType != null && List.class.isAssignableFrom(propertyType)) {
+			List<Object> list = new ArrayList<Object>();
+			// Note that in this case, passing property type is not useful since it is of type List
+			Class<?> genericType = null;
+			try {
+				genericType = (Class<?>) ((ParameterizedType) property.entity.value.getClass()
+						.getDeclaredField(property.name).getGenericType()).getActualTypeArguments()[0];
+			} catch (Exception e) {
+				throw new RuntimeException("Could not determine the generic type of list " + property.name + " in "
+						+ property.entity.value.getClass());
+			}
+			for (String part : String.valueOf(property.rawValue).split(";")) {
+				list.add(getAtomicAttributeValue(property, genericType, part));
+			}
+			return list;
+		} else {
+			return getAtomicAttributeValue(property, propertyType, property.rawValue);
+		}
+	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	protected Object getAtomicAttributeValue(ProcessProperty property, Class propertyType, Object value) {
 		// Resolve dynamic values, if allowed
 		if ((property.metadata == null || property.metadata.isDynamic())) {
 			String valueAsStr = String.valueOf(value);
@@ -670,7 +690,7 @@ public class DefaultInitializer implements Initializer {
 			attrValue = attrValue.substring(0, attrValue.length() - 1);
 		}
 		Object value = null;
-		if (_ACTION.equals(attrName)) {
+		if (ACTION.equals(attrName)) {
 			value = attrValue;
 		} else if (attrValue.startsWith("@parent(")) {
 			int arg = Integer.parseInt(attrValue.substring(8, attrValue.length() - 1));
@@ -711,24 +731,7 @@ public class DefaultInitializer implements Initializer {
 		} else if (attrValue.equals("@type.name")) {
 			value = entity.getTypeName();
 		} else { // look into anchors
-			if (attrValue.indexOf(';') < 0) {
-				value = getAnchorValue(attrValue.substring(1), propertyType, optional);
-			} else {
-				List<Object> list = new ArrayList<Object>();
-				// Note that in this case, passing property type is not useful since it is of type List
-				Class<?> genericType = null;
-				try {
-					genericType = (Class<?>) ((ParameterizedType) entity.value.getClass().getDeclaredField(attrName)
-							.getGenericType()).getActualTypeArguments()[0];
-				} catch (Exception e) {
-
-				}
-				for (String part : attrValue.split(";")) {
-					list.add(getAnchorValue(part.substring(1), genericType, optional));
-				}
-				value = list;
-			}
-
+			value = getAnchorValue(attrValue.substring(1), propertyType, optional);
 		}
 		return value;
 	}
@@ -769,7 +772,7 @@ public class DefaultInitializer implements Initializer {
 		String value = String.valueOf(property.value);
 		try {
 			// check for special attributes
-			if (property.name.equals(_ANCHOR)) {
+			if (property.name.equals(ANCHOR)) {
 				if (value.startsWith("parent") || value.equals("child") || StringUtils.containsAny(value, '?')) {
 					throw new IllegalArgumentException("Illegal anchor name " + value);
 				}
@@ -782,12 +785,12 @@ public class DefaultInitializer implements Initializer {
 					}
 					anchores.put(value, property.entity.value);
 				}
-			} else if (property.name.equals(_ACTION)) {
+			} else if (property.name.equals(ACTION)) {
 				int index = value.indexOf('.');
 				int arg = Integer.parseInt(value.substring(8, index - 1)); // -1 for )
 				Object target = stack.peek(arg);
 				MethodUtils.invokeMethod(target, value.substring(index + 1), property.entity.value);
-			} else if (property.name.equals(_IN_PARENT)) {
+			} else if (property.name.equals(IN_PARENT)) {
 				Object parent = stack.size() >= 2 ? stack.get(stack.size() - 2) : null;
 				boolean optional = value.endsWith("?");
 				if (parent != null) {

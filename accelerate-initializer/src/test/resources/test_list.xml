@@ -5,6 +5,13 @@
 	
 	<book title="b1" authors="@a11;@a12" />
 	
+	<book title="b2">
+		<Author name="a21" _in-parent_="authors"/>
+		<Author name="a22" _in-parent_="authors"/>
+	</book>
+	
+	<book title="b3" tags="SCIENTIFIC;LITRETURE"/>
+	
 	<!-- 
 	<book title="b2">
 		<authors>

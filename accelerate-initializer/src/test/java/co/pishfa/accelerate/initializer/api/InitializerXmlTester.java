@@ -16,6 +16,7 @@ import org.junit.Test;
 import co.pishfa.accelerate.initializer.model.Author;
 import co.pishfa.accelerate.initializer.model.Book;
 import co.pishfa.accelerate.initializer.model.Category;
+import co.pishfa.accelerate.initializer.model.Tag;
 
 /**
  * @author Taha Ghasemi
@@ -33,7 +34,7 @@ public class InitializerXmlTester {
 	 */
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class).key(
+		factory = new InitializerFactory().entityClasses(Book.class, Author.class, Category.class, Tag.class).key(
 				"name");
 	}
 
@@ -175,6 +176,16 @@ public class InitializerXmlTester {
 		assertEquals(3, result.get("Authors").size());
 		assertEquals(4, result.get("Author").size());
 		assertEquals("t1", ((Author) result.get("Authors").get(0)).getName());
+	}
+
+	@Test
+	public void testList() throws Exception {
+		initializer.read("test_list.xml");
+
+		List<Tag> tags = initializer.getObject("b3", Book.class).getTags();
+		assertEquals(2, tags.size());
+		assertEquals(Tag.SCIENTIFIC, tags.get(0));
+		assertEquals(Tag.LITRETURE, tags.get(1));
 	}
 
 }

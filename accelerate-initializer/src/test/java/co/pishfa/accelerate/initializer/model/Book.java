@@ -26,6 +26,8 @@ public class Book {
 
 	private List<Author> authors;
 
+	private List<Tag> tags;
+
 	private Author mainAuthor = new Author();
 
 	private int edition;
@@ -84,6 +86,14 @@ public class Book {
 
 	public void setMainAuthor(Author mainAuthor) {
 		this.mainAuthor = mainAuthor;
+	}
+
+	public List<Tag> getTags() {
+		return tags;
+	}
+
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
 	}
 
 }
