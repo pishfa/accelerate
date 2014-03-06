@@ -1,6 +1,7 @@
 package co.pishfa.accelerate.initializer.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -47,7 +48,7 @@ public class InitializerFactoryTest {
 		InitEntityMetaData book = factory.getInitEntityByAlias("book");
 		assertNotNull(book);
 		assertEquals(Book.class, book.getEntityClass());
-		assertEquals(3, book.getProperties().size());
+		assertEquals(4, book.getProperties().size());
 		InitPropertyMetaData name = book.getProperty("title");
 		assertNotNull(name);
 		assertEquals("name", name.getName());

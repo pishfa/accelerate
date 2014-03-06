@@ -9,5 +9,6 @@
 		<property name="name" dynamic="false" alias="title"/>
 		<property name="fullName" default="Book #{this.name}" />
 		<property name="category" default="@parent?"/>
+		<property name="_in-parent_" default="books?" />
 	</entity>
 </metadata>
