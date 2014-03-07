@@ -12,6 +12,7 @@
 	<name>initializer</name>
 	<description>This project enables reading an object graph from several xml files or annotated classes.</description>
 	
+	
 	<developers>
 		<developer>
 			<id>tahagh</id>
