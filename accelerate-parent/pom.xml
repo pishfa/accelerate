@@ -3,16 +3,10 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>co.pishfa.accelerate</groupId>
 	<artifactId>accelerate-parent</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<packaging>pom</packaging>
 	<description>The aim of this project is to accelerate the development of JSF-CDI-JPA based projects. The target projects are small-to-medium-sized business web applications.</description>
-	
-	<parent>
-	    <groupId>org.sonatype.oss</groupId>
-	    <artifactId>oss-parent</artifactId>
-	    <version>7</version>
-	</parent>
-  
+
 	<url>https://github.com/pishfa/accelerate</url>
 	<licenses>
 		<license>
@@ -30,12 +24,25 @@
 		<connection>scm:git:git@github.com:pishfa/accelerate</connection>
 		<developerConnection>scm:git:git@github.com:pishfa/accelerate</developerConnection>
 	</scm>
-	
+
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<maven.compile.source>1.7</maven.compile.source>
 		<maven.compile.target>1.7</maven.compile.target>
 	</properties>
+
+	<distributionManagement>
+		<snapshotRepository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
+		</snapshotRepository>
+		<repository>
+			<id>sonatype-nexus-staging</id>
+			<name>Nexus Release Repository</name>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+		</repository>
+	</distributionManagement>
 
 	<build>
 		<plugins>
@@ -43,7 +50,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
+				<version>3.1</version>
 				<configuration>
 					<source>${maven.compile.source}</source>
 					<target>${maven.compile.target}</target>
@@ -54,6 +61,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-eclipse-plugin</artifactId>
+				<version>2.9</version>
 				<configuration>
 					<wtpversion>2.0</wtpversion>
 					<downloadSources>true</downloadSources>
@@ -64,7 +72,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.1</version>
+				<version>2.4</version>
 				<configuration>
 					<archive>
 						<manifestEntries>
@@ -82,17 +90,94 @@
 					</archive>
 				</configuration>
 			</plugin>
-			
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.3.1</version>
+				<executions>
+					<execution>
+						<id>enforce-maven</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireMavenVersion>
+									<version>(,2.1.0),(2.1.0,2.2.0),(2.2.0,)</version>
+									<message>Maven 2.1.0 and 2.2.0 produce incorrect GPG signatures
+										and checksums respectively.</message>
+								</requireMavenVersion>
+							</rules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
+				<version>2.4.2</version>
 				<configuration>
+					<mavenExecutorId>forked-path</mavenExecutorId>
+					<useReleaseProfile>false</useReleaseProfile>
+					<arguments>-Psonatype-oss-release</arguments>
 					<localCheckout>true</localCheckout>
 				</configuration>
 			</plugin>
 
+
 		</plugins>
 
 	</build>
-	
+
+	<profiles>
+		<profile>
+			<id>sonatype-oss-release</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.2.1</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar-no-fork</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<version>2.9.1</version>
+						<executions>
+							<execution>
+								<id>attach-javadocs</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-gpg-plugin</artifactId>
+						<version>1.5</version>
+						<executions>
+							<execution>
+								<id>sign-artifacts</id>
+								<phase>verify</phase>
+								<goals>
+									<goal>sign</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>

@@ -27,8 +27,6 @@ import javax.el.FunctionMapper;
 import javax.el.ValueExpression;
 import javax.el.VariableMapper;
 
-import de.odysseus.el.util.SimpleResolver;
-
 /**
  * Simple context implementation.
  * 
