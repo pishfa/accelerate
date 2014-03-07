@@ -3,8 +3,9 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>co.pishfa.accelerate</groupId>
 	<artifactId>accelerate-parent</artifactId>
-	<version>0.0.1</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
+	<name>accelerate</name>
 	<description>The aim of this project is to accelerate the development of JSF-CDI-JPA based projects. The target projects are small-to-medium-sized business web applications.</description>
 
 	<url>https://github.com/pishfa/accelerate</url>
@@ -19,6 +20,13 @@
 		<name>Pishfa</name>
 		<url>http://pishfa.co/</url>
 	</organization>
+	<developers>
+		<developer>
+			<id>tahagh</id>
+			<name>Taha Ghasemi</name>
+			<email>taha.ghasemi@gmail.com</email>
+		</developer>
+	</developers>
 	<scm>
 		<url>git@github.com:/pishfa/accelerate</url>
 		<connection>scm:git:git@github.com:pishfa/accelerate</connection>
@@ -122,6 +130,7 @@
 					<useReleaseProfile>false</useReleaseProfile>
 					<arguments>-Psonatype-oss-release</arguments>
 					<localCheckout>true</localCheckout>
+					<pushChanges>false</pushChanges>
 				</configuration>
 			</plugin>
 
