@@ -132,7 +132,7 @@ public class SimpleContext extends ELContext {
 	@Override
 	public ELResolver getELResolver() {
 		if (resolver == null) {
-			resolver = new SimpleResolver();
+			resolver = new SimpleResolver(true);
 		}
 		return resolver;
 	}

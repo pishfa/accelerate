@@ -401,6 +401,9 @@ public class DefaultInitializer implements Initializer {
 				} finally {
 					insideLoad = oldInsideLoad;
 				}
+			} else if (VARS_ELEMENT.equals(name)) {
+				processVars(entity);
+				return null;
 			}
 
 			// child anchors are previously processed.
@@ -450,6 +453,18 @@ public class DefaultInitializer implements Initializer {
 		} catch (Exception e) {
 			log.error("Exception occured during processing of element " + name, e);
 			return null;
+		}
+	}
+
+	/**
+	 * Processes defined variables.
+	 */
+	private void processVars(ProcessEntity entity) {
+		for (ProcessEntity child : entity.getChildren()) {
+			String name = (String) child.getAttributeValue("name");
+			String value = (String) child.getAttributeValue("value");
+			ExpressionFactory expressionFactory = factory.getExpressionFactory();
+			context.setVariable(name, expressionFactory.createValueExpression(context, value, Object.class));
 		}
 	}
 

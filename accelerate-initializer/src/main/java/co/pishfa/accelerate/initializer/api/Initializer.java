@@ -19,6 +19,7 @@ public interface Initializer {
 	// Special elements or attributes
 	public static final String LOAD_ELEMENT = "load";
 	public static final String INCLUDE_ELEMENT = "include";
+	public static final String VARS_ELEMENT = "variables";
 	public static final String IN_PARENT = "_in-parent_";
 	public static final String ACTION = "_action_";
 	public static final String ANCHOR = "_anchor_";

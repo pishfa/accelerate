@@ -3,7 +3,9 @@
  */
 package co.pishfa.accelerate.initializer.api;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.HashMap;
 import java.util.List;
@@ -165,6 +167,7 @@ public class InitializerXmlTester {
 		assertEquals("by taha", getBook(anchores, "test1").getFullName());
 		assertEquals("test5", getBook(anchores, "test2").getFullName());
 		assertEquals("test#{num}", getBook(anchores, "test3").getFullName());
+		assertEquals("test_test", getBook(anchores, "test4").getFullName());
 	}
 
 	@Test
