@@ -1,5 +1,7 @@
 package co.pishfa.accelerate.initializer.api;
 
+import java.util.Map;
+
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 
 /**
@@ -23,8 +25,8 @@ public interface InitListener {
 
 	/**
 	 * Only used in incremental mode or in the load section, to find existing entities with the given properties and
-	 * values.
+	 * values. Non of values are null.
 	 * 
 	 */
-	public Object findEntity(InitEntityMetaData initEntity, String[] properties, Object[] values);
+	public Object findEntity(InitEntityMetaData initEntity, Map<String, Object> propValues);
 }

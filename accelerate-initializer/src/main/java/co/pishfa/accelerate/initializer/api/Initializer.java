@@ -17,14 +17,25 @@ import org.jdom2.Element;
 public interface Initializer {
 
 	// Special elements or attributes
-	public static final String LOAD_ELEMENT = "load";
-	public static final String INCLUDE_ELEMENT = "include";
-	public static final String VARS_ELEMENT = "variables";
-	public static final String IN_PARENT = "_in-parent_";
-	public static final String ACTION = "_action_";
-	public static final String ANCHOR = "_anchor_";
+	static final String ELEMENT_LOAD = "load";
+	static final String ELEMENT_INCLUDE = "include";
+	static final String ELEMENT_VARS = "variables";
+
+	static final String ATTR_IN_PARENT = "_in-parent_";
+	static final String ATTR_ACTION = "_action_";
+	static final String ATTR_ANCHOR = "_anchor_";
 	// TODO is not supported yet
-	public static final String CHILD_ANCHOR = "_child-anchor_";
+	static final String ATTR_CHILD_ANCHOR = "_child-anchor_";
+
+	// context variables
+	static final String CONTEXT_ANCHORS = "anchors";
+	static final String CONTEXT_PARENTS = "parents";
+	static final String CONTEXT_THIS = "this";
+	static final String CONTEXT_ENTITY = "entity";
+
+	// constants that can be used in defining the key property
+	static final String PROPERTY_ALL = "*";
+	static final String PROPERTY_EMPTY = "-";
 
 	/**
 	 * Reads data from specified resource.

@@ -1,5 +1,7 @@
 package co.pishfa.accelerate.initializer.core;
 
+import java.util.Map;
+
 import co.pishfa.accelerate.initializer.api.InitListener;
 import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 
@@ -19,7 +21,7 @@ public class BaseInitListener implements InitListener {
 	}
 
 	@Override
-	public Object findEntity(InitEntityMetaData initEntity, String[] properties, Object[] values) {
+	public Object findEntity(InitEntityMetaData initEntity, Map<String, Object> propValues) {
 		return null;
 	}
 
