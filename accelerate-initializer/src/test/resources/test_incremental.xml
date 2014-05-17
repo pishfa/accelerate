@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data>
+	<Authors>
+		<Author name="a1" />
+		<Author name="a2" />
+	</Authors>
+	<Category name="c1">
+		<book title="b1" edition="2" author="@a1"/> 
+		<Category name="c2">
+			<book title="b2" /> 
+		</Category>
+	</Category>
+</data>
