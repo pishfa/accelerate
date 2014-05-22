@@ -54,7 +54,7 @@
 
 	<build>
 		<plugins>
-			<!-- Compiler plugin enforces Java 1.7 compatibility -->
+			<!-- Compiler plugin enforces Java 1.7 compatibility 
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -63,7 +63,7 @@
 					<source>${maven.compile.source}</source>
 					<target>${maven.compile.target}</target>
 				</configuration>
-			</plugin>
+			</plugin>-->
 
 			<!-- Eclipse plugin - download source and JavaDoc jars automatically -->
 			<plugin>
