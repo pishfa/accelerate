@@ -19,15 +19,14 @@ import java.util.Set;
 
 import javax.el.ExpressionFactory;
 
+import co.pishfa.accelerate.initializer.model.InitPropertyMetadata;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.MethodUtils;
 import org.apache.commons.beanutils.PropertyUtils;
-import org.apache.commons.beanutils.PropertyUtilsBean;
 import org.apache.commons.collections.ArrayStack;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.commons.lang3.reflect.FieldUtils;
 import org.jdom2.Attribute;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
@@ -38,8 +37,7 @@ import co.pishfa.accelerate.initializer.api.InitListener;
 import co.pishfa.accelerate.initializer.api.Initializer;
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.model.InitAnnotation;
-import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
-import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
+import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
 import co.pishfa.accelerate.initializer.util.Input;
 
 /**
@@ -58,7 +56,7 @@ public class DefaultInitializer implements Initializer {
 	private abstract class ProcessEntity {
 
 		public ProcessEntity parent;
-		public InitEntityMetaData metadata;
+		public InitEntityMetadata metadata;
 		/**
 		 * The current value of this entity. For example, if this entity corresponds to a class, this value is refer to
 		 * instance of this class that is created (or loaded) by the initializer.
@@ -249,7 +247,7 @@ public class DefaultInitializer implements Initializer {
 	 * 
 	 */
 	private static class ProcessProperty {
-		public ProcessProperty(ProcessEntity entity, InitPropertyMetaData metadata, String name, Object rawValue,
+		public ProcessProperty(ProcessEntity entity, InitPropertyMetadata metadata, String name, Object rawValue,
 				Object value) {
 			this.entity = entity;
 			this.metadata = metadata;
@@ -259,7 +257,7 @@ public class DefaultInitializer implements Initializer {
 		}
 
 		public ProcessEntity entity;
-		public InitPropertyMetaData metadata;
+		public InitPropertyMetadata metadata;
 		public String name;
 		public Object rawValue;
 		public Object value;
@@ -534,7 +532,7 @@ public class DefaultInitializer implements Initializer {
 
 			// check for alias
 			if (entity.parent != null && entity.parent.metadata != null) {
-				InitPropertyMetaData initProperty = entity.parent.metadata.getProperty(propName);
+				InitPropertyMetadata initProperty = entity.parent.metadata.getProperty(propName);
 				if (initProperty != null) {
 					propName = initProperty.getName();
 				}
@@ -644,7 +642,7 @@ public class DefaultInitializer implements Initializer {
 			String attrName = attr.getKey();
 			Object attrValue = attr.getValue();
 			// resolve aliases
-			InitPropertyMetaData prop = null;
+			InitPropertyMetadata prop = null;
 			if (entity.metadata != null) {
 				prop = entity.metadata.getProperty(attrName);
 				if (prop != null) {
@@ -659,7 +657,7 @@ public class DefaultInitializer implements Initializer {
 
 		// check for unset defaults
 		if (entity.metadata != null) {
-			for (InitPropertyMetaData prop : entity.metadata.getProperties()) {
+			for (InitPropertyMetadata prop : entity.metadata.getProperties()) {
 				String attrName = prop.getName();
 				if (!entity.properties.containsKey(attrName) && prop.getDefaultValue() != null) {
 					ProcessProperty property = new ProcessProperty(entity, prop, attrName, prop.getDefaultValue(), null);
@@ -817,7 +815,7 @@ public class DefaultInitializer implements Initializer {
 			// Auto-scoping: tries to guess
 			// First find the alias corresponding to this propertyType
 			String alias = null;
-			InitEntityMetaData initEntity = factory.getInitEntityByClass(propertyType);
+			InitEntityMetadata initEntity = factory.getInitEntityByClass(propertyType);
 			if (initEntity != null) {
 				alias = initEntity.getAlias();
 				if (alias != null) {
@@ -949,7 +947,7 @@ public class DefaultInitializer implements Initializer {
 
 	protected String getAbsoluteAnchorName(String anchorName, Class<?> entityClass) {
 		if (anchorName.startsWith(":")) {
-			InitEntityMetaData initEntity = factory.getInitEntityByClass(entityClass);
+			InitEntityMetadata initEntity = factory.getInitEntityByClass(entityClass);
 			Validate.notNull(initEntity, "Entity class is not defined for " + entityClass
 					+ " To be used in absolute anchor name");
 			anchorName = initEntity.getAlias() + anchorName;

@@ -1,18 +1,13 @@
 package co.pishfa.accelerate.initializer.core;
 
-import java.lang.reflect.Field;
-import java.util.List;
-
+import co.pishfa.accelerate.initializer.api.InitializerFactory;
+import co.pishfa.accelerate.initializer.model.*;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import co.pishfa.accelerate.initializer.api.InitializerFactory;
-import co.pishfa.accelerate.initializer.model.InitEntity;
-import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
-import co.pishfa.accelerate.initializer.model.InitKey;
-import co.pishfa.accelerate.initializer.model.InitProperty;
-import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
+import java.lang.reflect.Field;
+import java.util.List;
 
 /**
  * Reads init metadata from annotated classes
@@ -20,13 +15,13 @@ import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
  * 
  */
-public class AnnotationMetaDataReader {
+public class AnnotationMetadataReader {
 
-	private static final Logger log = LoggerFactory.getLogger(AnnotationMetaDataReader.class);
+	private static final Logger log = LoggerFactory.getLogger(AnnotationMetadataReader.class);
 
 	protected InitializerFactory factory;
 
-	public AnnotationMetaDataReader(InitializerFactory factory) {
+	public AnnotationMetadataReader(InitializerFactory factory) {
 		this.factory = factory;
 	}
 
@@ -60,9 +55,9 @@ public class AnnotationMetaDataReader {
 		if(StringUtils.isEmpty(key))
 			key = findEntityKeys(entityClass);
 
-		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(alias, entityClass, key);
-		factory.addInitEntity(initEntityMetaData);
-		addInitProperties(entityClass, initEntityMetaData);
+		InitEntityMetadata initEntityMetadata = new InitEntityMetadata(alias, entityClass, key);
+		factory.addInitEntity(initEntityMetadata);
+		addInitProperties(entityClass, initEntityMetadata);
 	}
 
 	protected String findEntityKeys(Class<?> entityClass) {
@@ -84,23 +79,23 @@ public class AnnotationMetaDataReader {
 	/**
 	 * Adds the init properties of the given entityClass plus all its parents that annotated with {@link InitEntity} .
 	 */
-	protected void addInitProperties(Class<?> entityClass, InitEntityMetaData initEntityMetaData) {
+	protected void addInitProperties(Class<?> entityClass, InitEntityMetadata initEntityMetadata) {
 		Class<?> parent = entityClass.getSuperclass();
 		if (parent.isAnnotationPresent(InitEntity.class)) {
-			addInitProperties(parent, initEntityMetaData);
+			addInitProperties(parent, initEntityMetadata);
 		}
 
 		InitEntity initEntity = entityClass.getAnnotation(InitEntity.class);
 		if (initEntity != null) {
 			for (InitProperty initProperty : initEntity.properties()) {
-				initEntityMetaData.addProperty(processInitProperty(null, initProperty, entityClass));
+				initEntityMetadata.addProperty(processInitProperty(null, initProperty, entityClass));
 			}
 		}
 
 		for (Field field : entityClass.getDeclaredFields()) {
 			InitProperty initProperty = field.getAnnotation(InitProperty.class);
 			if (initProperty != null) {
-				initEntityMetaData.addProperty(processInitProperty(field, initProperty, entityClass));
+				initEntityMetadata.addProperty(processInitProperty(field, initProperty, entityClass));
 			}
 		}
 	}
@@ -114,7 +109,7 @@ public class AnnotationMetaDataReader {
 	 *            only used for debugging purposes.
 	 * @return
 	 */
-	private InitPropertyMetaData processInitProperty(Field field, InitProperty initProperty, Class<?> entityClass) {
+	private InitPropertyMetadata processInitProperty(Field field, InitProperty initProperty, Class<?> entityClass) {
 		String fieldName = null;
 		if (field == null) {
 			fieldName = initProperty.name();
@@ -125,9 +120,9 @@ public class AnnotationMetaDataReader {
 		} else {
 			fieldName = StringUtils.isEmpty(initProperty.name()) ? field.getName() : initProperty.name();
 		}
-		InitPropertyMetaData initPropertyMetaData = new InitPropertyMetaData(fieldName, initProperty.alias(),
+		InitPropertyMetadata initPropertyMetadata = new InitPropertyMetadata(fieldName, initProperty.alias(),
 				initProperty.value(), initProperty.dynamic());
-		return initPropertyMetaData;
+		return initPropertyMetadata;
 	}
 
 }

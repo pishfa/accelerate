@@ -1,14 +1,14 @@
 package co.pishfa.accelerate.initializer.model;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Contains metadata information about an init entity during initialization.
@@ -16,18 +16,18 @@ import org.slf4j.LoggerFactory;
  * @author Taha Ghasemi
  * 
  */
-public class InitEntityMetaData {
+public class InitEntityMetadata {
 
-	private static final Logger log = LoggerFactory.getLogger(InitEntityMetaData.class);
+	private static final Logger log = LoggerFactory.getLogger(InitEntityMetadata.class);
 
 	private String alias;
 	private Class<?> entityClass;
 	private String key;
-	private Map<String, InitPropertyMetaData> propertiesByAlias = new HashMap<String, InitPropertyMetaData>();
+	private Map<String, InitPropertyMetadata> propertiesByAlias = new HashMap<>();
 
-	private final List<InitPropertyMetaData> properties = new ArrayList<InitPropertyMetaData>();
+	private final List<InitPropertyMetadata> properties = new ArrayList<>();
 
-	public InitEntityMetaData(String alias, Class<?> entityClass, String key) {
+	public InitEntityMetadata(String alias, Class<?> entityClass, String key) {
 		Validate.notNull(entityClass);
 
 		this.entityClass = entityClass;
@@ -51,12 +51,12 @@ public class InitEntityMetaData {
 		this.entityClass = entityClass;
 	}
 
-	public InitPropertyMetaData getProperty(String propertyAlias) {
+	public InitPropertyMetadata getProperty(String propertyAlias) {
 		return propertiesByAlias.get(propertyAlias);
 	}
 
-	public void setPropertiesByAlias(Map<String, InitPropertyMetaData> properteis) {
-		this.propertiesByAlias = properteis;
+	public void setPropertiesByAlias(Map<String, InitPropertyMetadata> properties) {
+		this.propertiesByAlias = properties;
 	}
 
 	public String getKey() {
@@ -67,7 +67,7 @@ public class InitEntityMetaData {
 		this.key = unique;
 	}
 
-	public List<InitPropertyMetaData> getProperties() {
+	public List<InitPropertyMetadata> getProperties() {
 		return properties;
 	}
 
@@ -75,11 +75,11 @@ public class InitEntityMetaData {
 	 * Adds a new property. Override the previous one with the same alias, if any.
 	 * 
 	 */
-	public void addProperty(InitPropertyMetaData property) {
-		InitPropertyMetaData prevPropery = propertiesByAlias.get(property.getAlias());
-		if (prevPropery != null) {
+	public void addProperty(InitPropertyMetadata property) {
+		InitPropertyMetadata prevProperty = propertiesByAlias.get(property.getAlias());
+		if (prevProperty != null) {
 			log.warn("Overriding the property with alias {} in {}", property.getAlias(), entityClass);
-			properties.remove(prevPropery);
+			properties.remove(prevProperty);
 		}
 		properties.add(property);
 		propertiesByAlias.put(property.getAlias(), property);

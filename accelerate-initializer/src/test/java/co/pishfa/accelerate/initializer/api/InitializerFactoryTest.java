@@ -3,14 +3,11 @@ package co.pishfa.accelerate.initializer.api;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import co.pishfa.accelerate.initializer.model.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import co.pishfa.accelerate.initializer.model.Author;
-import co.pishfa.accelerate.initializer.model.Book;
-import co.pishfa.accelerate.initializer.model.Category;
-import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
-import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
+import co.pishfa.accelerate.initializer.model.InitPropertyMetadata;
 
 public class InitializerFactoryTest {
 
@@ -41,19 +38,19 @@ public class InitializerFactoryTest {
 	}
 
 	private void checkInitEntites(InitializerFactory factory) {
-		InitEntityMetaData author = factory.getInitEntityByAlias("Author");
+		InitEntityMetadata author = factory.getInitEntityByAlias("Author");
 		assertNotNull(author);
 		assertEquals(Author.class, author.getEntityClass());
 
-		InitEntityMetaData book = factory.getInitEntityByAlias("book");
+		InitEntityMetadata book = factory.getInitEntityByAlias("book");
 		assertNotNull(book);
 		assertEquals(Book.class, book.getEntityClass());
 		assertEquals(4, book.getProperties().size());
-		InitPropertyMetaData name = book.getProperty("title");
+		InitPropertyMetadata name = book.getProperty("title");
 		assertNotNull(name);
 		assertEquals("name", name.getName());
 
-		InitPropertyMetaData fullName = book.getProperty("fullName");
+		InitPropertyMetadata fullName = book.getProperty("fullName");
 		assertNotNull(fullName);
 		assertEquals("Book #{this.name}", fullName.getDefaultValue());
 	}
