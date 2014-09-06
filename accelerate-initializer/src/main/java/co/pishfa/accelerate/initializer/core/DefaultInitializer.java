@@ -3,23 +3,13 @@
  */
 package co.pishfa.accelerate.initializer.core;
 
-import java.beans.PropertyDescriptor;
-import java.io.InputStream;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.ParameterizedType;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.el.ExpressionFactory;
-
+import co.pishfa.accelerate.initializer.api.InitListener;
+import co.pishfa.accelerate.initializer.api.Initializer;
+import co.pishfa.accelerate.initializer.api.InitializerFactory;
+import co.pishfa.accelerate.initializer.model.InitAnnotation;
+import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
 import co.pishfa.accelerate.initializer.model.InitPropertyMetadata;
+import co.pishfa.accelerate.initializer.util.Input;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
 import org.apache.commons.beanutils.MethodUtils;
@@ -33,12 +23,15 @@ import org.jdom2.input.SAXBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import co.pishfa.accelerate.initializer.api.InitListener;
-import co.pishfa.accelerate.initializer.api.Initializer;
-import co.pishfa.accelerate.initializer.api.InitializerFactory;
-import co.pishfa.accelerate.initializer.model.InitAnnotation;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
-import co.pishfa.accelerate.initializer.util.Input;
+import javax.el.ExpressionFactory;
+import java.beans.PropertyDescriptor;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.ParameterizedType;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * 
@@ -411,8 +404,6 @@ public class DefaultInitializer implements Initializer {
 	 * Processes the given element. Since an element can be a class-instance or property of its parent, parentEntity
 	 * should be passed. In case of no parent, null is an acceptable value.
 	 * 
-	 * @param parentEntity
-	 *            null if no parent is present.
 	 * @param entity
 	 *            element to be processed
 	 * @return
@@ -507,7 +498,7 @@ public class DefaultInitializer implements Initializer {
 	 * Creates or finds the object that corresponds to the given element whether it is an instance of a class or
 	 * property of an object or first level path element.
 	 * 
-	 * @param initEntity
+	 * @param entity
 	 *            the corresponding initEntityDate definition to the element. It is null when element is not a class
 	 *            alias
 	 * @return null in case of first level path element.
@@ -856,10 +847,16 @@ public class DefaultInitializer implements Initializer {
 					anchores.put(value, property.entity.value);
 				}
 			} else if (property.name.equals(ATTR_ACTION)) {
-				int index = value.indexOf('.');
-				int arg = Integer.parseInt(value.substring(8, index - 1)); // -1 for )
-				Object target = stack.peek(arg);
-				MethodUtils.invokeMethod(target, value.substring(index + 1), property.entity.value);
+                Object parent = stack.size() >= 2 ? stack.get(stack.size() - 2) : null;
+                boolean optional = value.endsWith("?");
+                if (parent != null) {
+                    if (optional) {
+                        value = value.substring(0, value.length() - 1);
+                    }
+                    MethodUtils.invokeMethod(parent, value, property.entity.value);
+                } else if (!optional) {
+                    throw new RuntimeException("non-optional in_parent is specified but the parent is null");
+                }
 			} else if (property.name.equals(ATTR_IN_PARENT)) {
 				Object parent = stack.size() >= 2 ? stack.get(stack.size() - 2) : null;
 				boolean optional = value.endsWith("?");

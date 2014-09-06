@@ -3,7 +3,7 @@
 	<groupId>co.pishfa.accelerate</groupId>
 	<artifactId>accelerate-parent</artifactId>
 	<version>0.0.2-SNAPSHOT</version>
-	<packaging>pom</packaging>
+    <packaging>pom</packaging>
 	<name>accelerate</name>
 	<description>The aim of this project is to accelerate the development of JSF-CDI-JPA based projects. The target projects are small-to-medium-sized business web applications.</description>
 
@@ -54,7 +54,7 @@
 
 	<build>
 		<plugins>
-			<!-- Compiler plugin enforces Java 1.7 compatibility 
+			<!-- Compiler plugin enforces Java 1.7 compatibility -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -63,7 +63,7 @@
 					<source>${maven.compile.source}</source>
 					<target>${maven.compile.target}</target>
 				</config>
-			</plugin>-->
+			</plugin>
 
 			<!-- Eclipse plugin - download source and JavaDoc jars automatically -->
 			<plugin>
