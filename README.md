@@ -3,13 +3,111 @@ Accelerate
 
 The aim of this project is to accelerate the development of JSF-CDI-JPA based projects. The target projects are small-to-medium-sized business web applications. 
 
-Accelerate is an open-source project published under Apache 2.0 license. It is written in Java 7 and can be used in any servlet container such as Tomcat and Jetty or JEE application server such as TomEE and JBoss wildfly.
+This project is not yet-another or me-too framework. It only tries to facilitate the development with these standards by adhering to their best or common practices and filling the gaps among them. It also paves the way for development with them by providing guidelines, ready-to-use samples, code generators, and templates.
 
-# Initializer
+Accelerate is an open-source project published under Apache 2.0 license. It is written in Java 8 and can be used in any servlet container such as Tomcat and Jetty or JEE application server such as TomEE and JBoss wildfly.
 
-Initializer helps you read a set of related objects (object graph) from several xml files or annotated interfaces. The goal is to write these xml files or annotated interfaces with minimum effort and with intutive structure and easy object referencing and left the hard work of reading them to Initializer. The project can be used to initialize (populate) your database with your JPA entities or read a complex configuration file. 
+Technology Stack
+----------------
+We support the following variations in our technology stack.
 
-The main advantages of this project, over other currently available approches is in its easy but flexible mechanism for object referencing, unification of xml-based and nnotation-based description of object graph, and support of default values..
+* JSF 2.2
+  * Myfaces
+  * Mojarra
+* CDI 1.0
+  * OWB
+  * Weld
+* JPA 2.1
+  * Eclipselink
+  * Hibernate
+* Component library
+  * Primefaces
+  * Richfaces (TODO)
+* Server
+  * Tomcat
+  * Wildfly
+  * Jetty (TODO)
+  * Glassfish (TODO)
+  * TomEE (TODO)
+* Scheduler
+  * Quartz
+  * Executor service
+  * Managed executor service (for application servers)
+* Cache Provider
+  * Eh-cache
+  * Guava (TODO)
+* Logging
+  * SLF4J
+* REST (Jax-rs) and Web services (Jax-ws)
+  * CXF
+  * (application server provided)
+* Mail
+  * Simplemail
+  * (application server provided)
+* Report engine (for samples)
+  * BIRT
+  * Jasper (TODO)
+* Workflow engine
+  * Jbpm
+* IDE (for guidelines)
+  * Intellij IDEA
+  * Eclipse
+* Programming language
+  * Java 1.8
+  * Groovy (for some samples)
+* Stylesheet language
+  * LESS
+* Javascript library
+  * JQuery
 
-[read more](https://github.com/pishfa/accelerate/wiki/Initializer)
+ 
+We also use these projects:
+  * Deltaspike
+  * Omnifaces
+
+
+Covered Topics
+--------------
+
+* Common UI Tasks
+  * Common form templates
+  * Page navigation
+  * Parameter management
+  * User messages
+  * Exception handling
+  * Validation
+* Entity management (CRUD, search, pagination, sort)
+  * Simple entity with many-to-one relations to other entities or enums
+    * add/edit in a modal dialog
+    * add/edit in place 
+    * add/edit in a different page
+  * Entity with one-to-many relations to weak entities
+  * Entity with many-to-many relations to other entities or enums
+  * Hierarchical entities (tree based)
+  * Ordered (or ranked) entities
+  * Initializing database with entities
+  * In-memory entity management (TODO)
+  * Dynamic entities (TODO)
+* Security
+  * User and online user management
+  * Attribute-based, role-based, and object-based authorization
+  * Auditing
+* File management
+  * File uploading
+  * File downloading
+* Scheduling
+  *  Transient schedulers
+  *  Persistent schedulers
+  *  Asynchronous execution
+* Cache handling
+* Configuration
+
+  
+  
+
+  
+
+
+
+
 
