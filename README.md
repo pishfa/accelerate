@@ -3,7 +3,7 @@ Accelerate
 
 The aim of this project is to accelerate the development of JSF-CDI-JPA based projects. The target projects are small-to-medium-sized business web applications. 
 
-Accelerate is an open-source project published under Apache 2.0 license. It is written in Java 7 and can be used in any servlet container such as Tomcat and Jetty.
+Accelerate is an open-source project published under Apache 2.0 license. It is written in Java 7 and can be used in any servlet container such as Tomcat and Jetty or JEE application server such as TomEE and JBoss wildfly.
 
 # Initializer
 
