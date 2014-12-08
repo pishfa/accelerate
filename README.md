@@ -66,17 +66,18 @@ We also use these projects:
   * Omnifaces
 
 
-Covered Topics
+Main Features
 --------------
 
 * Common UI Tasks
-  * Common form templates
+  * Common page and form templates
   * Page navigation
   * Parameter management
   * User messages
   * Exception handling
   * Validation
-* Entity management (CRUD, search, pagination, sort)
+* Common infrastructure for building 2-tier and 3-tier web applications
+* Entity management (CRUD, search, pagination, sort, security)
   * Simple entity with many-to-one relations to other entities or enums
     * add/edit in a modal dialog
     * add/edit in place 
