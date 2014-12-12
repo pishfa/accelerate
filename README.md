@@ -86,7 +86,7 @@ Features
   * Entity with many-to-many relations to other entities or enums
   * Hierarchical entities (tree based)
   * Ordered (or ranked) entities
-  * [Initializing database with entities](/wiki/Initializer)
+  * [Initializing database with entities](https://github.com/pishfa/accelerate/wiki/Initializer)
   * In-memory entity management (TODO)
   * Dynamic entities (TODO)
 * Security
