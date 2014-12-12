@@ -1,26 +1,26 @@
-Accelerate
-==========
+jAccelerate
+===========
 
 The aim of this project is to accelerate the development of JSF-CDI-JPA based projects. The target projects are small-to-medium-sized business web applications. 
 
 This project is not yet-another or me-too framework. It only tries to facilitate the development with these standards by adhering to their best or common practices and filling the gaps among them. It also paves the way for development with them by providing guidelines, ready-to-use samples, code generators, and templates.
 
-Accelerate is an open-source project published under Apache 2.0 license. It is written in Java 8 and can be used in any servlet container such as Tomcat and Jetty or JEE application server such as TomEE and JBoss wildfly.
+jAccelerate is an open-source project published under Apache 2.0 license. It is written in Java 8 and can be used in any servlet container such as Tomcat and Jetty or JEE application server such as TomEE and JBoss wildfly.
 
-Technology Stack
-----------------
+Supported Technologies
+----------------------
 We support the following variations in our technology stack.
 
-* JSF 2.2
+* JSF
   * Myfaces
   * Mojarra
-* CDI 1.0
+* CDI
   * OWB
   * Weld
-* JPA 2.1
+* JPA
   * Eclipselink
   * Hibernate
-* Component library
+* JSF Component library
   * Primefaces
   * Richfaces (TODO)
 * Server
@@ -66,8 +66,8 @@ We also use these projects:
   * Omnifaces
 
 
-Main Features
---------------
+Features
+--------
 
 * Common UI Tasks
   * Common page and form templates
@@ -86,7 +86,7 @@ Main Features
   * Entity with many-to-many relations to other entities or enums
   * Hierarchical entities (tree based)
   * Ordered (or ranked) entities
-  * Initializing database with entities
+  * [Initializing database with entities](/wiki/Initializer)
   * In-memory entity management (TODO)
   * Dynamic entities (TODO)
 * Security
