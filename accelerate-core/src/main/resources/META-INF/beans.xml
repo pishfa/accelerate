@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://java.sun.com/xml/ns/javaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="         http://java.sun.com/xml/ns/javaee          http://java.sun.com/xml/ns/javaee/beans_1_0.xsd">
+
+    <interceptors>
+        <class>co.pishfa.accelerate.async.AsyncInterceptor</class>
+        <class>co.pishfa.accelerate.log.LoggedInterceptor</class>
+        <class>co.pishfa.security.service.RunAsInterceptor</class>
+        <class>co.pishfa.security.SecuredInterceptor</class>
+        <class>co.pishfa.accelerate.validation.AutoValidatingInterceptor</class>
+        <class>co.pishfa.accelerate.validation.UiValidatorInterceptor</class>
+        <class>co.pishfa.security.AuditedInterceptor</class>
+        <class>org.apache.deltaspike.jpa.impl.transaction.TransactionalInterceptor</class>
+        <class>co.pishfa.accelerate.persistence.query.QueryRunnerInterceptor</class>
+        <class>co.pishfa.accelerate.config.cdi.ConfigGetterInterceptor</class>
+        <class>co.pishfa.accelerate.ui.param.UiParamGetterInterceptor</class>
+        <class>co.pishfa.accelerate.ui.UiMessageInterceptor</class>
+        <class>co.pishfa.accelerate.cache.NamedCachedInterceptor</class>
+        <class>co.pishfa.accelerate.cache.UiCachedInterceptor</class>
+        <class>co.pishfa.accelerate.cache.ContextCachedInterceptor</class>
+        <class>co.pishfa.accelerate.exception.UiExceptionalInterceptor</class>
+    </interceptors>
+
+</beans>

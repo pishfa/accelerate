@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>accelerate-parent</artifactId>
+        <groupId>co.pishfa.accelerate</groupId>
+        <version>0.0.2-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>accelerate-mojarra</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <properties>
+        <juel.version>2.2.7</juel.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.glassfish</groupId>
+            <artifactId>javax.faces</artifactId>
+            <version>2.2.6</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.odysseus.juel</groupId>
+            <artifactId>juel-api</artifactId>
+            <version>${juel.version}</version>
+            <scope>provided</scope> <!-- Provided in tomcat -->
+        </dependency>
+    </dependencies>
+
+
+</project>

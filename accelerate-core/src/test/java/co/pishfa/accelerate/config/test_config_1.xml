@@ -1,0 +1,10 @@
+<config>
+	<security enabled="true" sso="true" />
+	<init incremental="true" />
+	<services>
+		<userService location="localhost"/>
+	</services>
+	<properties>
+		<property name="services.userService.interval" value="10" />
+	</properties>
+</config>

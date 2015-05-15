@@ -35,8 +35,8 @@
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<maven.compile.source>1.7</maven.compile.source>
-		<maven.compile.target>1.7</maven.compile.target>
+		<maven.compile.source>1.8</maven.compile.source>
+		<maven.compile.target>1.8</maven.compile.target>
 	</properties>
 
 	<distributionManagement>
@@ -54,15 +54,16 @@
 
 	<build>
 		<plugins>
-			<!-- Compiler plugin enforces Java 1.7 compatibility -->
+			<!-- Compiler plugin enforces Java 1.8 compatibility -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.1</version>
-				<config>
+                <inherited>true</inherited>
+				<configuration>
 					<source>${maven.compile.source}</source>
 					<target>${maven.compile.target}</target>
-				</config>
+				</configuration>
 			</plugin>
 
 			<!-- Eclipse plugin - download source and JavaDoc jars automatically -->

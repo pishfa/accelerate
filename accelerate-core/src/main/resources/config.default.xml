@@ -1,0 +1,24 @@
+<config>
+	<i18n defaultLocale="fa" supportedLocales="fa,en"/>
+	<security enabled="true" sso="false">
+		<onlineUser updateInterval="300" />
+	</security>
+    <admin>
+        <backup executorCommand = "C:\Program Files\PostgreSQL\9.3\bin\pg_dump.exe -a -U postgres -Fc -Z9 -f %file% sandoq"
+                deletePeriod="1000" storage="backup" schedule="0 0 11 1 * ?" />
+    </admin>
+	<init incremental="false" />
+	<ui header="header2.png">
+		<exceptions>
+			<javax.faces.application.ViewExpiredException page="ac:this" message="pages.error.view-expired" />
+			<not-handeled page="ac:error" message="pages.error.general-error-msg" />
+		</exceptions>
+	</ui>
+    <report server="http://localhost:49295/viewer"/>
+	<storages
+		upload="upload"
+		main="main"
+		reports="reports"
+        backup="c:\backup"
+	/>
+</config>

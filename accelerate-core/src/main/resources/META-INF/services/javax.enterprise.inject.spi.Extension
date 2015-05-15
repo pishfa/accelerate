@@ -1,0 +1,3 @@
+co.pishfa.accelerate.core.FrameworkExtension
+co.pishfa.accelerate.config.cdi.ConfigExtention
+co.pishfa.accelerate.ui.UiExtention
