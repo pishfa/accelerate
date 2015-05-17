@@ -156,32 +156,35 @@ public class QueryRunnerInterceptor implements Serializable {
             return null;
         } else if (List.class.isAssignableFrom(returnType)) {
             return query.getResultList();
-        } else if (returnType == boolean.class) {
+        } else if (returnType == Boolean.TYPE || returnType == Boolean.class) {
             Object result = query.getSingleResult();
             if(result == null)
-                return false;
+                return returnType == Boolean.TYPE? false : null;
             if (result instanceof Long)
                 return (Long) result > 0;
             else if (result instanceof Integer)
                 return (Integer) result > 0;
             return result;
-        } else if (returnType == long.class) {
-            Object numRes = query.getSingleResult();
+        } else if (returnType == Long.TYPE || returnType == Long.class) {
+            Number numRes = (Number) query.getSingleResult();
             if(numRes == null)
-                return 0L;
-            if(numRes instanceof Integer)
-                return new Long((Integer) numRes);
-            return numRes;
-        } else if (returnType == int.class) {
-            Object numRes = query.getSingleResult();
+                return returnType == Long.TYPE? 0L : null;
+            return numRes.longValue();
+        } else if (returnType == Integer.TYPE || returnType == Integer.class) {
+            Number numRes = (Number) query.getSingleResult();
             if(numRes == null)
-                return 0;
-            return numRes;
-        } else if (returnType == float.class || returnType == double.class) {
-            Object numRes = query.getSingleResult();
+                return returnType == Integer.TYPE? 0 : null;
+            return numRes.intValue();
+        } else if (returnType == Float.TYPE || returnType == Float.class) {
+            Number numRes = (Number) query.getSingleResult();
             if(numRes == null)
-                return 0f;
-            return numRes;
+                return returnType == Float.TYPE? 0f : null;
+            return numRes.floatValue();
+        } else if (returnType == Double.TYPE || returnType == Double.class) {
+            Number numRes = (Number) query.getSingleResult();
+            if(numRes == null)
+                return returnType == Double.TYPE? 0d : null;
+            return numRes.doubleValue();
         } else {
             if (!qr.nullOnNoResult()) {
                 return query.getSingleResult();
