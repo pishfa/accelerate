@@ -75,7 +75,7 @@ public class ViewController implements LoggerHolder, Serializable {
 	 */
 	@UiPhaseAction(PhaseId.RESTORE_VIEW)
 	@Logged
-	protected void onViewLoaded() throws Exception {
+	public void onViewLoaded() throws Exception {
 		getLogger().info("onViewLoaded");
 	}
 

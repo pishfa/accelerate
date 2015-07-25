@@ -10,6 +10,7 @@ import co.pishfa.accelerate.entity.common.Entity;
 import co.pishfa.accelerate.reflection.ReflectionUtils;
 import co.pishfa.accelerate.service.EntityService;
 import co.pishfa.accelerate.ui.controller.PageController;
+import co.pishfa.accelerate.ui.controller.ViewController;
 import co.pishfa.security.entity.authorization.Action;
 import co.pishfa.security.service.AuthorizationService;
 import org.apache.commons.lang3.Validate;
@@ -159,16 +160,16 @@ public abstract class EntityController<T extends Entity<K>, K> extends PageContr
         return options.get(option);
     }
 
-    public void setOption(EntityControllerOption option, Object value) {
-        options.put(option, value);
+    public Object setOption(EntityControllerOption option, Object value) {
+        return options.put(option, value);
     }
 
-    public void addOption(EntityControllerOption option) {
-        options.put(option, true);
+    public Object addOption(EntityControllerOption option) {
+        return options.put(option, true);
     }
 
-    public void removeOption(EntityControllerOption option) {
-        options.remove(option);
+    public Object removeOption(EntityControllerOption option) {
+        return options.remove(option);
     }
 
     public EntityService<T, K> getEntityService() {
@@ -337,13 +338,13 @@ public abstract class EntityController<T extends Entity<K>, K> extends PageContr
     }
 
     @Override
-    protected void onViewLoaded() throws Exception {
+    public void onViewLoaded() throws Exception {
         super.onViewLoaded();
         load();
     }
 
     /**
-     * Loads associated data for this controller. It is first time called from {@link #onViewLoaded()}.
+     * Loads associated data for this controller. It is first time called from {@link ViewController#onViewLoaded()}.
      *
      * @return null
      */

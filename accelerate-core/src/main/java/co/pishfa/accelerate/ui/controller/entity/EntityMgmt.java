@@ -98,7 +98,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	}
 
 	@Override
-	protected void onViewLoaded() throws Exception {
+	public void onViewLoaded() throws Exception {
 		clean();
 		super.onViewLoaded();
 	}

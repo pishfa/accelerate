@@ -17,7 +17,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	private int maxRank;
 
 	@Override
-	protected void onViewLoaded() throws Exception {
+	public void onViewLoaded() throws Exception {
 		super.onViewLoaded();
 		maxRank = getEntityService().maxRank(getRankFilter());
 	}
