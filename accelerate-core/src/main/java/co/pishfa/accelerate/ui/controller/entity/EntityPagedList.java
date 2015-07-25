@@ -5,6 +5,8 @@ import co.pishfa.accelerate.persistence.query.QueryBuilder;
 import co.pishfa.accelerate.ui.UiAction;
 import co.pishfa.accelerate.ui.controller.Paginator;
 
+import java.util.List;
+
 /**
  * A controller that keeps a list of entities with filtering, pagination, and sorting capabilities.
  * 
@@ -53,6 +55,17 @@ public class EntityPagedList<T extends Entity<K>, K> extends EntityFilterableLis
 
 	public void setCount(Integer count) {
 		this.count = count;
+	}
+
+	protected List<T> findData(boolean withPagination) {
+		if(!withPagination) {
+			Object pageSize = removeOption(EntityControllerOption.PAGE_SIZE);
+			List<T> res = findData();
+			setOption(EntityControllerOption.PAGE_SIZE, pageSize);
+			return res;
+		} else {
+			return findData();
+		}
 	}
 
 	protected int findCount() {
