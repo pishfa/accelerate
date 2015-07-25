@@ -49,7 +49,7 @@ public class EntityFilterableList<T extends Entity<K>, K> extends EntityList<T, 
 		super.init();
 		filterMetadata = gettTypedFilterMetadata();
 		String viewAction = getViewAction();
-		if (!StrUtils.isEmpty(viewAction)) {
+		if (!StrUtils.isEmpty(viewAction) && hasOption(EntityControllerOption.SECURED)) {
 			viewPermission = getIdentity().findPermission(viewAction);
 			scopeHandler = getIdentity().getScopeHandler(viewPermission);
 		}
