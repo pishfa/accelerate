@@ -6,18 +6,13 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.ManyToOne;
-import javax.persistence.OneToOne;
 import javax.persistence.PreRemove;
 import javax.persistence.Table;
-import javax.persistence.Transient;
 
 import co.pishfa.accelerate.cdi.CdiUtils;
-import co.pishfa.accelerate.clone.CloneIgnore;
 import co.pishfa.accelerate.clone.CloneShallow;
 import co.pishfa.accelerate.content.entity.BaseContentEntity;
 import co.pishfa.accelerate.content.entity.ContentEntity;
-import co.pishfa.accelerate.i18n.model.MultiStringLong;
-import co.pishfa.accelerate.i18n.model.MultiStringLongProxy;
 import co.pishfa.accelerate.initializer.model.InitProperty;
 import co.pishfa.accelerate.storage.service.FileService;
 import co.pishfa.accelerate.utility.StrUtils;
@@ -40,25 +35,18 @@ public class File extends BaseContentEntity {
     @InitProperty("@parent?")
 	private Folder folder;
 
-	@OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-	private MultiStringLong description;
-
-	@Transient
-	@CloneIgnore
-	private final MultiStringLongProxy descriptionProxy = new MultiStringLongProxy("description", this);
+	private String description;
 
 	/**
 	 * Whether the file can live without its referencing item
 	 */
 	private boolean global = false;
 
-    private String filename;
-
-	public MultiStringLong getDescription() {
+	public String getDescription() {
 		return description;
 	}
 
-	public void setDescription(MultiStringLong description) {
+	public void setDescription(String description) {
 		this.description = description;
 	}
 
@@ -74,13 +62,6 @@ public class File extends BaseContentEntity {
 	 */
 	public boolean isEmpty() {
 		return StrUtils.isEmpty(getName());
-	}
-
-	/**
-	 * @return the descriptionProxy
-	 */
-	public MultiStringLongProxy getDescriptionProxy() {
-		return descriptionProxy;
 	}
 
 	public Folder getFolder() {
@@ -116,16 +97,8 @@ public class File extends BaseContentEntity {
 	public void setOriginalEntity(ContentEntity originalEntity) {
 	}
 
-    public String getFullPath() {
-        return new StringBuilder(getFolder().getStorage().getAddress()).append(getFolder().getPath()).append(getFilename())
-                .toString();
+    public String getPath() {
+        return new StringBuilder(getFolder().getPath()).append(getName()).toString();
     }
 
-    public String getFilename() {
-        return filename;
-    }
-
-    public void setFilename(String filename) {
-        this.filename = filename;
-    }
 }

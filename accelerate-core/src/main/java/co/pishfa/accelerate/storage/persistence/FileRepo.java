@@ -18,8 +18,8 @@ public class FileRepo extends BaseJpaRepo<File, Long> {
 		return CdiUtils.getInstance(FileRepo.class);
 	}
 
-    @QueryRunner(where = "e.filename = ?1 and e.folder = ?2")
-    public File findByFileNameAndFolder(String filename, Folder folder) {
+    @QueryRunner(where = "e.name = ?1 and e.folder = ?2")
+    public File findByNameAndFolder(String filename, Folder folder) {
         return null;
     }
 }

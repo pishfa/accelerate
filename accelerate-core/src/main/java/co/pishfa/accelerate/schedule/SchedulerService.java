@@ -108,18 +108,18 @@ public class SchedulerService {
      */
     public void schedule(String name, RescheduleType rescheduleType, String cron) throws SchedulerException {
         JobKey jobKey = new JobKey(name);
-        if (persistedScheduler.getJobDetail(jobKey) != null) {
+        if (getPersistedScheduler().getJobDetail(jobKey) != null) {
             if (rescheduleType == RescheduleType.SKIP)
                 return;
             if (rescheduleType == RescheduleType.DELETE_PREV)
-                persistedScheduler.deleteJob(jobKey);
+                getPersistedScheduler().deleteJob(jobKey);
         }
 
         JobBuilder jobBuilder = JobBuilder.newJob().ofType(EventFiringJob.class).usingJobData(OBSERVER_NAME, name);
         JobDetail jobDetail = rescheduleType==RescheduleType.NEW? jobBuilder.build() : jobBuilder.withIdentity(jobKey).build();
         Trigger trigger = TriggerBuilder.newTrigger().startNow()
                 .withSchedule(CronScheduleBuilder.cronSchedule(cron)).build();
-        persistedScheduler.scheduleJob(jobDetail, trigger);
+        getPersistedScheduler().scheduleJob(jobDetail, trigger);
     }
 
 }

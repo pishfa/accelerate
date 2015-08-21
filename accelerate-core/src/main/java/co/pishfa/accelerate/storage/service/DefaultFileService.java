@@ -7,12 +7,17 @@ import co.pishfa.accelerate.storage.model.*;
 import co.pishfa.accelerate.storage.persistence.FileRepo;
 import co.pishfa.accelerate.storage.persistence.FolderRepo;
 import co.pishfa.accelerate.storage.persistence.StorageRepo;
+import co.pishfa.accelerate.ui.UiUtils;
 import co.pishfa.accelerate.validation.AutoValidating;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.Validate;
 
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.validation.constraints.NotNull;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +31,11 @@ import java.util.Map;
 @Named("fileService")
 public class DefaultFileService implements FileService {
 
-	private final Map<Storage.StorageType, StorageManager> managers = new HashMap<>();
+	@Inject
+	@Any
+	Instance<StorageManager> storageManagers;
+
+	private final Map<String, StorageManager> managers = new HashMap<>();
 
     @Inject
     private FileRepo fileRepo;
@@ -41,12 +50,23 @@ public class DefaultFileService implements FileService {
 		return CdiUtils.getInstance(DefaultFileService.class);
 	}
 
-	public DefaultFileService() {
-		managers.put(Storage.StorageType.FILE_SYSTEM, new FileSystemStorageManager());
+	@PostConstruct
+	public void init() {
+		for(StorageManager storageManager : storageManagers) {
+			managers.put(storageManager.getName(), storageManager);
+		}
 	}
 
-	public StorageManager getManager(Storage.StorageType type) {
+	@Override
+	public StorageManager getManager(String type) {
 		return managers.get(type);
+	}
+
+	@Override
+	public File upload(@NotNull UploadedFile file, @NotNull Folder place) throws IOException {
+		File res = new File();
+		upload(res, file, place);
+		return res;
 	}
 
 	@Action
@@ -66,17 +86,15 @@ public class DefaultFileService implements FileService {
 	}
 
 	@Override
-	public void upload(MultiUploadedFile file, Folder place, MultiFile out) throws IOException {
-		upload(out.getEn(), file.getEn(), place);
-		upload(out.getFa(), file.getFa(), place);
-	}
-
-	@Override
 	public String getUrl(File file) {
 		if (isEmpty(file)) {
 			return null;
 		}
-		return managerOf(file).getUrl(file);
+		if ("downloader".equals(file.getFolder().getStorage().getUrl())) {
+			StringBuilder path = new StringBuilder(UiUtils.getRequest().getContextPath());
+			return path.append("/download.do?fileId=").append(file.getId()).toString();
+		} else
+			return managerOf(file).getUrl(file);
 	}
 
 	@Override
@@ -87,17 +105,18 @@ public class DefaultFileService implements FileService {
 	@Action
 	@Override
 	public java.io.File download(File file) {
-		return managerOf(file).getPhysicalFile(file);
+		return managerOf(file).download(file);
 	}
 
     @Override
-    public File findFile(String name) {
-        return fileRepo.findByName(name);
+    public File findFile(String fullPath) {
+		int fileIndex = fullPath.lastIndexOf("/");
+		return findFile(fullPath.substring(fileIndex + 1), findFolder(fullPath.substring(0, fileIndex)));
     }
 
     @Override
-    public File findFile(String filename, Folder folder) {
-        return fileRepo.findByFileNameAndFolder(filename, folder);
+    public File findFile(String name, Folder folder) {
+        return fileRepo.findByNameAndFolder(name, folder);
     }
 
     @Override
@@ -105,7 +124,13 @@ public class DefaultFileService implements FileService {
 		return folderRepo.findByStorageNameAndPath(storageName, path == null ? "/" : path);
 	}
 
-    @Override
+	@Override
+	public Folder findFolder(String fullPath) {
+		String[] parts = fullPath.split("://");
+		return findFolder(parts[0], parts.length>1?parts[1]:null);
+	}
+
+	@Override
     public Storage findStorage(String storageName) {
         return storageRepo.findByName(storageName);
     }
@@ -114,18 +139,21 @@ public class DefaultFileService implements FileService {
 	@Override
 	public void delete(File file) throws IOException {
 		managerOf(file).delete(file);
+		fileRepo.delete(file);
 	}
 
 	@Action
 	@Override
 	public void add(Folder folder) throws IOException {
 		managerOf(folder).add(folder);
+		folderRepo.add(folder);
 	}
 
 	@Action
 	@Override
 	public void delete(Folder folder) throws IOException {
 		managerOf(folder).delete(folder);
+		folderRepo.delete(folder);
 	}
 
 	protected StorageManager managerOf(File file) {

@@ -23,16 +23,13 @@ public class Storage extends BaseSecuredEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	public enum StorageType {
-		FILE_SYSTEM, SAMBA, JCR, DB;
-	};
-
 	private String address;
+
+	@Column(name = "url_col")
 	private String url;
 
-	@Enumerated(EnumType.ORDINAL)
-	@Column(name = "typeColumn")
-	private StorageType type;
+	@Column(name = "type_col")
+	private String type;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "storage")
 	private List<Folder> folders;
@@ -45,11 +42,11 @@ public class Storage extends BaseSecuredEntity {
 		this.address = address;
 	}
 
-	public StorageType getType() {
+	public String getType() {
 		return type;
 	}
 
-	public void setType(StorageType type) {
+	public void setType(String type) {
 		this.type = type;
 	}
 

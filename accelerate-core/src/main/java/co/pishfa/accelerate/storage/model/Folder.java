@@ -22,7 +22,7 @@ import java.util.List;
 @Entity
 @Table(name = "ac_folder")
 @InitEntity(properties = { @InitProperty(name = "storage", value = "@parent"),
-		@InitProperty(name = Initializer.ATTR_ANCHOR, value = "#{this.storage.name}:://#{this.path}") })
+		@InitProperty(name = Initializer.ATTR_ANCHOR, value = "#{this.storage.name}://#{this.path}") })
 public class Folder extends BaseHierarchicalEntity<Folder> {
 
 	private static final long serialVersionUID = 1L;
@@ -65,7 +65,7 @@ public class Folder extends BaseHierarchicalEntity<Folder> {
 	public void setParent(Folder parent) {
 		super.setParent(parent);
 		if (parent != null) {
-			this.path = parent.getPath() + getName() + "/";
+			this.path = parent.getPath() + getName() + '/';
 			this.storage = parent.getStorage();
 		}
 	}

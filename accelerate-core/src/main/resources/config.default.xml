@@ -4,7 +4,7 @@
 		<onlineUser updateInterval="300" />
 	</security>
     <admin>
-        <backup executorCommand = "C:\Program Files\PostgreSQL\9.3\bin\pg_dump.exe -a -U postgres -Fc -Z9 -f %file% sandoq"
+        <backup executorCommand = "C:\Program Files\PostgreSQL\9.3\bin\pg_dump.exe -a -d postgresql://postgres:root@127.0.0.1:5432/sandoq -Fc -Z9 -f #{file}"
                 deletePeriod="1000" storage="backup" schedule="0 0 11 1 * ?" />
     </admin>
 	<init incremental="false" />
@@ -15,10 +15,11 @@
 		</exceptions>
 	</ui>
     <report server="http://localhost:49295/viewer"/>
+	<!-- can be used in init.xml -->
 	<storages
 		upload="upload"
 		main="main"
 		reports="reports"
-        backup="c:\backup"
+        backup=""
 	/>
 </config>
