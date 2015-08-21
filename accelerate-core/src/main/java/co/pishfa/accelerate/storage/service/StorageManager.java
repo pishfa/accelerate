@@ -13,13 +13,15 @@ import java.io.IOException;
  * @author Taha Ghasemi
  * 
  */
-interface StorageManager {
+public interface StorageManager {
 
-	java.io.File upload(UploadedFile file, Folder place, File out) throws IOException;
+	String getName();
+
+	void upload(UploadedFile file, Folder place, File out) throws IOException;
 
 	String getUrl(File file);
 
-	java.io.File getPhysicalFile(File file);
+	java.io.File download(File file);
 
 	void delete(File file) throws IOException;
 

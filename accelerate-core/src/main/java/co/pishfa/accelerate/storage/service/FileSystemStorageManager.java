@@ -19,7 +19,12 @@ import java.io.IOException;
 public class FileSystemStorageManager implements StorageManager {
 
 	@Override
-	public java.io.File upload(UploadedFile file, Folder place, File out) throws IOException {
+	public String getName() {
+		return "filesystem";
+	}
+
+	@Override
+	public void upload(UploadedFile file, Folder place, File out) throws IOException {
 		String fileName = FileUtils.trimFilePath(file.getName());
 		java.io.File uniqueFile = FileUtils.uniqueFile(getPhysicalFile(place), fileName);
 
@@ -32,21 +37,14 @@ public class FileSystemStorageManager implements StorageManager {
 			fos.close();
 		}
 
-		out.setFilename(uniqueFile.getName());
-
-		return uniqueFile;
+		out.setName(uniqueFile.getName());
 	}
 
 	@Override
 	public String getUrl(File file) {
 		StringBuilder path = new StringBuilder(UiUtils.getRequest().getContextPath());
-
 		String address = file.getFolder().getStorage().getUrl();
-		if ("downloader".equals(address)) {
-			return path.append("/download.do?fileId=").append(file.getId()).toString();
-		} else {
-			return path.append(address).append(file.getFolder().getPath()).append(file.getFilename()).toString();
-		}
+		return path.append(address).append(file.getFolder().getPath()).append(file.getName()).toString();
 	}
 
 	/*
@@ -80,7 +78,7 @@ public class FileSystemStorageManager implements StorageManager {
 	 */
 
 	public String getPhysicalPath(File file) {
-		return file.getFullPath();
+		return new StringBuilder(file.getFolder().getStorage().getAddress()).append(file.getPath()).toString();
 	}
 
 	public String getPhysicalPath(Folder folder) {
@@ -92,13 +90,13 @@ public class FileSystemStorageManager implements StorageManager {
 	}
 
 	@Override
-	public java.io.File getPhysicalFile(File file) {
+	public java.io.File download(File file) {
 		return new java.io.File(getPhysicalPath(file));
 	}
 
 	@Override
 	public void delete(File file) throws IOException {
-		org.apache.commons.io.FileUtils.deleteQuietly(getPhysicalFile(file));
+		org.apache.commons.io.FileUtils.deleteQuietly(download(file));
 	}
 
 	@Override

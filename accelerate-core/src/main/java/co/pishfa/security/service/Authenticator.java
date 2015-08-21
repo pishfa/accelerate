@@ -57,6 +57,9 @@ public class Authenticator {
     @Inject
     private UiService uiService;
 
+	@Inject
+	private OnlineUserService onlineUserService;
+
 	@Transactional
 	public void authenticate(String username, String password) throws AuthenticationException {
 		User user = null;
@@ -73,7 +76,7 @@ public class Authenticator {
 			user = userRepo.findByName(username);
 			policy = user.getDomain().getSecurityPolicyInherited();
 			if (securityConfig.isSecurityEnabled()) {
-				checkAlowedToLogin(user, policy);
+				checkAllowedToLogin(user, policy);
 				if (!securityConfig.isSsoEnabled()
 						|| "true".equals(sessionContext.get(SecurityConstants.SESSION_LOCAL_LOGIN, String.class))) {
 					password = authenticationService.hashPassword(password);
@@ -124,12 +127,12 @@ public class Authenticator {
 		userLoggedInEvent.fire(new LoggedInEvent(user));
 	}
 
-	public void checkAlowedToLogin(User user, SecurityPolicy policy) {
+	public void checkAllowedToLogin(User user, SecurityPolicy policy) {
 		if (!user.isActive()) {
 			throw new AccountDisabledException();
 		}
 
-		if (policy.isPreventMultipleLogin() && OnlineUserService.getInstance().isOnline(user)) {
+		if (policy.isPreventMultipleLogin() && onlineUserService.isOnline(user)) {
 			throw new ReLoginException();
 		}
 

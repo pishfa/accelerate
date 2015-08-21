@@ -25,7 +25,6 @@ import java.util.List;
 public class FrameworkExtension implements Extension {
 
 	private static List<Class<?>> annotatedEntities = new ArrayList<>();
-	private static List<Class<?>> scopeHandlers = new ArrayList<>();
 
 	public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> pat) {
 		final AnnotatedType<T> annotatedType = pat.getAnnotatedType();
@@ -34,8 +33,6 @@ public class FrameworkExtension implements Extension {
 
 		if (javaClass.isAnnotationPresent(Entity.class) || javaClass.isAnnotationPresent(InitEntity.class)) {
 			annotatedEntities.add(javaClass);
-		} else if (javaClass.isAnnotationPresent(ScopeHandler.class)) {
-			scopeHandlers.add(javaClass);
 		}
 
 		if (javaClass.isAnnotationPresent(Veto.class) || (pkg != null && pkg.isAnnotationPresent(Veto.class))) {
@@ -50,10 +47,6 @@ public class FrameworkExtension implements Extension {
 	 */
 	public static List<Class<?>> getAnnotatedEntities() {
 		return annotatedEntities;
-	}
-
-	public static List<Class<?>> getScopeHandlers() {
-		return scopeHandlers;
 	}
 
 	public void afterBeanDiscovery(@Observes AfterBeanDiscovery event) throws Exception {

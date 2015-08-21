@@ -1,10 +1,6 @@
 package co.pishfa.security.service.handler;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Indicates that this class is responsible for scopes of certain name.
@@ -14,6 +10,7 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
+@Inherited
 @Target({ ElementType.TYPE })
 public @interface ScopeHandler {
 
