@@ -185,6 +185,8 @@ public class PageMetadataService {
 		return primaryController.getControllerObject();
 	}
 
+	@Produces
+	@ViewScoped
 	public PageMetadata getPageMetadata() {
 		String viewId = UiUtils.getViewId();
 		if (viewId != null) {

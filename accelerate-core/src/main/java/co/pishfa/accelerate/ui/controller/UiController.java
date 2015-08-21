@@ -36,12 +36,12 @@ public @interface UiController {
 	 * class name with the first letter lower cases and appended with ac:
 	 */
 	@Nonbinding
-	public String value() default "";
+	String value() default "";
 
 	/**
 	 * @return is this controller is the primary page controller.
 	 */
 	@Nonbinding
-	public boolean primary() default true;
+	boolean primary() default true;
 
 }

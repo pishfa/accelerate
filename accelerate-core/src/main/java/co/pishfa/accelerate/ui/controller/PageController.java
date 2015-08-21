@@ -3,6 +3,7 @@ package co.pishfa.accelerate.ui.controller;
 import co.pishfa.accelerate.cache.UiCached;
 import co.pishfa.accelerate.i18n.domain.Locale;
 import co.pishfa.accelerate.portal.entity.Page;
+import co.pishfa.accelerate.portal.service.PageMetadata;
 import co.pishfa.accelerate.portal.service.PageMetadataService;
 import co.pishfa.security.entity.authentication.Identity;
 
@@ -21,7 +22,7 @@ public class PageController extends ViewController {
 	private static final long serialVersionUID = 1L;
 
 	@Inject
-	private Page page;
+	private PageMetadata pageMetadata;
 
 	@Inject
 	private Identity identity;
@@ -36,8 +37,12 @@ public class PageController extends ViewController {
 		return getPage() != null ? getPage().getTitle() : null;
 	}
 
+	public PageMetadata getPageMetadata() {
+		return pageMetadata;
+	}
+
 	public Page getPage() {
-		return page;
+		return pageMetadata.getPage();
 	}
 
 	public Page getRootPage() {

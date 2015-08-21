@@ -9,6 +9,7 @@ import java.util.List;
 import javax.enterprise.inject.spi.Bean;
 
 import co.pishfa.accelerate.cdi.CdiUtils;
+import co.pishfa.accelerate.cdi.Veto;
 import co.pishfa.accelerate.portal.entity.Page;
 import co.pishfa.accelerate.reflection.ReflectionUtils;
 import co.pishfa.accelerate.ui.controller.ViewController;
@@ -22,6 +23,7 @@ import co.pishfa.accelerate.ui.phase.UiPhaseAction;
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
  * 
  */
+@Veto
 public class PageMetadata implements Serializable {
 
 	private static final long serialVersionUID = 1L;

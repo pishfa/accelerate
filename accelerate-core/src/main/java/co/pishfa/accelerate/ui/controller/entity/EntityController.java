@@ -182,6 +182,7 @@ public abstract class EntityController<T extends Entity<K>, K> extends PageContr
 
     /**
      * Returns the security action related to viewing of entities. It first tries to find it in the options, then to infer this from the current page
+     * (only if this controller is the primarly controller of this page)
      * and if no page info is available consults the entity service.
      *
      * @return the security action related to viewing of entities
@@ -190,9 +191,10 @@ public abstract class EntityController<T extends Entity<K>, K> extends PageContr
         String viewAction = (String) getOption(EntityControllerOption.VIEW_ACTION);
         if(viewAction != null)
             return viewAction;
-        /*if (getPage() != null && getPage().getViewAction() != null) {
+        if (getPage() != null && getPage().getViewAction() != null && getPageMetadata().getPrimaryController() != null
+                && this.getClass().isAssignableFrom(getPageMetadata().getPrimaryController().getControllerClass())) {
             return getPage().getViewAction();
-        }*/
+        }
         return getEntityService().getAction("view");
     }
 
