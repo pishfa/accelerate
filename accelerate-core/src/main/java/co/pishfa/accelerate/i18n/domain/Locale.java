@@ -5,7 +5,6 @@ package co.pishfa.accelerate.i18n.domain;
 
 import co.pishfa.accelerate.cdi.CdiUtils;
 import co.pishfa.accelerate.i18n.model.LocaleDate;
-import co.pishfa.accelerate.i18n.model.MultiString;
 import co.pishfa.accelerate.message.Messages;
 import co.pishfa.accelerate.utility.StrUtils;
 import co.pishfa.security.LoggedInEvent;
@@ -119,13 +118,6 @@ public class Locale implements Serializable {
 		lang = locale.getLanguage();
 		isRTL = localizer.isRTL();
 		this.timeZone = timeZone;
-	}
-
-	public String getValue(MultiString str) {
-		if (str == null) {
-			return null;
-		}
-		return str.getValue(lang);
 	}
 
 	public Localizer getLocalizer() {

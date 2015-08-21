@@ -22,6 +22,19 @@ public class UploadedFile {
 	private String name;
 	private String contentType;
 
+	public UploadedFile() {
+	}
+
+	public UploadedFile(String name, File file) {
+		this.name = name;
+		this.file = file;
+	}
+
+	public UploadedFile(String name, byte[] data) {
+		this.name = name;
+		this.data = data;
+	}
+
 	public byte[] getData() {
 		return data;
 	}

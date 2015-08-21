@@ -10,6 +10,8 @@ import co.pishfa.accelerate.message.Messages;
 import co.pishfa.accelerate.service.Service;
 
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.util.*;
@@ -29,6 +31,9 @@ public class LocalizationService implements Serializable {
 	private Map<Locale, Messages> messagesPerLocale;
 	private Map<Locale, Localizer> localizersPerLocale;
 
+	@Inject
+	private Instance<Localizer> localizersInstance;
+
 	public void onEvent(@Observes ConfigAppliedEvent event) {
 		Config config = event.getConfig();
 		Locale.setDefault(new Locale(config.getString("i18n.defaultLocale")));
@@ -43,7 +48,7 @@ public class LocalizationService implements Serializable {
 
 		List<Localizer> localizers = CdiUtils.getAllInstances(Localizer.class);
 		localizersPerLocale = new HashMap<>(localizers.size() * 2 + 1);
-		for (Localizer localizer : localizers) {
+		for (Localizer localizer : localizersInstance) {
 			localizersPerLocale.put(localizer.getLocale(), localizer);
 		}
 	}
