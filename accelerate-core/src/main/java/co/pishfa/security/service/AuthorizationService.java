@@ -24,6 +24,7 @@ import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import java.io.Serializable;
@@ -58,9 +59,6 @@ public class AuthorizationService implements Serializable {
 	@Inject
 	private ActionRepo actionRepo;
 
-	@Inject
-	private Instance<PermissionScopeHandler> scopeHandlersInstance;
-
 	private final BlockScopeHandler blockScopeHandler = new BlockScopeHandler();
 
     @Inject
@@ -90,13 +88,14 @@ public class AuthorizationService implements Serializable {
 
     @PostConstruct
 	public void init() {
-		for(PermissionScopeHandler scopeHandler : scopeHandlersInstance) {
-			ScopeHandler annotation = scopeHandler.getClass().getAnnotation(ScopeHandler.class);
-			if(annotation != null) {
-				String scope = annotation.value();
-				add(scope, scopeHandler);
+		for (Class<?> scopeHandlerClass : FrameworkExtension.getScopeHandlers()) {
+			String scope = scopeHandlerClass.getAnnotation(ScopeHandler.class).value();
+			try {
+				add(scope, (PermissionScopeHandler<?>) scopeHandlerClass.newInstance());
+			} catch (Exception e) {
+				log.error("",e);
 			}
-        }
+		}
         principalPermissions = cacheService.getCache("principalPermissions");
         for(Action action : actionRepo.findAll()) {
             actionsByName.put(action.getName(), action);
