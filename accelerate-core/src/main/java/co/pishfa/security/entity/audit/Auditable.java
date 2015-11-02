@@ -9,6 +9,6 @@ package co.pishfa.security.entity.audit;
  */
 public interface Auditable {
 
-	public void audit(Audit audit);
+	void audit(Audit audit);
 
 }

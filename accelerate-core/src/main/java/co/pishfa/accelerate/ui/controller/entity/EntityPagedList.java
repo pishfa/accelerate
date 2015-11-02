@@ -57,7 +57,7 @@ public class EntityPagedList<T extends Entity<K>, K> extends EntityFilterableLis
 		this.count = count;
 	}
 
-	protected List<T> findData(boolean withPagination) {
+	public List<T> findData(boolean withPagination) {
 		if(!withPagination) {
 			Object pageSize = removeOption(EntityControllerOption.PAGE_SIZE);
 			List<T> res = findData();
@@ -68,7 +68,7 @@ public class EntityPagedList<T extends Entity<K>, K> extends EntityFilterableLis
 		}
 	}
 
-	protected int findCount() {
+	public int findCount() {
 		if (hasOption(EntityControllerOption.PAGE_SIZE)) {
 			return getEntityService().count(getFilter());
 		} else {

@@ -8,8 +8,11 @@ import co.pishfa.accelerate.ui.controller.ViewController;
 import co.pishfa.accelerate.ui.param.RequiredParams;
 import co.pishfa.security.entity.authorization.SecuredEntity;
 import org.apache.commons.lang3.Validate;
+import org.primefaces.event.TreeDragDropEvent;
 import org.primefaces.model.DefaultTreeNode;
 import org.primefaces.model.TreeNode;
+
+import java.util.List;
 
 /**
  * Can be used to manage a tree of hierarchical entities.
@@ -45,6 +48,8 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         // required
         if (!NULL_KEY.equals(idParam)) {
             loadCurrent(getIdConverter().toObject(idParam));
+        } else {
+            reloadCurrent();
         }
     }
 
@@ -177,17 +182,26 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         }
 
         if(!isEditMode()) {
-            T parent = (T) getCurrentNode().getData();
-            if(parent != null) {
-                getCurrent().setParent(null); //to make it change
-                getEntityService().addChild(parent, getCurrent());
+            T parent = null;
+            if(getCurrentNode() != null) {
+                T currentNodeData = getData(getCurrentNode());
+                if(currentNodeData != null)
+                    parent = getEntityService().findById(currentNodeData.getId());
+                expandNode(getCurrentNode());
             }
-            setCurrent(saveEntity(getCurrent()));
-            expandNode(getCurrentNode());
-            addNode(getCurrent(), getCurrent().getParent(), getCurrentNode(), true);
+            if(parent != null) {
+                getEntityService().addChild(parent, getCurrent());
+            } else
+                getEntityService().setParent(null, getCurrent(), true);
+            setCurrent(saveEntity(getCurrent())); //assume cascading to parent
+            if(getCurrentNode() != null) { //propagate possible changes to parent (such as leaf)
+                setData(getCurrentNode(), getCurrent().getParent());
+            }
+            addNode(getCurrent(), getCurrent().getParent(), getCurrentNode(), true, null);
+            setCurrentNode(getCurrentNode());
         } else {
             setCurrent(saveEntity(getCurrent()));
-            ((DefaultTreeNode) getCurrentNode()).setData(getCurrent());
+            setData(getCurrentNode(), getCurrent());
         }
 
         if (getChildControllers() != null) {
@@ -197,6 +211,14 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
                 }
             }
         }
+    }
+
+    protected void setData(TreeNode node, T data) {
+        ((DefaultTreeNode) node).setData(data);
+    }
+
+    protected T getData(TreeNode node) {
+        return (T) node.getData();
     }
 
     /**
@@ -219,7 +241,11 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
             TreeNode parentNode = getCurrentNode().getParent();
             if(parentNode != null) {
                 parentNode.getChildren().remove(getCurrentNode());
+                if(parent != null) {
+                    setData(parentNode, getEntityService().edit(parent));
+                }
             }
+            setCurrentNode(parentNode);
         }
         return null;
     }
@@ -237,6 +263,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         if (hasOption(EntityControllerOption.DELETE)) {
             checkDeletePermission(entity);
             deleteEntity(entity);
+            entityNodes.remove(entity);
         }
         return null;
     }
@@ -294,5 +321,40 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         } else {
             return getActionTitle(getAction("add"), "ui.page.title.add");
         }
+    }
+
+    public void onDrop(TreeDragDropEvent event) {
+        TreeNode dragNode = event.getDragNode();
+        TreeNode dropNode = event.getDropNode();
+        int dropIndex = event.getDropIndex();
+
+        T source = getEntityService().findById(getData(dragNode).getId());
+        T oldParent = source.getParent();
+        T newParent = (T) dropNode.getData();
+        if(newParent != null)
+            newParent = getEntityService().findById(newParent.getId());
+
+        if(oldParent != null && oldParent != newParent) {
+            getEntityService().removeChild(oldParent, source);
+            setData(dragNode.getParent(), getEntityService().edit(oldParent));
+        }
+        if(newParent == null || !newParent.isLeaf()) {
+            //update rank using dropIndex
+            updateRank(newParent, dropIndex, source);
+        }
+
+        if(newParent != null && newParent != oldParent) {
+            getEntityService().addChild(newParent, source);
+        } else {
+            getEntityService().setParent(null, source, true);
+        }
+        source = getEntityService().edit(source); //assume the changes are propagated to parent too
+        setData(dragNode, source);
+        setCurrentNode(dragNode);
+        setData(dropNode, source.getParent());
+    }
+
+    protected void updateRank(T newParent, int dropIndex, T source) {
+
     }
 }

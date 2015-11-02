@@ -71,6 +71,9 @@ public interface EntityService<T extends Entity<K>, K> extends Serializable {
 
 	void delete(@NotNull T entity);
 
+	/**
+	 * The entity must be managed
+	 */
 	T refresh(@NotNull T entity);
 
 	T newEntity() throws Exception;

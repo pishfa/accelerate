@@ -22,7 +22,7 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
     private TreeNode currentNode;
     private TreeNode[] currentNodes;
     private T current;
-    private Map<T, DefaultTreeNode> entityNodes;
+    protected Map<T, DefaultTreeNode> entityNodes;
 
     public HierarchicalEntityView(Class<T> entityClass, Class<K> keyClass) {
         super(entityClass, keyClass);
@@ -40,26 +40,39 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
     public TreeNode getRootNode() {
         if(rootNode == null) {
             entityNodes = new HashMap<>();
-            rootNode = addNode(null, null, null, false);
-            Integer levels = (Integer) getOption(EntityControllerOption.LOCAL);
-            if(levels == null) {
-                List<T> roots = getEntityService().findRoots(getFilter());
-                for (T rootEntity : roots) {
-                    addNode(rootEntity, null, rootNode, true);
-                }
+            rootNode = createRootNode(); //required by primefaces (not shown)
+            boolean local = hasOption(EntityControllerOption.LOCAL);
+            if(!local) {
+                List<T> roots = findData(null);
+                if(roots != null)
+                    for (T rootEntity : roots) {
+                        addNode(rootEntity, null, rootNode, true, null);
+                    }
             } else {
-                List<T> list = getEntityService().findOrderByDepth(levels, getFilter());
-                addList(levels, list, rootNode);
+                List<T> list = findData(0);
+                if(list != null)
+                    addList(0, list, rootNode);
             }
         }
         return rootNode;
+    }
+
+    protected DefaultTreeNode createRootNode() {
+        return addNode(null, null, null, false, null);
+    }
+
+    protected List<T> findData(Integer levels) {
+        if(levels == null)
+            return getEntityService().findRoots(getFilter());
+        else
+            return getEntityService().findOrderByDepth(levels, getFilter());
     }
 
     private void addList(int levels, List<T> list, DefaultTreeNode rootNode) {
         for(T entity : list) {
             T parent = entity.getParent();
             DefaultTreeNode parentNode = parent == null? rootNode : entityNodes.get(parent);
-            addNode(entity, parent, parentNode, entity.getDepth() + 1 == levels);
+            addNode(entity, parent, parentNode, entity.getDepth() + 1 == levels, null);
         }
     }
 
@@ -73,14 +86,14 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
     }
 
     protected void expandNode(TreeNode node) {
-        if(!((T)node.getData()).isLeaf()) {
+        if(node != null && node.getData() != null && !((T)node.getData()).isLeaf()) {
             clearLazyState(node);
             node.setExpanded(true);
             if (node.getChildCount() == 0) {
                 T entity = (T) node.getData();
                 List<T> children = getEntityService().findDirectChildren(entity, getFilter());
                 for (T child : children) {
-                    TreeNode childNode = addNode(child, entity, node, true);
+                    TreeNode childNode = addNode(child, entity, node, true, null);
                 }
             }
         }
@@ -92,8 +105,13 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
         }
     }
 
-    protected DefaultTreeNode addNode(T entity, T parent, TreeNode parentNode, boolean addLazy) {
-        DefaultTreeNode node = new DefaultTreeNode(entity, parentNode);
+    protected DefaultTreeNode addNode(T entity, T parent, TreeNode parentNode, boolean addLazy, String type) {
+        DefaultTreeNode node = null;
+        if(type != null)
+            node = new DefaultTreeNode(type, entity, parentNode);
+        else
+            node = new DefaultTreeNode(entity, parentNode);
+
         if(addLazy && entity != null && !entity.isLeaf()) {
             new DefaultTreeNode(LOADING_TYPE, null, node);
         } else {

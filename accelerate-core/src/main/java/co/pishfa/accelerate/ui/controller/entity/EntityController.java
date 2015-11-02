@@ -2,11 +2,11 @@ package co.pishfa.accelerate.ui.controller.entity;
 
 import co.pishfa.accelerate.convert.Converter;
 import co.pishfa.accelerate.convert.ObjectConverter;
+import co.pishfa.accelerate.entity.common.Entity;
 import co.pishfa.accelerate.message.Messages;
 import co.pishfa.accelerate.message.UserMessages;
 import co.pishfa.accelerate.meta.domain.EntityMetadataService;
 import co.pishfa.accelerate.meta.entity.EntityMetadata;
-import co.pishfa.accelerate.entity.common.Entity;
 import co.pishfa.accelerate.reflection.ReflectionUtils;
 import co.pishfa.accelerate.service.EntityService;
 import co.pishfa.accelerate.ui.controller.PageController;
@@ -126,6 +126,8 @@ public abstract class EntityController<T extends Entity<K>, K> extends PageContr
             if(!"".equals(o.autoReload())) {
                 setOption(EntityControllerOption.AUTO_RELOAD, Boolean.parseBoolean(o.autoReload()));
             }
+            if(!"".equals(o.local()))
+                setOption(EntityControllerOption.LOCAL, Boolean.parseBoolean(o.local()));
         }
     }
 

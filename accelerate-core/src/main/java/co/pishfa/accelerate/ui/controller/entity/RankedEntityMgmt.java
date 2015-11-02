@@ -14,12 +14,21 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 
 	private static final long serialVersionUID = 1L;
 
-	private int maxRank;
+	private Integer maxRank;
 
-	@Override
-	public void onViewLoaded() throws Exception {
-		super.onViewLoaded();
-		maxRank = getEntityService().maxRank(getRankFilter());
+	public void setMaxRank(Integer maxRank) {
+		this.maxRank = maxRank;
+	}
+
+	public Integer getMaxRank() {
+		if(maxRank == null) {
+			maxRank = findMaxRank();
+		}
+		return maxRank;
+	}
+
+	protected int findMaxRank() {
+		return getEntityService().maxRank(getRankFilter());
 	}
 
 	@Override
@@ -44,7 +53,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	}
 
 	public boolean canDown(T entity) {
-		return canEdit(entity) && entity.getRank() < maxRank;
+		return canEdit(entity) && entity.getRank() < getMaxRank();
 	}
 
 	@UiAction
@@ -58,14 +67,14 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	@Override
 	protected T newEntity() {
 		T e = super.newEntity();
-		e.setRank(maxRank + 1);
+		e.setRank(getMaxRank() + 1);
 		return e;
 	}
 
 	@Override
 	protected T saveEntity(T entity) {
 		if (!getEditMode())
-			maxRank++;
+			maxRank = getMaxRank() + 1;
 		return super.saveEntity(entity);
 	}
 

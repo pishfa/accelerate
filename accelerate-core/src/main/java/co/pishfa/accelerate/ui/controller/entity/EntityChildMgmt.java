@@ -93,8 +93,7 @@ public abstract class EntityChildMgmt<T extends Entity<Long>, P extends Entity<L
     }
 
 	/**
-	 * @return the data associated to the passed parent. Null should not be returned. This method is called from
-	 *         {@link #findData()}.
+	 * @return the data associated to the passed parent. This method is called from {@link #findData()}.
 	 */
 	protected abstract List<T> findData(P parent);
 

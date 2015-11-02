@@ -19,6 +19,10 @@ public interface EntityMetadata<T extends Entity<K>,K> extends Entity<K> {
 
 	EntityRepository<T,K> getRepository();
 
+	/**
+	 * TODO: must be removed
+	 * @param repository
+	 */
 	void setRepository(EntityRepository<T,K> repository);
 
 	Class<T> getEntityClass();

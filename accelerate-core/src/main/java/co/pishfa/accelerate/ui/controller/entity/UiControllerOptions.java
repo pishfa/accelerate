@@ -33,7 +33,6 @@ public @interface UiControllerOptions {
     String sortOn() default "";
     String secured() default "";
     String autoReload() default "";
-
-
+    String preserveCurrent() default "";
 
 }

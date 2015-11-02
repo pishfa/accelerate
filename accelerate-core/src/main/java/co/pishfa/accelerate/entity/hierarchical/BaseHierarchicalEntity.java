@@ -36,7 +36,7 @@ public abstract class BaseHierarchicalEntity<T extends HierarchicalEntity<T,Long
 	@ManyToOne(fetch = FetchType.LAZY, cascade = { CascadeType.MERGE }, optional = true)
 	protected T parent;
 
-	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parent", orphanRemoval = true)
+	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "parent"/*, orphanRemoval = true*/)
 	protected List<T> children = new ArrayList<>();
 
 	@Override

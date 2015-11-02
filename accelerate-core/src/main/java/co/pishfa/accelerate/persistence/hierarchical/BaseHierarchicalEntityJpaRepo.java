@@ -129,7 +129,14 @@ public abstract class BaseHierarchicalEntityJpaRepo<T extends HierarchicalEntity
         } else {
             child.setDepth(0);
         }
-        //TODO cascade to children
+		if(cascadeToChildren) {
+			List<T> children = child.getChildren();
+			if (children != null) {
+				for (T c : children) {
+					setParent(child, c, true);
+				}
+			}
+		}
     }
 
 

@@ -34,8 +34,7 @@ public enum EntityControllerOption implements UiControllerOption {
      */
     ID,
     /**
-     * Integer or Boolean, In tree views, this indicates how many levels to be fetched lazily for others just a boolean indicates
-     * that the data is kept in controller locally.
+     * Boolean, indicates that the data must be kept in controller locally managed (avoid excessive load from db).
      */
 	LOCAL,
     /**
@@ -62,6 +61,10 @@ public enum EntityControllerOption implements UiControllerOption {
     /**
      * Boolean, if true, the current will be reattached upon every postback. The default is false.
      */
-    AUTO_RELOAD
+    AUTO_RELOAD,
+    /**
+     * Boolean, if true, the controller tries to keep the selected entity (current) as much as possible
+     */
+    PRESERVE_SELECTED
     ;
 }

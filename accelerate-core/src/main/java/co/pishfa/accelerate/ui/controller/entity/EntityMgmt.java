@@ -31,6 +31,8 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 
 	private Boolean editMode;
 
+	private T prevCurrent;
+
 	public EntityMgmt(Class<T> entityClass, Class<K> keyClass) {
 		super(entityClass, keyClass);
 	}
@@ -46,6 +48,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
         setOption(EntityControllerOption.EDIT, true);
         setOption(EntityControllerOption.DELETE, true);
         setOption(EntityControllerOption.ID, ID_PARAM_NAME);
+		setOption(EntityControllerOption.PRESERVE_SELECTED, true);
 	}
 
 	protected void loadCurrent() {
@@ -106,7 +109,10 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@Override
 	public String load() {
 		setEditMode(null);
-		return super.load();
+		super.load();
+		if(hasOption(EntityControllerOption.PRESERVE_SELECTED))
+			setCurrent(prevCurrent);
+		return null;
 	}
 
 	/**
@@ -118,6 +124,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	public String add() {
 		if (hasOption(EntityControllerOption.ADD)) {
 			setEditMode(false);
+			prevCurrent = getCurrent();
             newCurrent();
             checkAddPermission(getCurrent());
             addEdit();
@@ -149,6 +156,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 			setEditMode(true);
 			loadCurrent();
             checkEditPermission(getCurrent());
+			prevCurrent = getCurrent();
             addEdit();
 		}
 		return null;
@@ -160,6 +168,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
      */
     public void edit(T entity) {
         setCurrent(entity);
+		prevCurrent = getCurrent();
         setEditMode(true);
         addEdit();
     }
@@ -230,6 +239,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 			}
 		}
 		setCurrent(saveEntity(getCurrent()));
+		prevCurrent = getCurrent();
 		if (getChildControllers() != null) {
 			for (ViewController controller : getChildControllers()) {
 				if (controller instanceof EntityChildMgmt) {
@@ -271,6 +281,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 		if (hasOption(EntityControllerOption.DELETE)) {
             checkDeletePermission(entity);
 			deleteEntity(entity);
+			prevCurrent = null;
 			load();
 		}
 		return null;
@@ -284,7 +295,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@UiAction
 	public String cancel() {
 		setEditMode(null);
-		setCurrent(null);
+		setCurrent(hasOption(EntityControllerOption.PRESERVE_SELECTED)?prevCurrent:null);
 		setCurrents(null);
 		return null;
 	}
