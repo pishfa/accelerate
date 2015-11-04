@@ -224,16 +224,14 @@ public class AuthorizationService implements Serializable {
 
 	protected void addDomainPermissions(Domain domain, Map<String, Permission> result) {
 		if (domain != null) {
-			Map<String, Permission> cachedResult = principalPermissions.getIfPresent(domain);
-			if (cachedResult != null) {
-				result.putAll(cachedResult);
-				return;
+			Map<String, Permission> local = principalPermissions.getIfPresent(domain);
+			if (local != null) {
+				local = new HashMap<>();
+				addDomainPermissions(domain.getParent(), local); // parent takes precedence
+				addPrincipalPermissions(domain, local);
+				principalPermissions.put(domain, local);
 			}
-			addDomainPermissions(domain.getParent(), result); // parent
-																			// takes
-																			// precedence
-			addPrincipalPermissions(domain, result);
-			principalPermissions.put(domain, result);
+			result.putAll(local);
 		}
 	}
 

@@ -21,6 +21,6 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
  */
 public @interface Scheduled {
 
-	public String value();
+	String value();
 
 }

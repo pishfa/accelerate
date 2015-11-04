@@ -29,7 +29,7 @@ public class CustomPermissionHandler implements PermissionScopeHandler<Entity<Lo
 	public void addConditions(Identity identity, Permission permission, QueryBuilder<Entity<Long>> query) {
 		List<Long> targetIds = PermissionParamRepo.getInstance().findTargetIds(permission);
 		if (!targetIds.isEmpty()) {
-			query.and("e.id in (:entities_id)").with("entities_id", targetIds);
+			query.and("e.id in :entities_id").with("entities_id", targetIds);
 		} else {
 			query.and("1<>1");
 		}
