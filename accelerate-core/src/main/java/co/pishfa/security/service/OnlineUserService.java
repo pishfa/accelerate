@@ -141,7 +141,12 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 	public void applyDelayedCommands() {
 		synchronized (toBeRemoved) {
 			if (!toBeRemoved.isEmpty()) {
-				onlineUserRepo.delete(toBeRemoved);
+				for(Long id : toBeRemoved) {
+					try {
+						OnlineUser ou = findById(id);
+						onlineUserRepo.delete(ou);
+					} catch(Exception e) {}
+				}
 				toBeRemoved.clear();
 			}
 		}
@@ -158,6 +163,8 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 	@Action
 	public void invalidate(@NotNull OnlineUser onlineUser) {
 		onlineUser.getSession().invalidate();
+		onlineUser.setSessionId(null);
+		delete(onlineUser);
 	}
 
 }

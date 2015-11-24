@@ -9,6 +9,7 @@ import co.pishfa.security.entity.authentication.User;
 
 /**
  * @author Taha Ghasemi
+ * TODO runas can not be mixed with @Async since there is no session context there
  * 
  */
 public abstract class RunAsWork {

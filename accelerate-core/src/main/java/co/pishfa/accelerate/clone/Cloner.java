@@ -49,7 +49,7 @@ import com.rits.cloning.Immutable;
  * 
  *         18 Sep 2008
  */
-public class Cloner extends com.rits.cloning.Cloner {
+public class Cloner /*extends com.rits.cloning.Cloner*/ {
 	// TAHA private final Objenesis objenesis;
 	private final Set<Class<?>> ignored = new HashSet<Class<?>>();
 	private final Set<Class<?>> nullInstead = new HashSet<Class<?>>();
@@ -61,7 +61,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	private boolean nullTransient = false;
 	private boolean cloneSynthetics = true;
 
-	@Override
+	
 	public boolean isNullTransient() {
 		return nullTransient;
 	}
@@ -74,12 +74,12 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param nullTransient
 	 *            true for transient fields to be nulled
 	 */
-	@Override
+	
 	public void setNullTransient(final boolean nullTransient) {
 		this.nullTransient = nullTransient;
 	}
 
-	@Override
+	
 	public void setCloneSynthetics(final boolean cloneSynthetics) {
 		this.cloneSynthetics = cloneSynthetics;
 	}
@@ -98,7 +98,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	/**
 	 * registers a std set of fast cloners.
 	 */
-	@Override
+	
 	protected void registerFastCloners() {
 		fastCloners.put(GregorianCalendar.class, new FastClonerCalendar());
 		fastCloners.put(ArrayList.class, new FastClonerArrayList());
@@ -109,13 +109,13 @@ public class Cloner extends com.rits.cloning.Cloner {
 		fastCloners.put(ConcurrentHashMap.class, new FastClonerConcurrentHashMap());
 	}
 
-	@Override
+	
 	protected Object fastClone(final Object o, final Map<Object, Object> clones) throws IllegalAccessException {
 		final Class<? extends Object> c = o.getClass();
 		final IFastCloner fastCloner = fastCloners.get(c);
-		if (fastCloner != null) {
+		/*if (fastCloner != null) {
 			return fastCloner.clone(o, this, clones);
-		}
+		}*/
 		return null;
 	}
 
@@ -124,12 +124,12 @@ public class Cloner extends com.rits.cloning.Cloner {
 		init();
 	}
 
-	@Override
+	
 	public void registerConstant(final Object o) {
 		ignoredInstances.put(o, true);
 	}
 
-	@Override
+	
 	public void registerConstant(final Class<?> c, final String privateFieldName) {
 		try {
 			final Field field = c.getDeclaredField(privateFieldName);
@@ -150,7 +150,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	/**
 	 * registers some known JDK immutable classes. Override this to register your own list of jdk's immutable classes
 	 */
-	@Override
+	
 	protected void registerKnownJdkImmutableClasses() {
 		registerImmutable(String.class);
 		registerImmutable(Integer.class);
@@ -172,7 +172,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 		registerImmutable(Pattern.class);
 	}
 
-	@Override
+	
 	protected void registerKnownConstants() {
 		// registering known constants of the jdk.
 		registerStaticFields(TreeSet.class, HashSet.class, HashMap.class, TreeMap.class);
@@ -187,7 +187,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param classes
 	 *            array of classes
 	 */
-	@Override
+	
 	public void registerStaticFields(final Class<?>... classes) {
 		for (final Class<?> c : classes) {
 			final List<Field> fields = allFields(c);
@@ -207,7 +207,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param set
 	 *            a set of classes which will be scanned for static fields
 	 */
-	@Override
+	
 	public void setExtraStaticFields(final Set<Class<?>> set) {
 		registerStaticFields((Class<?>[]) set.toArray());
 	}
@@ -219,7 +219,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 *            The class that shouldn't be cloned. That is, whenever a deep clone for an object is created and c is encountered, the
 	 *            object instance of c will be added to the clone.
 	 */
-	@Override
+	
 	public void dontClone(final Class<?>... c) {
 		for (final Class<?> cl : c) {
 			ignored.add(cl);
@@ -232,7 +232,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param c
 	 *            the classes to nullify during cloning
 	 */
-	@Override
+	
 	public void nullInsteadOfClone(final Class<?>... c) {
 		for (final Class<?> cl : c) {
 			nullInstead.add(cl);
@@ -242,7 +242,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	/**
 	 * spring framework friendly version of nullInsteadOfClone
 	 */
-	@Override
+	
 	public void setExtraNullInsteadOfClone(final Set<Class<?>> set) {
 		nullInstead.addAll(set);
 	}
@@ -253,7 +253,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param c
 	 *            the immutable class
 	 */
-	@Override
+	
 	public void registerImmutable(final Class<?>... c) {
 		for (final Class<?> cl : c) {
 			ignored.add(cl);
@@ -263,12 +263,12 @@ public class Cloner extends com.rits.cloning.Cloner {
 	/**
 	 * spring framework friendly version of registerImmutable
 	 */
-	@Override
+	
 	public void setExtraImmutables(final Set<Class<?>> set) {
 		ignored.addAll(set);
 	}
 
-	@Override
+	
 	public void registerFastCloner(final Class<?> c, final IFastCloner fastCloner) {
 		if (fastCloners.containsKey(c)) {
 			throw new IllegalArgumentException(c + " already fast-cloned!");
@@ -285,7 +285,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 *            the class
 	 * @return a new instance of c
 	 */
-	@Override
+	
 	public <T> T newInstance(final Class<T> c) {
 		// Taha: prefer to call constructors
 		try {
@@ -299,7 +299,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 		// return (T) objenesis.newInstance(c);
 	}
 
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public <T> T fastCloneOrNewInstance(final Class<T> c) {
 		try {
@@ -323,7 +323,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 *            the object to be deep-cloned
 	 * @return a deep-clone of "o".
 	 */
-	@Override
+	
 	public <T> T deepClone(final T o) {
 		if (o == null) {
 			return null;
@@ -342,7 +342,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 		}
 	}
 
-	@Override
+	
 	public <T> T deepCloneDontCloneInstances(final T o, final Object... dontCloneThese) {
 		if (o == null) {
 			return null;
@@ -373,7 +373,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 *            the object to be shallow-cloned
 	 * @return a shallow clone of "o"
 	 */
-	@Override
+	
 	public <T> T shallowClone(final T o) {
 		if (o == null) {
 			return null;
@@ -421,7 +421,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	/**
 	 * PLEASE DONT CALL THIS METHOD The only reason for been public is because custom IFastCloner's must invoke it
 	 */
-	@Override
+	
 	@SuppressWarnings("unchecked")
 	public <T> T cloneInternal(T o, final Map<Object, Object> clones) throws IllegalAccessException {
 		if (o == null) {
@@ -540,7 +540,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param dest
 	 *            the destination object which must contain as minimul all the fields of src
 	 */
-	@Override
+	
 	public <T, E extends T> void copyPropertiesOfInheritedClass(final T src, final E dest) {
 		if (src == null) {
 			throw new IllegalArgumentException("src can't be null");
@@ -608,7 +608,7 @@ public class Cloner extends com.rits.cloning.Cloner {
 		return l;
 	}
 
-	@Override
+	
 	public boolean isDumpClonedClasses() {
 		return dumpClonedClasses;
 	}
@@ -619,17 +619,17 @@ public class Cloner extends com.rits.cloning.Cloner {
 	 * @param dumpClonedClasses
 	 *            true to enable printing all cloned classes
 	 */
-	@Override
+	
 	public void setDumpClonedClasses(final boolean dumpClonedClasses) {
 		this.dumpClonedClasses = dumpClonedClasses;
 	}
 
-	@Override
+	
 	public boolean isCloningEnabled() {
 		return cloningEnabled;
 	}
 
-	@Override
+	
 	public void setCloningEnabled(final boolean cloningEnabled) {
 		this.cloningEnabled = cloningEnabled;
 	}

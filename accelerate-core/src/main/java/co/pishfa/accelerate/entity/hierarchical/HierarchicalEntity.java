@@ -32,7 +32,7 @@ public interface HierarchicalEntity<T extends HierarchicalEntity<T,K>,K> extends
 	 * 
 	 * @param depth
 	 */
-	public void setDepth(int depth);
+	void setDepth(int depth);
 
 	boolean isLeaf();
 

@@ -189,4 +189,10 @@ public class EntityPagedList<T extends Entity<K>, K> extends EntityFilterableLis
 		return gotoPage(1);
 	}
 
+	@Override
+	protected void deleteEntity(T entity) {
+		super.deleteEntity(entity);
+		if(getData().size()==1 && getCurrentPage() > 1)
+			setCurrentPage(getCurrentPage()-1);
+	}
 }

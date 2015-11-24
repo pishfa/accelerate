@@ -1,6 +1,7 @@
 package co.pishfa.security.service;
 
 import co.pishfa.accelerate.cache.Cache;
+import co.pishfa.accelerate.cache.CacheKey;
 import co.pishfa.accelerate.cache.CacheService;
 import co.pishfa.accelerate.cache.NamedCached;
 import co.pishfa.accelerate.cdi.CdiUtils;
@@ -225,7 +226,7 @@ public class AuthorizationService implements Serializable {
 	protected void addDomainPermissions(Domain domain, Map<String, Permission> result) {
 		if (domain != null) {
 			Map<String, Permission> local = principalPermissions.getIfPresent(domain);
-			if (local != null) {
+			if (local == null) {
 				local = new HashMap<>();
 				addDomainPermissions(domain.getParent(), local); // parent takes precedence
 				addPrincipalPermissions(domain, local);
@@ -361,12 +362,18 @@ public class AuthorizationService implements Serializable {
         return action;
     }
 
-    public void invalidatePrincipalPermissions(Principal principal) {
-        Cache permCache = cacheService.getCache("userImpliedPermissions");
-        permCache.removeAll();
-        Cache roleCache = cacheService.getCache("userImpliedRoles");
-        roleCache.removeAll();
-        principalPermissions.removeAll();
+    public void invalidateUserPermissions(User user) {
+		CacheKey key = new CacheKey(new Object[]{user});
+		cacheService.getCache("userImpliedPermissions").remove(key);
+        cacheService.getCache("userImpliedRoles").remove(key);
     }
+
+	public void invalidateAllPermissions() {
+		Cache permCache = cacheService.getCache("userImpliedPermissions");
+		permCache.removeAll();
+		Cache roleCache = cacheService.getCache("userImpliedRoles");
+		roleCache.removeAll();
+		principalPermissions.removeAll();
+	}
 
 }

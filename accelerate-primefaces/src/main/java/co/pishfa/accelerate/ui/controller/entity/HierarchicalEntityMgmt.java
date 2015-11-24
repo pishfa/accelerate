@@ -197,8 +197,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
             if(getCurrentNode() != null) { //propagate possible changes to parent (such as leaf)
                 setData(getCurrentNode(), getCurrent().getParent());
             }
-            addNode(getCurrent(), getCurrent().getParent(), getCurrentNode(), true, null);
-            setCurrentNode(getCurrentNode());
+            setCurrentNode(addNode(getCurrent(), getCurrent().getParent(), getCurrentNode(), true, null));
         } else {
             setCurrent(saveEntity(getCurrent()));
             setData(getCurrentNode(), getCurrent());

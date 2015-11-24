@@ -5,6 +5,7 @@ import co.pishfa.accelerate.persistence.repository.BaseJpaRepo;
 import co.pishfa.accelerate.persistence.repository.Repository;
 import co.pishfa.security.entity.authentication.Principal;
 import co.pishfa.security.entity.authorization.RoleAssignment;
+import org.apache.deltaspike.jpa.api.transaction.Transactional;
 
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class RoleAssignmentRepo extends BaseJpaRepo<RoleAssignment, Long> {
 				.setParameter(1, principal.getId()).setParameter(2, principal.getMetadata()).getResultList();
 	}
 
+	@Transactional
 	public void deleteByPrincipal(Principal principal) {
 		getEntityManager().createQuery("delete from RoleAssignment e where e.principalId = ?1 and e.principalType = ?2")
 				.setParameter(1, principal.getId()).setParameter(2, principal.getType()).executeUpdate();

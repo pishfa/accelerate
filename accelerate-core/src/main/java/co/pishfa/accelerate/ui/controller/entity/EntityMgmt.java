@@ -263,6 +263,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
                 checkDeletePermission(selected);
 				deleteEntity(selected);
 			}
+			prevCurrent = null;
 			load();
 		}
 		return null;
@@ -337,4 +338,11 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 		}
 	}
 
+	public T getPrevCurrent() {
+		return prevCurrent;
+	}
+
+	public void setPrevCurrent(T prevCurrent) {
+		this.prevCurrent = prevCurrent;
+	}
 }

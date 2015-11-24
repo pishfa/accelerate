@@ -4,9 +4,10 @@ import co.pishfa.accelerate.persistence.filter.Filter;
 import co.pishfa.accelerate.service.RankedEntityService;
 import co.pishfa.accelerate.entity.common.RankedEntity;
 import co.pishfa.accelerate.ui.UiAction;
+import co.pishfa.accelerate.ui.UiMessage;
 
 /**
- * 
+ * Keeps continues ranks
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
  * 
  */
@@ -15,6 +16,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	private static final long serialVersionUID = 1L;
 
 	private Integer maxRank;
+	private Integer prevRank; //keep track of rank change
 
 	public void setMaxRank(Integer maxRank) {
 		this.maxRank = maxRank;
@@ -41,15 +43,21 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	}
 
 	public boolean canUp(T entity) {
-		return canEdit(entity) && entity.getRank() > 1;
+		return canEdit(entity) && entity.getRank() > 1; //1 must be replaced by minRank
 	}
 
 	@UiAction
 	public String up() {
-		T current = getEntityService().setRank(getRankFilter(), getCurrent(), getCurrent().getRank() - 1);
+		if(getData().get(0) == getCurrent()) {
+			setCurrentPage(getCurrentPage()-1);
+		}
+		setPrevCurrent(upEntity(getCurrent()));
 		load();
-		setCurrent(current);
 		return null;
+	}
+
+	protected T upEntity(T entity) {
+		return getEntityService().setRank(getRankFilter(), entity, entity.getRank() - 1);
 	}
 
 	public boolean canDown(T entity) {
@@ -58,10 +66,23 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 
 	@UiAction
 	public String down() {
-		T current = getEntityService().setRank(getRankFilter(), getCurrent(), getCurrent().getRank() + 1);
+		if(getData().get(getPageSize()-1) == getCurrent()) {
+			setCurrentPage(getCurrentPage()+1);
+		}
+		setPrevCurrent(downEntity(getCurrent()));
 		load();
-		setCurrent(current);
 		return null;
+	}
+
+	protected T downEntity(T entity) {
+		return getEntityService().setRank(getRankFilter(), entity, entity.getRank() + 1);
+	}
+
+	@Override
+	protected void deleteEntity(T entity) {
+		super.deleteEntity(entity);
+		getEntityService().decrement(getRankFilter(), entity.getRank());
+		maxRank = getMaxRank() - 1;
 	}
 
 	@Override
@@ -72,9 +93,35 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	}
 
 	@Override
+	protected void addEdit() {
+		super.addEdit();
+		prevRank = getCurrent().getRank();
+	}
+
+	@Override
+	@UiAction
+	@UiMessage
+	public String save() throws Exception {
+		String res = super.save();
+		if(getCurrent() != null)
+			setCurrentPage(1 + (getCurrent().getRank()-1) / getPageSize());
+		return res;
+	}
+
+	@Override
 	protected T saveEntity(T entity) {
-		if (!getEditMode())
+		if (!getEditMode()) {
 			maxRank = getMaxRank() + 1;
+			if(entity.getRank() != prevRank) {
+				getEntityService().increment(getRankFilter(), entity.getRank());
+			}
+		} else {
+			if(entity.getRank() > prevRank) {
+				getEntityService().decrement(getRankFilter(), prevRank + 1, entity.getRank() + 1);
+			} else if(entity.getRank() < prevRank) {
+				getEntityService().increment(getRankFilter(), entity.getRank(), prevRank);
+			}
+		}
 		return super.saveEntity(entity);
 	}
 

@@ -17,14 +17,15 @@ import java.lang.annotation.*;
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Documented
 @InterceptorBinding
+@Inherited
 public @interface RunAs {
 
 	@Nonbinding
-	public String username() default "";
+	String username() default "";
 
 	@Nonbinding
-	public boolean systemMode() default true;
+	boolean systemMode() default true;
 
 	@Nonbinding
-	public String actionName() default "";
+	String actionName() default "";
 }

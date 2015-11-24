@@ -53,7 +53,7 @@ public class File extends BaseContentEntity {
 	@PreRemove
 	public void preRemove() throws IOException {
 		if (!global) {
-			CdiUtils.getInstance(FileService.class).delete(this);
+			CdiUtils.getInstance(FileService.class).getManager(getFolder().getStorage().getType()).delete(this);
 		}
 	}
 

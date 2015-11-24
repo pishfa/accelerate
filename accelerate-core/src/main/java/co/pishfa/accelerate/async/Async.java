@@ -17,17 +17,20 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ ElementType.METHOD, ElementType.TYPE })
 @Documented
+@Inherited
 @InterceptorBinding
 public @interface Async {
 
-    public long delay() default 0;
+    @Nonbinding
+    long delay() default 0;
 
-    public long interval() default 0;
+    @Nonbinding
+    long interval() default 0;
 
     /**
      * @return Specifies if a job with the same name exists, how scheduler behave, default is to create a new job.
      */
     @Nonbinding
-    public RescheduleType reschedule() default RescheduleType.NEW;
+    RescheduleType reschedule() default RescheduleType.NEW;
 
 }

@@ -3,6 +3,7 @@
  */
 package co.pishfa.accelerate.schedule;
 
+import co.pishfa.accelerate.async.AsyncInterceptor;
 import co.pishfa.accelerate.async.RescheduleType;
 import co.pishfa.accelerate.cdi.CdiUtils;
 import co.pishfa.accelerate.core.FrameworkShutdownEvent;
@@ -10,12 +11,15 @@ import co.pishfa.accelerate.core.FrameworkStartedEvent;
 import co.pishfa.accelerate.persistence.DbService;
 import co.pishfa.accelerate.resource.ResourceUtils;
 import co.pishfa.accelerate.service.Service;
+import org.apache.deltaspike.cdise.api.ContextControl;
 import org.quartz.*;
 import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Produces;
@@ -36,7 +40,17 @@ public class SchedulerService {
 
         @Override
         public void execute(JobExecutionContext context) throws JobExecutionException {
-            CdiUtils.getBeanManager().fireEvent(new ScheduleTrigger(), new ScheduledLiteral((String) context.get(OBSERVER_NAME)));
+            ContextControl contextControl = CdiUtils.getInstance(ContextControl.class);
+            try {
+                contextControl.startContext(SessionScoped.class);
+                contextControl.startContext(RequestScoped.class);
+                CdiUtils.getBeanManager().fireEvent(new ScheduleTrigger(), new ScheduledLiteral((String) context.getMergedJobDataMap().get(OBSERVER_NAME)));
+            } catch (Exception e) {
+                throw new JobExecutionException(e);
+            } finally {
+                contextControl.stopContext(RequestScoped.class);
+                contextControl.stopContext(SessionScoped.class);
+            }
         }
     }
 
@@ -73,15 +87,13 @@ public class SchedulerService {
     }
 
     public void startup(@Observes FrameworkStartedEvent event) throws SchedulerException {
-        if (inMemoryScheduler != null)
-            inMemoryScheduler.start();
+        getInMemoryScheduler().start();
         if (persistedScheduler != null)
             persistedScheduler.start();
     }
 
     public void shutdown(@Observes final FrameworkShutdownEvent event) throws SchedulerException {
-        if (inMemoryScheduler != null)
-            inMemoryScheduler.shutdown();
+        inMemoryScheduler.shutdown();
         if (persistedScheduler != null)
             persistedScheduler.shutdown();
     }

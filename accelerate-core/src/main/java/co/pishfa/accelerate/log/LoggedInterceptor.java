@@ -8,6 +8,8 @@ import java.io.Serializable;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,15 +37,28 @@ public class LoggedInterceptor implements Serializable {
 		} else {
 			logger = log;
 		}
-		if (logger.isDebugEnabled()) {
-			long start = System.currentTimeMillis();
-			logger.debug("Entering method " + ic.getMethod().getName());
-			Object result = ic.proceed();
-			logger.debug("Exiting method " + ic.getMethod().getName() + ". Time: "
-					+ (System.currentTimeMillis() - start));
-			return result;
-		} else {
-			return ic.proceed();
+
+		try {
+			if (logger.isDebugEnabled()) {
+				long start = System.currentTimeMillis();
+				logger.debug("Entering method " + ic.getMethod().getName());
+				Object result = ic.proceed();
+				logger.debug("Exiting method " + ic.getMethod().getName() + ". Time: "
+						+ (System.currentTimeMillis() - start));
+				return result;
+			} else {
+				return ic.proceed();
+			}
+		} catch (ConstraintViolationException e) {
+			StringBuilder message = new StringBuilder("ConstraintViolationException: ");
+			for(ConstraintViolation v : e.getConstraintViolations()) {
+				message.append(v.getRootBeanClass()).append(".").append(".").append(v.getPropertyPath())
+						.append("(").append(v.getRootBean()).append(v.getLeafBean()).append("<-").append(v.getInvalidValue()).append(")")
+						.append(" ").append(v.getMessage())
+						.append("\n");
+			}
+			logger.error(message.toString());
+			throw e;
 		}
 	}
 

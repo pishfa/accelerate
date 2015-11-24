@@ -19,6 +19,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.jpa.api.transaction.Transactional;
 import org.quartz.SchedulerException;
+import org.slf4j.Logger;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
@@ -38,6 +39,9 @@ import static co.pishfa.accelerate.utility.TimeUtils.*;
  */
 @Service
 public class BackupService extends BaseEntityService<Backup, Long> {
+
+    @Inject
+    private Logger log;
 
     public static BackupService getInstance() {
         return CdiUtils.getInstance(BackupService.class);
@@ -86,6 +90,10 @@ public class BackupService extends BaseEntityService<Backup, Long> {
     @RunAs
     @Transactional
     public void performBackup(Backup backup) {
+        for(Backup b : backupRepository.findOlderThan(toDate(since(toMilliSecond(backupConfig.getDeletePeriod(),
+                TimeUnit.DAYS))))) {
+            backupRepository.delete(b);
+        }
         backup = backupRepository.findById(backup.getId()); //obtain the last version
         int status = -1;
         try {
@@ -93,16 +101,21 @@ public class BackupService extends BaseEntityService<Backup, Long> {
             Map<String, Object> params = new HashMap<>();
             params.put("file", temp.getAbsolutePath());
             String command = expressionInterpolator.populate(backupConfig.getExecutorCommand(), params);
-            Process process = Runtime.getRuntime().exec(command);
-            getLogger().warn(IOUtils.toString(process.getErrorStream()));
-            status = process.waitFor();
+            log.info("Backingup: " + command);
+            Process process = new ProcessBuilder(command.split("###"))
+                            .redirectErrorStream(true)
+                            .start();
+            log.info(IOUtils.toString(process.getInputStream()));
+            if(process.waitFor(1, TimeUnit.HOURS))
+                status = process.exitValue();
 
-            String fileName = "backup_" + System.currentTimeMillis();
-            Folder out = fileService.findFolder(backupConfig.getStorage());
-            backup.setFile(fileService.upload(new UploadedFile(fileName, temp), out));
+            if(status == 0) {
+                String fileName = "backup_" + System.currentTimeMillis();
+                Folder out = fileService.findFolder(backupConfig.getStorage());
+                backup.setFile(fileService.upload(new UploadedFile(fileName, temp), out));
+            }
         } catch (Exception e) {
             getLogger().error("", e);
-            status = -1;
         }
         backup.setStatus(status == 0 ? Backup.BackupStatus.COMPLETED : Backup.BackupStatus.FAILED);
         backupRepository.edit(backup);
@@ -133,9 +146,9 @@ public class BackupService extends BaseEntityService<Backup, Long> {
         return res.toArray(new String[0]);
     }
 
-    @Transactional
+    /*@Transactional
     public void cleanUp(@Observes @Scheduled("every.month") final ScheduleTrigger t) {
         backupRepository.deleteOlderThan(toDate(since(toMilliSecond(backupConfig.getDeletePeriod(),
                 TimeUnit.DAYS))));
-    }
+    }*/
 }

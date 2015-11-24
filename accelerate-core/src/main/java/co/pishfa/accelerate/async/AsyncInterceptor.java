@@ -29,7 +29,7 @@ public class AsyncInterceptor implements Serializable {
     private AsyncStrategy strategy;
 
     @AroundInvoke
-    public Object aroundInvoke(InvocationContext ic) throws Exception {
+    public Object aroundInvoke(final InvocationContext ic) throws Exception {
         if (invokedFromInterceptorInThread.get() == null) {
             if (ic.getContextData().get(INVOKED_IN_THREAD) == null) {
                 return strategy.run(ic);

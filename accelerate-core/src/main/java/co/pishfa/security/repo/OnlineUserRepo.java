@@ -23,7 +23,7 @@ public class OnlineUserRepo extends BaseJpaRepo<OnlineUser, Long> {
 	 * @param user
 	 * @return
 	 */
-	@QueryRunner("select count(*) from OnlineUser where user.id = ?1")
+	@QueryRunner("select count(e) from OnlineUser e where e.user = ?1 and e.loggedIn = true")
 	public long getCountByUser(User user) {
 		return 0;
 	}

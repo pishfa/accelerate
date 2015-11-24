@@ -74,22 +74,21 @@ public abstract class EntityChildMgmt<T extends Entity<Long>, P extends Entity<L
 	@Override
 	protected List<T> findData() {
 		List<T> res = findData(parent);
-        if(res != null) {
-            //Validate.notNull(res, "The returned value from findData should not be null");
-            if (res.size() == 0) {
-                currentId = 0;
-            } else {
-                currentId = res.get(0).getId();
-                for (int i = 1; i < res.size(); i++) {
-                    if (res.get(i).getId() > currentId) {
-                        currentId = res.get(i).getId();
-                    }
-                }
-            }
-            added = new ArrayList<>();
-            return res;
-        } else
-            return Collections.EMPTY_LIST;
+        if(res == null)
+			res = new ArrayList<>();
+		//Validate.notNull(res, "The returned value from findData should not be null");
+		if (res.size() == 0) {
+			currentId = 0;
+		} else {
+			currentId = res.get(0).getId();
+			for (int i = 1; i < res.size(); i++) {
+				if (res.get(i).getId() > currentId) {
+					currentId = res.get(i).getId();
+				}
+			}
+		}
+		added = new ArrayList<>();
+		return res;
     }
 
 	/**
@@ -206,9 +205,10 @@ public abstract class EntityChildMgmt<T extends Entity<Long>, P extends Entity<L
 	 */
 	public void preCommit() {
 		// remove artificial ids
-		for (T entity : added) {
-			entity.setId(null);
-		}
+		if(added != null)
+			for (T entity : added) {
+				entity.setId(null);
+			}
 	}
 
 	/**

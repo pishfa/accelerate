@@ -206,11 +206,16 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
     }
 
     public void setCurrentNode(TreeNode currentNode) {
+        if(this.currentNode != null) {
+            this.currentNode.setSelected(false);
+        }
         this.currentNode = currentNode;
         if(currentNode == null)
             setCurrent(null);
-        else
+        else {
+            currentNode.setSelected(true);
             setCurrent((T) currentNode.getData());
+        }
     }
 
 }

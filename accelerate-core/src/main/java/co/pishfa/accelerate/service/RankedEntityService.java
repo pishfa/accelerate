@@ -14,4 +14,12 @@ public interface RankedEntityService<T extends RankedEntity<K>,K> extends Entity
 
 	int maxRank(Filter<T> filter);
 
+	void decrement(Filter<T> filter, int fromRank);
+
+	void increment(Filter<T> filter, int fromRank);
+
+	void increment(Filter<T> filter, int fromRank, int toRank);
+
+	void decrement(Filter<T> filter, int fromRank, int toRank);
+
 }

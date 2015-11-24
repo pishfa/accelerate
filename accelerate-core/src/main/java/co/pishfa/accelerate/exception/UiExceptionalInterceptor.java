@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
+import javax.validation.ConstraintViolationException;
 
 import co.pishfa.accelerate.exception.ExceptionService.UiExceptionData;
 import co.pishfa.accelerate.message.UserMessages;
