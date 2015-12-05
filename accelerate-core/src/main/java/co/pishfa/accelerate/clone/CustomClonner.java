@@ -20,6 +20,6 @@ public interface CustomClonner {
 	 * 
 	 * @return the cloned value.
 	 */
-	public Object clone(Cloner cloner, Map<Object, Object> clones, Field field, Object object, Object fieldValue) throws Exception;
+	Object clone(Cloner cloner, Map<Object, Object> clones, Field field, Object object, Object fieldValue) throws Exception;
 
 }

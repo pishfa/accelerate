@@ -60,6 +60,8 @@ public class Cloner /*extends com.rits.cloning.Cloner*/ {
 	private boolean cloningEnabled = true;
 	private boolean nullTransient = false;
 	private boolean cloneSynthetics = true;
+	//TAHA
+	private CloneProcessor cloneProcessor;
 
 	
 	public boolean isNullTransient() {
@@ -86,6 +88,11 @@ public class Cloner /*extends com.rits.cloning.Cloner*/ {
 
 	public Cloner() {
 		// TAHA objenesis = new ObjenesisStd();
+		init();
+	}
+
+	public Cloner(CloneProcessor cloneProcessor) {
+		this.cloneProcessor = cloneProcessor;
 		init();
 	}
 
@@ -424,6 +431,9 @@ public class Cloner /*extends com.rits.cloning.Cloner*/ {
 	
 	@SuppressWarnings("unchecked")
 	public <T> T cloneInternal(T o, final Map<Object, Object> clones) throws IllegalAccessException {
+		if(cloneProcessor != null) {
+			o = cloneProcessor.preClone(o);
+		}
 		if (o == null) {
 			return null;
 		}
@@ -489,7 +499,11 @@ public class Cloner /*extends com.rits.cloning.Cloner*/ {
 			return newInstance;
 		}
 
-		final T newInstance = newInstance(clz);
+		T newInstance = null;
+		if(cloneProcessor!=null)
+			newInstance = cloneProcessor.init(clz);
+		else
+			newInstance(clz);
 		if (clones != null) {
 			clones.put(o, newInstance);
 		}
@@ -529,6 +543,8 @@ public class Cloner /*extends com.rits.cloning.Cloner*/ {
 				}
 			}
 		}
+		if(cloneProcessor != null)
+			cloneProcessor.postClone(newInstance, clz);
 		return newInstance;
 	}
 
