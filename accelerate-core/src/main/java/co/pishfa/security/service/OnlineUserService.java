@@ -73,7 +73,8 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 	}
 
 	public boolean isOnline(User user) {
-		return !toBeRemoved.contains(user.getId()) && onlineUserRepo.getCountByUser(user) > 0;
+		applyDelayedCommands();
+		return onlineUserRepo.getCountByUser(user) > 0;
 	}
 
 	public void onStart(@Observes FrameworkStartedEvent event) {

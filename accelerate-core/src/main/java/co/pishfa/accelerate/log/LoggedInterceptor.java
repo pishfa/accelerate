@@ -52,8 +52,8 @@ public class LoggedInterceptor implements Serializable {
 		} catch (ConstraintViolationException e) {
 			StringBuilder message = new StringBuilder("ConstraintViolationException: ");
 			for(ConstraintViolation v : e.getConstraintViolations()) {
-				message.append(v.getRootBeanClass()).append(".").append(".").append(v.getPropertyPath())
-						.append("(").append(v.getRootBean()).append(v.getLeafBean()).append("<-").append(v.getInvalidValue()).append(")")
+				message.append(v.getRootBeanClass()).append(".").append(v.getPropertyPath())
+						.append("(").append(v.getRootBean()).append(".").append(v.getLeafBean()).append("<-").append(v.getInvalidValue()).append(")")
 						.append(" ").append(v.getMessage())
 						.append("\n");
 			}

@@ -10,6 +10,8 @@ import co.pishfa.accelerate.common.AuditableEvent;
 import co.pishfa.accelerate.core.ConfigAppliedEvent;
 import co.pishfa.accelerate.i18n.domain.Locale;
 import co.pishfa.accelerate.i18n.model.ExtendedLocaleTime;
+import co.pishfa.accelerate.notification.Notification;
+import co.pishfa.accelerate.notification.service.NotificationService;
 import co.pishfa.accelerate.schedule.ScheduleInterval;
 import co.pishfa.accelerate.schedule.ScheduleTrigger;
 import co.pishfa.accelerate.schedule.Scheduled;
@@ -79,6 +81,9 @@ public class AuditService implements Serializable {
 
     @Inject
     private UiService uiService;
+
+	@Inject
+	private NotificationService notificationService;
 
     private ThreadLocal<Boolean> rootAudited = new ThreadLocal<>();
 
@@ -192,6 +197,18 @@ public class AuditService implements Serializable {
 				toBeAdded.add(audit);
 			}
 		}
+		for(AuditNotificationConfig notificationConfig : auditConfig.getNotifications()) {
+			if(notificationConfig.isEnabled() && notificationConfig.getIncludes().contains(audit.getAction()) && notificationConfig.getTargets().size()>0) {
+				Notification notification = new Notification();
+				notification.setTo(notificationConfig.getTargets());
+				notification.setFrom("audit");
+				notification.setTitle(audit.getAction().getTitle());
+				notification.setMessage("notification.audit");
+				notification.setParameters(audit.getAction().getTitle(), audit.getCreatedBy().getTitle(), audit.getTargetTitle(), audit.getMessage()==null?"":audit.getMessage());
+				notificationService.notify(notification,notificationConfig.getNotifier());
+			}
+		}
+
 	}
 
 	@Async(reschedule = RescheduleType.DELETE_PREV)

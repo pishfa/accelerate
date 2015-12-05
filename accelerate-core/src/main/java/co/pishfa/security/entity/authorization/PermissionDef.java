@@ -41,6 +41,7 @@ public class PermissionDef extends AccessRuleDef {
 	private Map<String, PermissionDefParam> parameters;
 
 	@ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+	@JoinTable(joinColumns = @JoinColumn(name="permissiondef_id"))
 	private List<PermissionDef> include;
 
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "definition")

@@ -23,8 +23,11 @@ public class AuditConfig extends PersistentConfigEntity {
 
     private int flushInterval;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.MERGE)
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Action> excludes = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "config")
+    private List<AuditNotificationConfig> notifications = new ArrayList<>();
 
     public int getDeletePeriod() {
         return deletePeriod;
@@ -58,4 +61,11 @@ public class AuditConfig extends PersistentConfigEntity {
         this.excludes = excludes;
     }
 
+    public List<AuditNotificationConfig> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<AuditNotificationConfig> notifications) {
+        this.notifications = notifications;
+    }
 }

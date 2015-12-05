@@ -72,6 +72,7 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 
 	@Override
 	public int maxRank(Filter<T> filter) {
-		return query("select max(e.rank)").fromEntity().where(filter).result(Integer.class);
+		Integer res = query("select max(e.rank)").fromEntity().where(filter).result(Integer.class);
+		return res==null?0:res.intValue();
 	}
 }

@@ -10,6 +10,7 @@ import co.pishfa.accelerate.utility.CommonUtils;
 /**
  * In-memory {@link Hashtable} based implementation of {@link Config}.
  * It also has the capability to be merged with another {@link HashTableConfig}.
+ * Due to its implementation it dose not allow null values to be inserted.
  * 
  * @author Taha Ghasemi
  * 

@@ -22,25 +22,25 @@ public class UINotificationProvider extends BaseEntityService<UINotification, Lo
     @Inject
     private UINotificationRepo uiNotificationRepo;
 
-    @Inject
-    private MessageFormatter formatter;
+    @Override
+    public String getName() {
+        return "ui";
+    }
 
-    @Inject
-    private Messages messages;
-
-    public void onNotify(NotificationEvent event) {
-        Notification src = event.getNotification();
-        UINotification n = new UINotification();
-        n.setTitle(src.getTitle());
-        n.setCreationTime(src.getCreationTime());
-        n.setFrom(src.getFrom());
-        n.setMessage(formatter.format(messages.get(src.getMessage()), src.getParameters()));
-        n.setTo(src.getTo());
-        add(n);
+    public void notify(Notification src) {
+        for(User to : src.getTo()) {
+            UINotification n = new UINotification();
+            n.setTitle(src.getTitle());
+            n.setCreationTime(src.getCreationTime());
+            n.setFrom(src.getFrom());
+            n.setMessage(src.getMessage());
+            n.setTo(to);
+            add(n);
+        }
     }
 
     @Override
-    public EntityRepository<UINotification, Long> getRepository() {
+     public EntityRepository<UINotification, Long> getRepository() {
         return uiNotificationRepo;
     }
 

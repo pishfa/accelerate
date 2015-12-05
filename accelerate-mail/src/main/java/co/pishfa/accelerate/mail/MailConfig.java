@@ -5,9 +5,8 @@ package co.pishfa.accelerate.mail;
 
 import javax.enterprise.context.ApplicationScoped;
 
+import co.pishfa.accelerate.config.cdi.ConfigGetter;
 import org.codemonkey.simplejavamail.TransportStrategy;
-
-import co.pishfa.accelerate.config.cdi.Configured;
 
 /**
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
@@ -16,27 +15,27 @@ import co.pishfa.accelerate.config.cdi.Configured;
 @ApplicationScoped
 public class MailConfig {
 
-	@Configured("mail.host")
+	@ConfigGetter("mail.host")
 	public String getHost() {
 		return null;
 	}
 
-	@Configured("mail.port")
+	@ConfigGetter("mail.port")
 	public Integer getPort() {
 		return null;
 	}
 
-	@Configured("mail.username")
+	@ConfigGetter("mail.username")
 	public String getUsername() {
 		return null;
 	}
 
-	@Configured("mail.password")
+	@ConfigGetter("mail.password")
 	public String getPassword() {
 		return null;
 	}
 
-	@Configured("mail.transport")
+	@ConfigGetter("mail.transport")
 	public TransportStrategy getTransport() {
 		return null;
 	}

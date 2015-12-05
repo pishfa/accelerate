@@ -3,6 +3,7 @@ package co.pishfa.accelerate.notification;
 import co.pishfa.security.entity.authentication.User;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
@@ -13,8 +14,8 @@ public class Notification {
     private String message;
     private Object[] parameters;
     private String from;
-    private User to;
-    private Date creationTime;
+    private List<User> to;
+    private Date creationTime = new Date();
 
     public String getTitle() {
         return title;
@@ -40,11 +41,11 @@ public class Notification {
         this.from = from;
     }
 
-    public User getTo() {
+    public List<User> getTo() {
         return to;
     }
 
-    public void setTo(User to) {
+    public void setTo(List<User> to) {
         this.to = to;
     }
 
@@ -60,7 +61,7 @@ public class Notification {
         return parameters;
     }
 
-    public void setParameters(Object[] parameters) {
+    public void setParameters(Object... parameters) {
         this.parameters = parameters;
     }
 }

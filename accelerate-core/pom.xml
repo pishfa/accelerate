@@ -34,16 +34,16 @@
 
 		<!-- CDI -->
 		
-		<!-- 
+		<!-- -->
 		<dependency>
 		   <groupId>javax.enterprise</groupId>
 		   <artifactId>cdi-api</artifactId>
 		   <version>1.1</version>
 		   <scope>provided</scope>
 		</dependency>
-		-->
 
-        <!-- Only in JEE -->
+
+
         <dependency>
             <groupId>org.jboss.spec.javax.enterprise.concurrent</groupId>
             <artifactId>jboss-concurrency-api_1.0_spec</artifactId>
@@ -51,6 +51,7 @@
             <scope>provided</scope>
         </dependency>
 
+		<!-- Only in JEE
 		<dependency>
 			<groupId>org.apache.geronimo.specs</groupId>
 			<artifactId>geronimo-jcdi_1.0_spec</artifactId>
@@ -71,6 +72,7 @@
 			<version>1.0</version>
             <scope>provided</scope>
 		</dependency>
+		-->
 		
 		<dependency>
 		    <groupId>org.apache.deltaspike.core</groupId>
@@ -155,7 +157,7 @@
 		<dependency>
 			<groupId>javax.validation</groupId>
 			<artifactId>validation-api</artifactId>
-			<version>1.0.0.GA</version>
+			<version>1.1.0.Final</version>
             <scope>provided</scope>
 		</dependency>
 
@@ -295,5 +297,32 @@
 			<version>0.0.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
+
+	<!--
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>de.empulse.eclipselink</groupId>
+				<artifactId>staticweave-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+					<execution>
+						<phase>process-classes</phase>
+						<goals>
+							<goal>weave</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.eclipse.persistence</groupId>
+						<artifactId>eclipselink</artifactId>
+						<version>2.6.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+		</plugins>
+	</build>
+	-->
 
 </project>

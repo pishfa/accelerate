@@ -5,6 +5,7 @@ package co.pishfa.security.entity.authorization;
 
 import co.pishfa.accelerate.clone.CloneIgnore;
 import co.pishfa.accelerate.clone.CloneNull;
+import co.pishfa.accelerate.clone.CloneShallow;
 import co.pishfa.accelerate.entity.common.BaseEntity;
 import co.pishfa.security.entity.authentication.Domain;
 import co.pishfa.security.entity.authentication.User;
@@ -23,12 +24,13 @@ public abstract class BaseSecuredEntity extends BaseEntity implements SecuredEnt
 	private static final long serialVersionUID = 1L;
 
 	@ManyToOne(fetch = FetchType.LAZY, cascade = {}, optional = true)
+	@CloneShallow
 	private User createdBy;
 
 	@ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.REFRESH }, optional = true)
 	// @OnDelete(action = OnDeleteAction.NO_ACTION)
 	// since when we want to add the entity, its domain will be set based on the createdBy
-	@CloneNull
+	@CloneShallow
 	// @Fetch(FetchMode.SELECT)
 	protected Domain domain;
 
