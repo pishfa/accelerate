@@ -60,7 +60,6 @@ public class Authenticator {
 	@Inject
 	private OnlineUserService onlineUserService;
 
-	@Transactional
 	public void authenticate(String username, String password) throws AuthenticationException {
 		User user = null;
 		SecurityPolicy policy = null;
@@ -105,7 +104,7 @@ public class Authenticator {
 		}
 	}
 
-	protected void unsuccessfulLogin(User user, SecurityPolicy policy) {
+	public void unsuccessfulLogin(User user, SecurityPolicy policy) {
 		int attempts = user.getLoginInfo().getLoginAttempts();
 		LoginFailAction failAction = policy.getLoginFailAction();
 		if (attempts > policy.getNumberOfFailedTries() && failAction != LoginFailAction.NOTHING) {

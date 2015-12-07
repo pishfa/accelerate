@@ -10,6 +10,7 @@ import co.pishfa.security.entity.authentication.Domain;
 import co.pishfa.security.entity.authentication.Identity;
 import co.pishfa.security.entity.authentication.SecurityPolicy;
 import co.pishfa.security.entity.authentication.User;
+import co.pishfa.security.exception.ChangePasswordException;
 import co.pishfa.security.repo.UserRepo;
 import org.apache.commons.lang3.RandomStringUtils;
 

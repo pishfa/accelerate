@@ -2,15 +2,18 @@ package co.pishfa.accelerate.exception;
 
 import java.util.Iterator;
 
+import javax.enterprise.context.ContextNotActiveException;
 import javax.faces.FacesException;
 import javax.faces.application.ProjectStage;
 import javax.faces.context.ExceptionHandler;
 import javax.faces.context.ExceptionHandlerWrapper;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ExceptionQueuedEvent;
+import javax.faces.event.PhaseId;
 
 import co.pishfa.accelerate.config.cdi.ConfigService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.omnifaces.util.Exceptions;
 import org.omnifaces.util.Faces;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +50,10 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		UserMessages userMessages = UserMessages.getInstance();
 
+		if (facesContext.getExternalContext().isResponseCommitted()) {
+			return;
+		}
+
 		boolean isProduction = facesContext.isProjectStage(ProjectStage.Production);
 		boolean inError = false;
 		boolean navigatedToPage = false;
@@ -54,7 +61,7 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 		// log other exceptions + in production, don't allow them to be thrown just redirect to error current
 		for (Iterator<ExceptionQueuedEvent> i = getUnhandledExceptionQueuedEvents().iterator(); i.hasNext();) {
 			ExceptionQueuedEvent event = i.next();
-			Throwable exception = event.getContext().getException();
+			Throwable exception = Exceptions.unwrap(event.getContext().getException());
 			UiExceptionData uiException = ExceptionService.getInstance().getUiException(exception);
 			if (uiException == null) {
 				uiException = ExceptionService.getInstance().getUiException(ExceptionUtils.getRootCause(exception));
@@ -64,7 +71,11 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 					userMessages.error(uiException.message);
 				}
 				if (!StrUtils.isEmpty(uiException.page) && !navigatedToPage) {
-					Faces.navigate(uiException.page);
+					try {
+						Faces.navigate(uiException.page);
+					} catch (ContextNotActiveException e) {
+						Faces.navigate("ac:login");
+					}
 					navigatedToPage = true; // can not handle any more errors
 				}
 				i.remove();
