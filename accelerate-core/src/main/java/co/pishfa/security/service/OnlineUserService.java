@@ -120,6 +120,7 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 		Identity identity = Identity.getFromSession(session);
 		if (identity != null) {
 			OnlineUser onlineUser = identity.getOnlineUser();
+			onlineUser.setSessionId(null);
 			delete(onlineUser);
 		}
 	}
@@ -164,8 +165,6 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 	@Action
 	public void invalidate(@NotNull OnlineUser onlineUser) {
 		onlineUser.getSession().invalidate();
-		onlineUser.setSessionId(null);
-		delete(onlineUser);
 	}
 
 }

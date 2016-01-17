@@ -5,11 +5,8 @@ import co.pishfa.accelerate.service.Service;
 import co.pishfa.accelerate.validation.ValidationException;
 import co.pishfa.security.LoggedOutEvent;
 import co.pishfa.security.SecurityUtils;
+import co.pishfa.security.entity.authentication.*;
 import co.pishfa.security.exception.AuthenticationException;
-import co.pishfa.security.entity.authentication.Domain;
-import co.pishfa.security.entity.authentication.Identity;
-import co.pishfa.security.entity.authentication.SecurityPolicy;
-import co.pishfa.security.entity.authentication.User;
 import co.pishfa.security.exception.ChangePasswordException;
 import co.pishfa.security.repo.UserRepo;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -52,9 +49,9 @@ public class AuthenticationService implements Serializable {
 		authenticator.authenticate(username, password);
 	}
 
-	public void logout() {
-		// Most of work is done is OnlineUserSerivce
-		loggedOutEvent.fire(new LoggedOutEvent(getCurrentUser()));
+	public void logout(OnlineUser onlineUser) {
+		loggedOutEvent.fire(new LoggedOutEvent(onlineUser));
+		onlineUser.getSession().invalidate();
 	}
 
 	@Produces

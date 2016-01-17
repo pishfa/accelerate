@@ -170,6 +170,7 @@ public class Identity implements Serializable {
 		if (!hasOneOfPermissions(target, actions)) {
 			if (isLoggedIn()) {
 				String actionStrs = Arrays.toString(actions);
+				auditService.audit(authorizationService.findAction(actionStrs), "unathorized.access", String.valueOf(target), AuditLevel.RISK);
 				throw new AuthorizationException(target, actionStrs, getPermissionMsg(target, actionStrs));
 			} else {
 				throw new LoginRequiredException();
@@ -182,8 +183,8 @@ public class Identity implements Serializable {
             checkRole(action);
         }
 		if (!hasPermission(target, action)) {
-			auditService.audit(authorizationService.findAction(action), "unathorized.access", String.valueOf(target), AuditLevel.RISK);
 			if (isLoggedIn()) {
+				auditService.audit(authorizationService.findAction(action), "unathorized.access", String.valueOf(target), AuditLevel.RISK);
 				throw new AuthorizationException(target, action, getPermissionMsg(target, action));
 			} else {
 				throw new LoginRequiredException();
@@ -258,7 +259,7 @@ public class Identity implements Serializable {
 	}
 
 	public void logout() {
-		authenticationService.logout();
+		authenticationService.logout(getOnlineUser());
 	}
 
 	public static Identity getFromSession(HttpSession session) {

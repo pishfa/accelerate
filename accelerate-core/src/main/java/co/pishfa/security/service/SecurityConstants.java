@@ -12,31 +12,31 @@ public interface SecurityConstants {
 	/**
 	 * Session attribute
 	 */
-	public static final String SESSION_LOCAL_LOGIN = "security.localLogin";
+	String SESSION_LOCAL_LOGIN = "security.localLogin";
 
 	/**
 	 * Session attribute
 	 */
-	public static final String SESSION_IDENTITY = "security.identity";
+	String SESSION_IDENTITY = "security.identity";
 
 	/**
 	 * 
 	 */
-	public static final String ACTION_USER_LOGIN_MORE_THAN_ALLOWED = "user.loginMoreThanAllowed";
+	String ACTION_USER_LOGIN_MORE_THAN_ALLOWED = "user.login.moreThanAllowed";
 
 	/**
 	 * 
 	 */
-	public static final String ACTION_USER_LOGIN = "user.login";
+	String ACTION_USER_LOGIN = "user.login";
 
 	/**
 	 * 
 	 */
-	public static final String ACTION_USER_LOGOUT = "user.logout";
+	String ACTION_USER_LOGOUT = "user.logout";
 
 	/**
 	 * 
 	 */
-	public static final String ACTION_RUN_AS = "security.runAs";
+	String ACTION_RUN_AS = "security.runAs";
 
 }

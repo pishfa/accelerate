@@ -11,7 +11,7 @@
 	</parent>
 
 	<properties>
-		<deltaspike.version>1.5.1</deltaspike.version>
+		<deltaspike.version>1.0.3</deltaspike.version>
 		<juel.version>2.2.7</juel.version>
 	</properties>
 

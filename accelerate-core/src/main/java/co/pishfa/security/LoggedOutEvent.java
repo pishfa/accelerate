@@ -4,10 +4,10 @@
 package co.pishfa.security;
 
 import co.pishfa.accelerate.common.AuditableEvent;
+import co.pishfa.security.entity.authentication.OnlineUser;
 import co.pishfa.security.service.AuditService;
 import co.pishfa.security.service.SecurityConstants;
 import co.pishfa.security.entity.audit.AuditLevel;
-import co.pishfa.security.entity.authentication.User;
 
 /**
  * @author Taha Ghasemi
@@ -15,24 +15,21 @@ import co.pishfa.security.entity.authentication.User;
  */
 public class LoggedOutEvent implements AuditableEvent {
 
-	private final User user;
+	private final OnlineUser onlineUser;
 
-	/**
-	 * @param user
-	 */
-	public LoggedOutEvent(final User user) {
-		this.user = user;
+	public LoggedOutEvent(final OnlineUser onlineUser) {
+		this.onlineUser = onlineUser;
 	}
 
 	/**
 	 * @return the user
 	 */
-	public User getUser() {
-		return user;
+	public OnlineUser getOnlineUser() {
+		return onlineUser;
 	}
 
 	@Override
 	public void audit() {
-		AuditService.getInstance().audit(user, SecurityConstants.ACTION_USER_LOGOUT, null, AuditLevel.INFO);
+		AuditService.getInstance().audit(onlineUser.getUser(), SecurityConstants.ACTION_USER_LOGOUT, null, AuditLevel.INFO);
 	}
 }
