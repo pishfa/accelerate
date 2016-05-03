@@ -28,6 +28,7 @@ import co.pishfa.security.entity.authorization.Action;
 import co.pishfa.security.repo.ActionRepo;
 import co.pishfa.security.repo.AuditRepo;
 import co.pishfa.security.repo.DomainRepo;
+import co.pishfa.security.repo.UserRepo;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.deltaspike.jpa.api.transaction.Transactional;
@@ -54,6 +55,9 @@ public class AuditService implements Serializable {
 
 	@Inject
 	private Logger log;
+
+	@Inject
+	private UserRepo userRepo;
 
 	private AuditConfig auditConfig;
 
@@ -171,15 +175,14 @@ public class AuditService implements Serializable {
 		audit.setCreationTime(new Date());
 		// TODO use auditLocale
 		audit.setFinishTime(new ExtendedLocaleTime(new Date()));
-		audit.setCreatedBy(identity.getUser());
-		Domain secDomain = null;
+
 		if (identity.getUser() != null) {
-			secDomain = identity.getUser().getDomain();
+			audit.setCreatedBy(identity.getUser());
+			audit.setDomain(identity.getUser().getDomain());
+		} else {
+			audit.setCreatedBy(userRepo.findSystemUser());
+			audit.setDomain(domainRepo.getMainDomain());
 		}
-		if (secDomain == null) {
-			secDomain = domainRepo.getMainDomain();
-		}
-		audit.setDomain(secDomain);
         if (target != null && target instanceof Auditable) {
             ((Auditable) target).audit(audit);
         }
@@ -204,7 +207,7 @@ public class AuditService implements Serializable {
 				notification.setFrom("audit");
 				notification.setTitle(audit.getAction().getTitle());
 				notification.setMessage("notification.audit");
-				notification.setParameters(audit.getAction().getTitle(), audit.getCreatedBy().getTitle(), audit.getTargetTitle(), audit.getMessage()==null?"":audit.getMessage());
+				notification.setParameters(audit.getAction().getTitle(), audit.getCreatedBy()!=null?audit.getCreatedBy().getTitle():"", audit.getTargetTitle(), audit.getMessage()==null?"":audit.getMessage());
 				notificationService.notify(notification,notificationConfig.getNotifier());
 			}
 		}

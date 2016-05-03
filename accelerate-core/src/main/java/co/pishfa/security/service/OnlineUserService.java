@@ -10,6 +10,7 @@ import co.pishfa.accelerate.service.Action;
 import co.pishfa.accelerate.service.Service;
 import co.pishfa.accelerate.schedule.ScheduleInterval;
 import co.pishfa.accelerate.ui.UiUtils;
+import co.pishfa.security.ExitEvent;
 import co.pishfa.security.LoggedInEvent;
 import co.pishfa.security.LoggedOutEvent;
 import co.pishfa.security.entity.audit.AuditLevel;
@@ -23,6 +24,7 @@ import org.apache.deltaspike.core.api.lifecycle.Initialized;
 import org.apache.deltaspike.jpa.api.transaction.Transactional;
 import org.quartz.SchedulerException;
 
+import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
 import javax.servlet.http.HttpSession;
@@ -50,6 +52,9 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 
 	@Inject
 	private UserRepo userRepo;
+
+	@Inject
+	private Event<ExitEvent> exitEvent;
 
     private SecurityConfig.OnlineUserConfig onlineUserConfig;
 
@@ -104,7 +109,9 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 	}
 
 	public void onLogout(@Observes LoggedOutEvent event) {
-        identity.setOnlineUser(onlineUserRepo.findById(identity.getOnlineUser().getId()));
+		OnlineUser onlineUser = onlineUserRepo.findById(identity.getOnlineUser().getId());
+		exitEvent.fire(new ExitEvent(onlineUser));
+		identity.setOnlineUser(onlineUser);
 		identity.setUser(guest);
 		identity.setLoggedIn(false);
 		identity.setOnlineUser(onlineUserRepo.edit(identity.getOnlineUser()));
@@ -120,6 +127,8 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 		Identity identity = Identity.getFromSession(session);
 		if (identity != null) {
 			OnlineUser onlineUser = identity.getOnlineUser();
+			if(onlineUser.getUser() != guest)
+				exitEvent.fire(new ExitEvent(onlineUser));
 			onlineUser.setSessionId(null);
 			delete(onlineUser);
 		}

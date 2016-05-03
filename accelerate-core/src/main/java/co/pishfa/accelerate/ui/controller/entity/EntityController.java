@@ -287,7 +287,7 @@ public abstract class EntityController<T extends Entity<K>, K> extends PageContr
         if(hasOption(EntityControllerOption.SECURED))
             return entity != null && (getAction(action) == null || getIdentity().can(entity, getAction(action)));
         else
-            return true;
+            return entity != null;
     }
 
     /**

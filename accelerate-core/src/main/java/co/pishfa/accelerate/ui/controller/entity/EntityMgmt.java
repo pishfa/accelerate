@@ -208,14 +208,80 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	 */
 	@UiAction
 	@UiMessage
-	public String save()  throws Exception {
+	public String save() throws Exception {
 		applyCurrent();
 		load();
 		return null;
 	}
 
 	/**
-	 * 
+	 * Apply the changes in the current and set current to the next entity in the data
+     */
+	@UiAction
+	@UiMessage
+	public String applyAndNext() throws Exception {
+		applyCurrent();
+		return next();
+	}
+
+	@UiAction
+	@UiMessage
+	public String applyAndPrev() throws Exception {
+		applyCurrent();
+		return prev();
+	}
+
+	@UiAction
+	@UiMessage
+	public String next() {
+		int index = getData().indexOf(getCurrent());
+		if(index >= 0) {
+			if(index < getData().size() - 1) {
+				edit(getData().get(index + 1));
+			} else if(hasNextPage()) {
+				nextPage();
+				edit(getData().get(0));
+			} else if(!editMode)
+				add();
+		}
+		return null;
+	}
+
+	@UiAction
+	@UiMessage
+	public String prev() {
+		int index = getData().indexOf(getCurrent());
+		if(index > 0) {
+			edit(getData().get(index - 1));
+		} else if(index == 0 && hasPrevPage()) {
+			prevPage();
+			edit(getData().get(getData().size()-1));
+		}
+		return null;
+	}
+
+	public boolean canNext() {
+		if(getCurrent() != null) {
+			int index = getData().indexOf(getCurrent());
+			if (index >= 0 && (index < getData().size() - 1) || hasNextPage())
+				return true;
+			else if(!editMode)
+				return true;
+		}
+		return false;
+	}
+
+	public boolean canPrev() {
+		if(getCurrent() != null) {
+			int index = getData().indexOf(getCurrent());
+			if (index > 0 || (index == 0 && hasPrevPage()))
+				return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Apply the changes in the current
 	 * @return null
 	 */
 	@UiAction

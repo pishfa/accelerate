@@ -8,6 +8,7 @@ import org.apache.commons.lang.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.beans.PropertyDescriptor;
 import java.util.Map;
 
 /**
@@ -45,7 +46,8 @@ public class ConfigEntityConfig extends AbstractConfig {
                 try {
                     Object entity = configEntityData.getType().newInstance();
                     for (ConfigEntityData.ConfigPropertyData property : configEntityData.getProperties()) {
-                        Class<?> propType = PropertyUtils.getPropertyDescriptor(entity, property.getName()).getPropertyType();
+                        PropertyDescriptor descriptor = PropertyUtils.getPropertyDescriptor(entity, property.getName());
+                        Class<?> propType = descriptor==null?Object.class:descriptor.getPropertyType();
                         Object value = super.getObject(key + "." + property.getAlias(), propType);
                         BeanUtils.setProperty(entity, property.getName(), value);
                     }

@@ -4,8 +4,7 @@
 		<onlineUser updateInterval="300" />
 	</security>
     <admin>
-        <backup executorCommand = "C:\Program Files\PostgreSQL\9.3\bin\pg_dump.exe -a -d postgresql://postgres:root@127.0.0.1:5432/sandoq -Fc -Z9 -f #{file}"
-                deletePeriod="1000" storage="backup" schedule="0 0 11 1 * ?" />
+        <backup deletePeriod="1000"/>
     </admin>
 	<init incremental="false" />
 	<ui header="header2.png">

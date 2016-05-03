@@ -75,6 +75,8 @@ public class User extends Principal {
 
     private String email;
 
+	private String externalId;
+
     @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private File image;
 
@@ -233,4 +235,12 @@ public class User extends Principal {
     public void setImage(File image) {
         this.image = image;
     }
+
+	public String getExternalId() {
+		return externalId;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
 }

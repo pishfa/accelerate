@@ -102,6 +102,8 @@ public class EntityPagedList<T extends Entity<K>, K> extends EntityFilterableLis
 
 	public void setPageSize(int pageSize) {
 		setOption(EntityControllerOption.PAGE_SIZE, pageSize);
+		//correct page num
+		gotoPage(getCurrentPage());
 	}
 
 	@Override
@@ -135,7 +137,10 @@ public class EntityPagedList<T extends Entity<K>, K> extends EntityFilterableLis
 	public void setCurrentPage(int page) {
 		if (page >= 1 && page <= getNumOfPages()) {
 			this.page = page;
-		}
+		} else if(page < 1)
+			this.page = 1;
+		else
+			this.page = getNumOfPages();
 	}
 
 	@Override

@@ -218,4 +218,36 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
         }
     }
 
+    //Source: http://forum.primefaces.org/viewtopic.php?f=3&t=204&sid=dd0db716b0f62c696b0657a246f08147&start=10
+    /**
+     * Expands all nodes in the tree
+     */
+    public void expandAll(){
+        expandAllNodes(rootNode, true);
+    }
+
+    /**
+     * Collapse all nodes in the tree
+     */
+    public void collapseAll(){
+        expandAllNodes(rootNode, false);
+    }
+
+    /**
+     * Expands all nodes in the tree if expand is true. Otherwise, collapses all
+     * nodes in the tree.
+     *
+     * @param treeNode
+     * which should be expanded or collapsed
+     * @param expand
+     * true if all nodes should be expanded. Otherwise false
+     */
+    public void expandAllNodes(TreeNode treeNode, boolean expand) {
+        List<TreeNode> children = treeNode.getChildren();
+        for (TreeNode child : children) {
+            expandAllNodes(child, expand);
+        }
+        treeNode.setExpanded(expand);
+    }
+
 }

@@ -6,6 +6,8 @@ import co.pishfa.accelerate.persistence.filter.Filter;
 import co.pishfa.accelerate.persistence.query.QueryBuilder;
 import co.pishfa.accelerate.entity.common.RankedEntity;
 
+import java.util.List;
+
 /**
  * Note: if filter contains join, hiberante is not support join in updates and it should be converted to subqueries
  * 
@@ -25,6 +27,10 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 	@Override
 	public T findByRank(Filter<T> filter, int rank) {
 		return query("").select().where(filter).andEntityField("e.rank = :rank").with("rank", rank).result();
+	}
+
+	public List<T> findAllOrderByRank() {
+		return query("").select().sortBy("e.rank").list();
 	}
 
 	@Override
@@ -75,4 +81,5 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 		Integer res = query("select max(e.rank)").fromEntity().where(filter).result(Integer.class);
 		return res==null?0:res.intValue();
 	}
+
 }

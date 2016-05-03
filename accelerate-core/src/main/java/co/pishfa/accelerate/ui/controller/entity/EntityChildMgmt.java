@@ -6,6 +6,8 @@ import co.pishfa.accelerate.ui.UiAction;
 import co.pishfa.accelerate.ui.param.RequiredParams;
 import org.apache.commons.lang3.Validate;
 
+import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -315,4 +317,17 @@ public abstract class EntityChildMgmt<T extends Entity<Long>, P extends Entity<L
 		return added;
 	}
 
+	@Override
+	public Object getAsObject(FacesContext context, UIComponent component, String value) {
+		if (NULL_KEY.equals(value)) {
+			return null;
+		}
+
+		Long id = getIdConverter().toObject(value);
+		for(T add : added) {
+			if(add.getId() == id)
+				return add;
+		}
+		return findEntity(id);
+	}
 }

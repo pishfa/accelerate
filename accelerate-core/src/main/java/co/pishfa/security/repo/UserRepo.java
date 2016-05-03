@@ -23,7 +23,7 @@ public class UserRepo extends BaseJpaRepo<User, Long> {
 
 	public static final String GUEST_NAME = "guest";
 	public static final String ADMIN_NAME = "admin";
-	public static final String SYSTEM_NAME = "admin";
+	public static final String SYSTEM_NAME = "system";
 	public static final String SHARED_NAME = "shared";
 
 	private Long adminId, guessId, systemId, sharedId;

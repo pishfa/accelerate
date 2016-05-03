@@ -66,7 +66,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 
 	@UiAction
 	public String down() {
-		if(getData().get(getPageSize()-1) == getCurrent()) {
+		if(hasPagination() && getData().get(getPageSize()-1) == getCurrent()) {
 			setCurrentPage(getCurrentPage()+1);
 		}
 		setPrevCurrent(downEntity(getCurrent()));
@@ -103,6 +103,8 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	@UiMessage
 	public String save() throws Exception {
 		String res = super.save();
+		//due to buck inc,dec we must clear pc
+		getEntityService().clear();
 		if(getCurrent() != null)
 			setCurrentPage(1 + (getCurrent().getRank()-1) / getPageSize());
 		return res;
@@ -116,11 +118,16 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 				getEntityService().increment(getRankFilter(), entity.getRank());
 			}
 		} else {
-			if(entity.getRank() > prevRank) {
-				getEntityService().decrement(getRankFilter(), prevRank + 1, entity.getRank() + 1);
-			} else if(entity.getRank() < prevRank) {
-				getEntityService().increment(getRankFilter(), entity.getRank(), prevRank);
+			//actually the entity rank is get updated by jpa before running dec,inc quries below
+			int newRank = entity.getRank();
+			entity.setRank(prevRank);
+			if(newRank > prevRank) {
+				entity.setRank(prevRank);
+				getEntityService().decrement(getRankFilter(), prevRank + 1, newRank + 1);
+			} else if(newRank < prevRank) {
+				getEntityService().increment(getRankFilter(), newRank, prevRank);
 			}
+			entity.setRank(newRank);
 		}
 		return super.saveEntity(entity);
 	}

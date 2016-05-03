@@ -6,8 +6,8 @@ package co.pishfa.accelerate.convert;
  */
 public interface ObjectConverter<T> {
 
-    public String toString(T value);
-    public T toObject(String value);
+    String toString(T value);
+    T toObject(String value);
 
 
 }

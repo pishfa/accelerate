@@ -25,6 +25,8 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
 
     private Boolean editMode;
 
+    private TreeNode prevNode;
+
     public HierarchicalEntityMgmt(Class<T> entityClass, Class<K> keyClass) {
         super(entityClass, keyClass);
     }
@@ -40,6 +42,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         setOption(EntityControllerOption.EDIT, true);
         setOption(EntityControllerOption.DELETE, true);
         setOption(EntityControllerOption.ID, ID_PARAM_NAME);
+        setOption(EntityControllerOption.PRESERVE_SELECTED, true);
     }
 
     protected void loadCurrent() {
@@ -87,6 +90,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
     public String add() {
         if (hasOption(EntityControllerOption.ADD)) {
             setEditMode(false);
+            prevNode = getCurrentNode();
             newCurrent();
             checkAddPermission(getCurrent());
             addEdit();
@@ -121,6 +125,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
             setEditMode(true);
             loadCurrent();
             checkEditPermission(getCurrent());
+            prevNode = getCurrentNode();
             addEdit();
         }
         return null;
@@ -203,6 +208,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
             setData(getCurrentNode(), getCurrent());
         }
 
+        prevNode = getCurrentNode();
         if (getChildControllers() != null) {
             for (ViewController controller : getChildControllers()) {
                 if (controller instanceof EntityChildMgmt) {
@@ -217,7 +223,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
     }
 
     protected T getData(TreeNode node) {
-        return (T) node.getData();
+        return node == null? null : (T) node.getData();
     }
 
     /**
@@ -244,6 +250,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
                     setData(parentNode, getEntityService().edit(parent));
                 }
             }
+            prevNode = parentNode;
             setCurrentNode(parentNode);
         }
         return null;
@@ -275,9 +282,8 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
     @UiAction
     public String cancel() {
         setEditMode(null);
-        setCurrentNode(null);
-        setCurrent(null);
         setCurrentNodes(null);
+        setCurrentNode(hasOption(EntityControllerOption.PRESERVE_SELECTED)?prevNode:null);
         return null;
     }
 
@@ -356,4 +362,5 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
     protected void updateRank(T newParent, int dropIndex, T source) {
 
     }
+
 }

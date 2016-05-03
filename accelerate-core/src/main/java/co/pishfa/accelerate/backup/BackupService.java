@@ -14,6 +14,7 @@ import co.pishfa.accelerate.storage.model.UploadedFile;
 import co.pishfa.accelerate.storage.service.FileService;
 import co.pishfa.accelerate.storage.model.File;
 import co.pishfa.accelerate.template.ExpressionInterpolator;
+import co.pishfa.accelerate.utility.StrUtils;
 import co.pishfa.security.service.RunAs;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -109,7 +110,7 @@ public class BackupService extends BaseEntityService<Backup, Long> {
             if(process.waitFor(1, TimeUnit.HOURS))
                 status = process.exitValue();
 
-            if(status == 0) {
+            if(status == 0 && !StrUtils.isEmpty(backupConfig.getStorage())) {
                 String fileName = "backup_" + System.currentTimeMillis();
                 Folder out = fileService.findFolder(backupConfig.getStorage());
                 backup.setFile(fileService.upload(new UploadedFile(fileName, temp), out));

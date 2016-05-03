@@ -20,7 +20,6 @@ import java.lang.annotation.Target;
 public @interface UiException {
 
 	/**
-	 * 
 	 * @return the resource key that should be displayed in case of no current is defined, or passed via the request
 	 *         parameter named error to that current
 	 */

@@ -22,4 +22,6 @@ public interface RankedEntityService<T extends RankedEntity<K>,K> extends Entity
 
 	void decrement(Filter<T> filter, int fromRank, int toRank);
 
+	void clear();
+
 }
