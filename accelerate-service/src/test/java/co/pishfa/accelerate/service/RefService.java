@@ -1,7 +1,6 @@
-/**
+package co.pishfa.accelerate.service; /**
  * 
  */
-package co.pishfa.accelerate.service;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.jws.WebMethod;

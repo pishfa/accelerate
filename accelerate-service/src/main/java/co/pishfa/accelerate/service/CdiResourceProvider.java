@@ -30,21 +30,17 @@ public class CdiResourceProvider implements ResourceProvider {
 		singleton = bean.getScope().equals(ApplicationScoped.class) || bean.getScope().equals(Singleton.class);
 	}
 
-	@Override
 	public Object getInstance(Message m) {
 		return CdiUtils.getInstance(resourceClass);
 	}
 
-	@Override
 	public void releaseInstance(Message m, Object o) {
 	}
 
-	@Override
 	public Class<?> getResourceClass() {
 		return resourceClass;
 	}
 
-	@Override
 	public boolean isSingleton() {
 		return singleton;
 	}

@@ -8,7 +8,23 @@
   <groupId>co.pishfa.accelerate</groupId>
   <artifactId>accelerate-service</artifactId>
   <version>0.0.1-SNAPSHOT</version>
+	<properties>
+			<cxf.version>3.1.6</cxf.version>
+	</properties>
+
   <dependencies>
+	  <dependency>
+		  <groupId>javax.enterprise</groupId>
+		  <artifactId>cdi-api</artifactId>
+		  <version>1.1</version>
+		  <scope>provided</scope>
+	  </dependency>
+	  <dependency>
+		  <groupId>org.jboss.spec.javax.enterprise.concurrent</groupId>
+		  <artifactId>jboss-concurrency-api_1.0_spec</artifactId>
+		  <version>1.0.0.Final</version>
+		  <scope>provided</scope>
+	  </dependency>
   	<dependency>
 			<groupId>org.apache.cxf</groupId>
 			<artifactId>cxf-rt-frontend-jaxws</artifactId>
@@ -24,10 +40,29 @@
 			<artifactId>cxf-rt-frontend-jaxrs</artifactId>
 			<version>${cxf.version}</version>
 		</dependency>
-		<dependency>
+	  <dependency>
+		  <groupId>org.apache.cxf</groupId>
+		  <artifactId>cxf-rt-rs-extension-providers</artifactId>
+		  <version>${cxf.version}</version>
+	  </dependency>
+
+	  <dependency>
+		  <groupId>com.fasterxml.jackson.jaxrs</groupId>
+		  <artifactId>jackson-jaxrs-json-provider</artifactId>
+		  <version>2.7.4</version>
+	  </dependency>
+
+	  <dependency>
 			<groupId>co.pishfa.accelerate</groupId>
 			<artifactId>accelerate-core</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
 		</dependency>
+
+	  <dependency>
+		  <groupId>javax.servlet</groupId>
+		  <artifactId>servlet-api</artifactId>
+		  <version>2.5</version>
+		  <scope>provided</scope>
+	  </dependency>
   </dependencies>
 </project>

@@ -24,6 +24,7 @@ import co.pishfa.security.entity.audit.AuditLevel;
 import co.pishfa.security.entity.audit.Auditable;
 import co.pishfa.security.entity.authentication.Domain;
 import co.pishfa.security.entity.authentication.Identity;
+import co.pishfa.security.entity.authentication.User;
 import co.pishfa.security.entity.authorization.Action;
 import co.pishfa.security.repo.ActionRepo;
 import co.pishfa.security.repo.AuditRepo;
@@ -174,9 +175,13 @@ public class AuditService implements Serializable {
 		audit.setMessage(StringUtils.abbreviate(message, 12000));
 		audit.setCreationTime(new Date());
 		// TODO use auditLocale
-		audit.setFinishTime(new ExtendedLocaleTime(new Date()));
+		//audit.setFinishTime(new ExtendedLocaleTime(new Date()));
 
-		if (identity.getUser() != null) {
+		User user = null;
+		try {
+			user = identity.getUser();
+		} catch (Exception e) {} //sometimes SessionContext is not available
+		if (user != null) {
 			audit.setCreatedBy(identity.getUser());
 			audit.setDomain(identity.getUser().getDomain());
 		} else {

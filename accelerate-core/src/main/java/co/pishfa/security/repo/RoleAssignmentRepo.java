@@ -25,7 +25,7 @@ public class RoleAssignmentRepo extends BaseJpaRepo<RoleAssignment, Long> {
 	public List<RoleAssignment> findByPrincipal(Principal principal) {
 		return getEntityManager()
 				.createQuery("select e from RoleAssignment e where e.principalId = ?1 and e.principalType = ?2")
-				.setParameter(1, principal.getId()).setParameter(2, principal.getMetadata()).getResultList();
+				.setParameter(1, principal.getId()).setParameter(2, principal.getType()).getResultList();
 	}
 
 	@Transactional

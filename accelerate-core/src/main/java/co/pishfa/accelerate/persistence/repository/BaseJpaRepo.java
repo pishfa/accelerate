@@ -93,7 +93,7 @@ public abstract class BaseJpaRepo<T extends Entity<K>, K> implements EntityRepos
 
     /**
      * Note that bulk deleting has this side effect that JPA impl won't cascade delete to related entities and also it
-     * won't call listeners. Also buck operations in joined inheritance strategy has a bug in hibernate
+     * won't call listeners. Also bulk operations in joined inheritance strategy has a bug in hibernate
      *
      * @param ids
      */

@@ -127,8 +127,10 @@ public class OnlineUserService extends BaseEntityService<OnlineUser, Long> {
 		Identity identity = Identity.getFromSession(session);
 		if (identity != null) {
 			OnlineUser onlineUser = identity.getOnlineUser();
-			if(onlineUser.getUser() != guest)
+			if(onlineUser.getUser() != guest) {
+				AuditService.getInstance().audit(onlineUser.getUser(), "session.destroyed", null, AuditLevel.INFO);
 				exitEvent.fire(new ExitEvent(onlineUser));
+			}
 			onlineUser.setSessionId(null);
 			delete(onlineUser);
 		}
