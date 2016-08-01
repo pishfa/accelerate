@@ -23,10 +23,10 @@ public class AuditNotificationConfig extends BaseEntity {
 
     boolean enabled;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {})
     private List<Action> includes = new ArrayList<>();
 
-    @OneToMany(cascade = {CascadeType.MERGE,CascadeType.PERSIST})
+    @ManyToMany(cascade = {})
     private List<User> targets = new ArrayList<>();
 
     public AuditConfig getConfig() {

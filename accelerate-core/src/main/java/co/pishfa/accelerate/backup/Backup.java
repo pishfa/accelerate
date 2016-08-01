@@ -59,4 +59,5 @@ public class Backup extends BaseSecuredEntity {
     public void setStatus(BackupStatus status) {
         this.status = status;
     }
+
 }

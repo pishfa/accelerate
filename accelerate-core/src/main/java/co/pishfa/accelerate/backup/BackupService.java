@@ -15,6 +15,8 @@ import co.pishfa.accelerate.storage.service.FileService;
 import co.pishfa.accelerate.storage.model.File;
 import co.pishfa.accelerate.template.ExpressionInterpolator;
 import co.pishfa.accelerate.utility.StrUtils;
+import co.pishfa.security.entity.audit.AuditLevel;
+import co.pishfa.security.service.AuditService;
 import co.pishfa.security.service.RunAs;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -41,6 +43,8 @@ import static co.pishfa.accelerate.utility.TimeUtils.*;
 @Service
 public class BackupService extends BaseEntityService<Backup, Long> {
 
+    public static final String BACKUP_FAILED = "backup.failed";
+
     @Inject
     private Logger log;
 
@@ -61,6 +65,9 @@ public class BackupService extends BaseEntityService<Backup, Long> {
 
     @Inject
     private ExpressionInterpolator expressionInterpolator;
+
+    @Inject
+    private AuditService auditService;
 
     @Override
     public EntityRepository<Backup,Long> getRepository() {
@@ -97,6 +104,7 @@ public class BackupService extends BaseEntityService<Backup, Long> {
         }
         backup = backupRepository.findById(backup.getId()); //obtain the last version
         int status = -1;
+        String msg = null;
         try {
             java.io.File temp = java.io.File.createTempFile("backup", "");
             Map<String, Object> params = new HashMap<>();
@@ -106,7 +114,8 @@ public class BackupService extends BaseEntityService<Backup, Long> {
             Process process = new ProcessBuilder(command.split("###"))
                             .redirectErrorStream(true)
                             .start();
-            log.info(IOUtils.toString(process.getInputStream()));
+            msg = IOUtils.toString(process.getInputStream());
+            log.info(msg);
             if(process.waitFor(1, TimeUnit.HOURS))
                 status = process.exitValue();
 
@@ -118,7 +127,12 @@ public class BackupService extends BaseEntityService<Backup, Long> {
         } catch (Exception e) {
             getLogger().error("", e);
         }
-        backup.setStatus(status == 0 ? Backup.BackupStatus.COMPLETED : Backup.BackupStatus.FAILED);
+        if(status == 0)
+            backup.setStatus(Backup.BackupStatus.COMPLETED);
+        else {
+            backup.setStatus(Backup.BackupStatus.FAILED);
+            auditService.audit(backup, BACKUP_FAILED, msg, AuditLevel.RISK);
+        }
         backupRepository.edit(backup);
     }
 
