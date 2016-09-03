@@ -125,13 +125,24 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-release-plugin</artifactId>
-				<version>2.4.2</version>
+				<version>2.5.3</version>
 				<configuration>
 					<mavenExecutorId>forked-path</mavenExecutorId>
 					<useReleaseProfile>false</useReleaseProfile>
-					<arguments>-Psonatype-oss-release</arguments>
+					<releaseProfiles>sonatype-oss-release</releaseProfiles>
 					<localCheckout>true</localCheckout>
 					<pushChanges>false</pushChanges>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
+				<extensions>true</extensions>
+				<configuration>
+					<serverId>sonatype-nexus-snapshots</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>true</autoReleaseAfterClose>
 				</configuration>
 			</plugin>
 
@@ -145,17 +156,6 @@
 			<id>sonatype-oss-release</id>
 			<build>
 				<plugins>
-					<plugin>
-					  <groupId>org.sonatype.plugins</groupId>
-					  <artifactId>nexus-staging-maven-plugin</artifactId>
-					  <version>1.6.7</version>
-					  <extensions>true</extensions>
-					  <configuration>
-						<serverId>sonatype-nexus-snapshots</serverId>
-						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
-						<autoReleaseAfterClose>true</autoReleaseAfterClose>
-					  </configuration>
-					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>
