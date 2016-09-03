@@ -54,6 +54,7 @@
 
 	<build>
 		<plugins>
+			
 			<!-- Compiler plugin enforces Java 1.8 compatibility -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -144,6 +145,17 @@
 			<id>sonatype-oss-release</id>
 			<build>
 				<plugins>
+					<plugin>
+					  <groupId>org.sonatype.plugins</groupId>
+					  <artifactId>nexus-staging-maven-plugin</artifactId>
+					  <version>1.6.7</version>
+					  <extensions>true</extensions>
+					  <configuration>
+						<serverId>sonatype-nexus-snapshots</serverId>
+						<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+						<autoReleaseAfterClose>true</autoReleaseAfterClose>
+					  </configuration>
+					</plugin>
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-source-plugin</artifactId>

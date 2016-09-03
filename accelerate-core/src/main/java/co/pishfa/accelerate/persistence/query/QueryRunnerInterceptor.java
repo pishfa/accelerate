@@ -71,9 +71,13 @@ public class QueryRunnerInterceptor implements Serializable {
             if(qr.dynamic()) {
                 queryStr = expressionInterpolator.populate(queryStr, getNamedParams(m,ic));
             }
-            if(qr.nativeSql())
-                query = repository.getEntityManager().createNativeQuery(queryStr);
-            else
+            if(qr.nativeSql()) {
+                Class<?> returnType = m.getReturnType();
+                if (returnType != null && returnType != Void.TYPE && returnType != void.class && returnType != List.class && returnType != Object.class) {
+                    query = repository.getEntityManager().createNativeQuery(queryStr, returnType);
+                } else
+                    query = repository.getEntityManager().createNativeQuery(queryStr);
+            } else
                 query = repository.getEntityManager().createQuery(queryStr);
         } else { // named query mode
             String queryName = StrUtils.defaultIfEmpty(qr.named(), repository.entityAlias() + "." + m.getName());

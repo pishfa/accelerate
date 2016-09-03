@@ -220,14 +220,14 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@UiAction
 	@UiMessage
 	public String applyAndNext() throws Exception {
-		applyCurrent();
+		apply();
 		return next();
 	}
 
 	@UiAction
 	@UiMessage
 	public String applyAndPrev() throws Exception {
-		applyCurrent();
+		apply();
 		return prev();
 	}
 
@@ -241,7 +241,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 			} else if(hasNextPage()) {
 				nextPage();
 				edit(getData().get(0));
-			} else if(!editMode)
+			} else if(!isEditMode())
 				add();
 		}
 		return null;
@@ -265,7 +265,7 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 			int index = getData().indexOf(getCurrent());
 			if (index >= 0 && (index < getData().size() - 1) || hasNextPage())
 				return true;
-			else if(!editMode)
+			else if(!isEditMode())
 				return true;
 		}
 		return false;
