@@ -3,11 +3,11 @@
   <parent>
     <groupId>co.pishfa.accelerate</groupId>
     <artifactId>accelerate-parent</artifactId>
-    <version>0.0.2-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
   </parent>
   <groupId>co.pishfa.accelerate</groupId>
   <artifactId>accelerate-service</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.0.0-SNAPSHOT</version>
 	<properties>
 			<cxf.version>3.1.6</cxf.version>
 	</properties>
