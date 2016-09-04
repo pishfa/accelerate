@@ -2,7 +2,7 @@ package co.pishfa.accelerate.initializer.api;
 
 import java.util.Map;
 
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 
 /**
  * A Receiver for {@link Initializer} events.
@@ -16,17 +16,17 @@ public interface InitListener {
 	 * attributes of this entity is set.
 	 * 
 	 */
-	public void entityCreated(InitEntityMetadata initEntity, Object entityObj);
+	public void entityCreated(InitEntityMetaData initEntity, Object entityObj);
 
 	/**
 	 * Called when the processing of entity and its children are completed.
 	 */
-	public void entityFinished(InitEntityMetadata initEntity, Object entityObj);
+	public void entityFinished(InitEntityMetaData initEntity, Object entityObj);
 
 	/**
 	 * Only used in incremental mode or in the load section, to find existing entities with the given properties and
 	 * values. Non of values are null.
 	 * 
 	 */
-	public Object findEntity(InitEntityMetadata initEntity, Map<String, Object> propValues);
+	public Object findEntity(InitEntityMetaData initEntity, Map<String, Object> propValues);
 }

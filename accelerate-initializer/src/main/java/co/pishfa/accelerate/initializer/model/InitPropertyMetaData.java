@@ -12,13 +12,13 @@ import co.pishfa.accelerate.initializer.core.DefaultInitializer;
  * @author Taha Ghasemi
  * 
  */
-public class InitPropertyMetadata {
+public class InitPropertyMetaData {
 	private String name;
 	private String alias;
 	private String defaultValue;
 	private final boolean dynamic;
 
-	public InitPropertyMetadata(String name, String alias, String defaultValue, boolean dynamic) {
+	public InitPropertyMetaData(String name, String alias, String defaultValue, boolean dynamic) {
 		Validate.notNull(name, "Name of property is required");
 		this.name = name;
 		this.alias = StringUtils.isEmpty(alias) ? name : alias;

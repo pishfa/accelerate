@@ -7,7 +7,7 @@ import co.pishfa.accelerate.initializer.model.*;
 import org.junit.Before;
 import org.junit.Test;
 
-import co.pishfa.accelerate.initializer.model.InitPropertyMetadata;
+import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 
 public class InitializerFactoryTest {
 
@@ -38,19 +38,19 @@ public class InitializerFactoryTest {
 	}
 
 	private void checkInitEntites(InitializerFactory factory) {
-		InitEntityMetadata author = factory.getInitEntityByAlias("Author");
+		InitEntityMetaData author = factory.getInitEntityByAlias("Author");
 		assertNotNull(author);
 		assertEquals(Author.class, author.getEntityClass());
 
-		InitEntityMetadata book = factory.getInitEntityByAlias("book");
+		InitEntityMetaData book = factory.getInitEntityByAlias("book");
 		assertNotNull(book);
 		assertEquals(Book.class, book.getEntityClass());
 		assertEquals(4, book.getProperties().size());
-		InitPropertyMetadata name = book.getProperty("title");
+		InitPropertyMetaData name = book.getProperty("title");
 		assertNotNull(name);
 		assertEquals("name", name.getName());
 
-		InitPropertyMetadata fullName = book.getProperty("fullName");
+		InitPropertyMetaData fullName = book.getProperty("fullName");
 		assertNotNull(fullName);
 		assertEquals("Book #{this.name}", fullName.getDefaultValue());
 	}

@@ -8,7 +8,7 @@ import co.pishfa.accelerate.initializer.model.*;
 import org.junit.Test;
 
 import co.pishfa.accelerate.initializer.core.BaseInitListener;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 
 /**
  * 
@@ -25,7 +25,7 @@ public class IncrementalInitializerTester {
 				.entityClasses(Book.class, Author.class, Category.class, Tag.class).key("name").incremental(true);
 		Initializer initializer = factory.create(new BaseInitListener() {
 			@Override
-			public Object findEntity(InitEntityMetadata initEntity, Map<String, Object> propValues) {
+			public Object findEntity(InitEntityMetaData initEntity, Map<String, Object> propValues) {
 				if ("a1".equals(propValues.get("name")))
 					return a1;
 				if ("c1".equals(propValues.get("name")))

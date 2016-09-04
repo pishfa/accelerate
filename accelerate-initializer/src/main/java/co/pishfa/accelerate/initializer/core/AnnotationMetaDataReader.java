@@ -15,13 +15,13 @@ import java.util.List;
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
  * 
  */
-public class AnnotationMetadataReader {
+public class AnnotationMetaDataReader {
 
-	private static final Logger log = LoggerFactory.getLogger(AnnotationMetadataReader.class);
+	private static final Logger log = LoggerFactory.getLogger(AnnotationMetaDataReader.class);
 
 	protected InitializerFactory factory;
 
-	public AnnotationMetadataReader(InitializerFactory factory) {
+	public AnnotationMetaDataReader(InitializerFactory factory) {
 		this.factory = factory;
 	}
 
@@ -55,9 +55,9 @@ public class AnnotationMetadataReader {
 		if(StringUtils.isEmpty(key))
 			key = findEntityKeys(entityClass);
 
-		InitEntityMetadata initEntityMetadata = new InitEntityMetadata(alias, entityClass, key);
-		factory.addInitEntity(initEntityMetadata);
-		addInitProperties(entityClass, initEntityMetadata);
+		InitEntityMetaData initEntityMetaData = new InitEntityMetaData(alias, entityClass, key);
+		factory.addInitEntity(initEntityMetaData);
+		addInitProperties(entityClass, initEntityMetaData);
 	}
 
 	protected String findEntityKeys(Class<?> entityClass) {
@@ -79,23 +79,23 @@ public class AnnotationMetadataReader {
 	/**
 	 * Adds the init properties of the given entityClass plus all its parents that annotated with {@link InitEntity} .
 	 */
-	protected void addInitProperties(Class<?> entityClass, InitEntityMetadata initEntityMetadata) {
+	protected void addInitProperties(Class<?> entityClass, InitEntityMetaData initEntityMetaData) {
 		Class<?> parent = entityClass.getSuperclass();
 		if (parent.isAnnotationPresent(InitEntity.class)) {
-			addInitProperties(parent, initEntityMetadata);
+			addInitProperties(parent, initEntityMetaData);
 		}
 
 		InitEntity initEntity = entityClass.getAnnotation(InitEntity.class);
 		if (initEntity != null) {
 			for (InitProperty initProperty : initEntity.properties()) {
-				initEntityMetadata.addProperty(processInitProperty(null, initProperty, entityClass));
+				initEntityMetaData.addProperty(processInitProperty(null, initProperty, entityClass));
 			}
 		}
 
 		for (Field field : entityClass.getDeclaredFields()) {
 			InitProperty initProperty = field.getAnnotation(InitProperty.class);
 			if (initProperty != null) {
-				initEntityMetadata.addProperty(processInitProperty(field, initProperty, entityClass));
+				initEntityMetaData.addProperty(processInitProperty(field, initProperty, entityClass));
 			}
 		}
 	}
@@ -109,7 +109,7 @@ public class AnnotationMetadataReader {
 	 *            only used for debugging purposes.
 	 * @return
 	 */
-	private InitPropertyMetadata processInitProperty(Field field, InitProperty initProperty, Class<?> entityClass) {
+	private InitPropertyMetaData processInitProperty(Field field, InitProperty initProperty, Class<?> entityClass) {
 		String fieldName = null;
 		if (field == null) {
 			fieldName = initProperty.name();
@@ -120,9 +120,9 @@ public class AnnotationMetadataReader {
 		} else {
 			fieldName = StringUtils.isEmpty(initProperty.name()) ? field.getName() : initProperty.name();
 		}
-		InitPropertyMetadata initPropertyMetadata = new InitPropertyMetadata(fieldName, initProperty.alias(),
+		InitPropertyMetaData initPropertyMetaData = new InitPropertyMetaData(fieldName, initProperty.alias(),
 				initProperty.value(), initProperty.dynamic());
-		return initPropertyMetadata;
+		return initPropertyMetaData;
 	}
 
 }

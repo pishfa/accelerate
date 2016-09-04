@@ -7,8 +7,8 @@ import co.pishfa.accelerate.initializer.api.InitListener;
 import co.pishfa.accelerate.initializer.api.Initializer;
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.model.InitAnnotation;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
-import co.pishfa.accelerate.initializer.model.InitPropertyMetadata;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
+import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 import co.pishfa.accelerate.initializer.util.Input;
 import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.beanutils.ConvertUtils;
@@ -49,7 +49,7 @@ public class DefaultInitializer implements Initializer {
 	private abstract class ProcessEntity {
 
 		public ProcessEntity parent;
-		public InitEntityMetadata metadata;
+		public InitEntityMetaData metadata;
 		/**
 		 * The current value of this entity. For example, if this entity corresponds to a class, this value is refer to
 		 * instance of this class that is created (or loaded) by the initializer.
@@ -240,8 +240,8 @@ public class DefaultInitializer implements Initializer {
 	 * 
 	 */
 	private static class ProcessProperty {
-		public ProcessProperty(ProcessEntity entity, InitPropertyMetadata metadata, String name, Object rawValue,
-				Object value) {
+		public ProcessProperty(ProcessEntity entity, InitPropertyMetaData metadata, String name, Object rawValue,
+							   Object value) {
 			this.entity = entity;
 			this.metadata = metadata;
 			this.name = name;
@@ -250,7 +250,7 @@ public class DefaultInitializer implements Initializer {
 		}
 
 		public ProcessEntity entity;
-		public InitPropertyMetadata metadata;
+		public InitPropertyMetaData metadata;
 		public String name;
 		public Object rawValue;
 		public Object value;
@@ -523,7 +523,7 @@ public class DefaultInitializer implements Initializer {
 
 			// check for alias
 			if (entity.parent != null && entity.parent.metadata != null) {
-				InitPropertyMetadata initProperty = entity.parent.metadata.getProperty(propName);
+				InitPropertyMetaData initProperty = entity.parent.metadata.getProperty(propName);
 				if (initProperty != null) {
 					propName = initProperty.getName();
 				}
@@ -633,7 +633,7 @@ public class DefaultInitializer implements Initializer {
 			String attrName = attr.getKey();
 			Object attrValue = attr.getValue();
 			// resolve aliases
-			InitPropertyMetadata prop = null;
+			InitPropertyMetaData prop = null;
 			if (entity.metadata != null) {
 				prop = entity.metadata.getProperty(attrName);
 				if (prop != null) {
@@ -648,7 +648,7 @@ public class DefaultInitializer implements Initializer {
 
 		// check for unset defaults
 		if (entity.metadata != null) {
-			for (InitPropertyMetadata prop : entity.metadata.getProperties()) {
+			for (InitPropertyMetaData prop : entity.metadata.getProperties()) {
 				String attrName = prop.getName();
 				if (!entity.properties.containsKey(attrName) && prop.getDefaultValue() != null) {
 					ProcessProperty property = new ProcessProperty(entity, prop, attrName, prop.getDefaultValue(), null);
@@ -806,7 +806,7 @@ public class DefaultInitializer implements Initializer {
 			// Auto-scoping: tries to guess
 			// First find the alias corresponding to this propertyType
 			String alias = null;
-			InitEntityMetadata initEntity = factory.getInitEntityByClass(propertyType);
+			InitEntityMetaData initEntity = factory.getInitEntityByClass(propertyType);
 			if (initEntity != null) {
 				alias = initEntity.getAlias();
 				if (alias != null) {
@@ -944,7 +944,7 @@ public class DefaultInitializer implements Initializer {
 
 	protected String getAbsoluteAnchorName(String anchorName, Class<?> entityClass) {
 		if (anchorName.startsWith(":")) {
-			InitEntityMetadata initEntity = factory.getInitEntityByClass(entityClass);
+			InitEntityMetaData initEntity = factory.getInitEntityByClass(entityClass);
 			Validate.notNull(initEntity, "Entity class is not defined for " + entityClass
 					+ " To be used in absolute anchor name");
 			anchorName = initEntity.getAlias() + anchorName;

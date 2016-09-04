@@ -1,8 +1,8 @@
 package co.pishfa.accelerate.initializer.core;
 
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
-import co.pishfa.accelerate.initializer.model.InitPropertyMetadata;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
+import co.pishfa.accelerate.initializer.model.InitPropertyMetaData;
 import org.apache.commons.lang3.StringUtils;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
@@ -15,28 +15,28 @@ import java.io.File;
 import java.io.InputStream;
 
 /**
- * Reads {@link co.pishfa.accelerate.initializer.model.InitEntityMetadata} from an XML config file.
+ * Reads {@link InitEntityMetaData} from an XML config file.
  * 
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
  * 
  */
-public class XmlMetadataReader {
+public class XmlMetaDataReader {
 
 	private static final String INITIALIZER_METADATA_XSD = "/initializer-metadata.xsd";
 	protected static final Namespace PISHFA_NS = Namespace.getNamespace("http://pishfa.co");
 
-	private static final Logger log = LoggerFactory.getLogger(XmlMetadataReader.class);
+	private static final Logger log = LoggerFactory.getLogger(XmlMetaDataReader.class);
 
 	protected InitializerFactory factory;
 
-	public XmlMetadataReader(InitializerFactory factory) {
+	public XmlMetaDataReader(InitializerFactory factory) {
 		this.factory = factory;
 	}
 
 	public void processMetadata(InputStream input) throws Exception {
 		Element root = getRootElement(input);
 		for (Element entityElement : root.getChildren("entity", PISHFA_NS)) {
-			InitEntityMetadata initEntity = processEntityElement(entityElement);
+			InitEntityMetaData initEntity = processEntityElement(entityElement);
 			factory.addInitEntity(initEntity);
 		}
 	}
@@ -49,17 +49,17 @@ public class XmlMetadataReader {
 		return root;
 	}
 
-	protected InitEntityMetadata processEntityElement(Element entityElement) throws ClassNotFoundException {
+	protected InitEntityMetaData processEntityElement(Element entityElement) throws ClassNotFoundException {
 		String entityClazz = entityElement.getAttributeValue("class");
 		String entityAlias = entityElement.getAttributeValue("alias");
 		String entityKey = entityElement.getAttributeValue("key");
-		InitEntityMetadata initEntity = new InitEntityMetadata(entityAlias, Class.forName(entityClazz), entityKey);
+		InitEntityMetaData initEntity = new InitEntityMetaData(entityAlias, Class.forName(entityClazz), entityKey);
 		String inherits = entityElement.getAttributeValue("inherits");
 		if (!StringUtils.isEmpty(inherits)) {
 			for (String inherit : inherits.split(",")) {
-				InitEntityMetadata inheritEntity = factory.getInitEntityByAlias(inherit);
+				InitEntityMetaData inheritEntity = factory.getInitEntityByAlias(inherit);
 				if (inheritEntity != null) {
-					for (InitPropertyMetadata property : inheritEntity.getProperties()) {
+					for (InitPropertyMetaData property : inheritEntity.getProperties()) {
 						initEntity.addProperty(property);
 					}
 				} else {
@@ -71,20 +71,20 @@ public class XmlMetadataReader {
 		return initEntity;
 	}
 
-	protected void processEntityElementProperties(Element entityElement, InitEntityMetadata initEntity) {
+	protected void processEntityElementProperties(Element entityElement, InitEntityMetaData initEntity) {
 		// read properties of an entity
 		for (Element propertyElement : entityElement.getChildren("property", PISHFA_NS)) {
-			InitPropertyMetadata initProperty = processPropertyElement(propertyElement);
+			InitPropertyMetaData initProperty = processPropertyElement(propertyElement);
 			initEntity.addProperty(initProperty);
 		}
 	}
 
-	protected InitPropertyMetadata processPropertyElement(Element propertyElement) {
+	protected InitPropertyMetaData processPropertyElement(Element propertyElement) {
 		String propName = propertyElement.getAttributeValue("name");
 		String propAlias = propertyElement.getAttributeValue("alias");
 		String propDefault = propertyElement.getAttributeValue("default");
 		String propDynamic = propertyElement.getAttributeValue("dynamic");
-		InitPropertyMetadata initProperty = new InitPropertyMetadata(propName, propAlias, propDefault,
+		InitPropertyMetaData initProperty = new InitPropertyMetaData(propName, propAlias, propDefault,
 				!"false".equals(propDynamic));
 		return initProperty;
 	}

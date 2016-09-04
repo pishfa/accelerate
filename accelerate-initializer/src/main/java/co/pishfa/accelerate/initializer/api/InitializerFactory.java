@@ -11,9 +11,9 @@ import java.util.Map;
 
 import javax.el.ExpressionFactory;
 
-import co.pishfa.accelerate.initializer.core.AnnotationMetadataReader;
-import co.pishfa.accelerate.initializer.core.XmlMetadataReader;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
+import co.pishfa.accelerate.initializer.core.AnnotationMetaDataReader;
+import co.pishfa.accelerate.initializer.core.XmlMetaDataReader;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,8 +39,8 @@ public class InitializerFactory {
 
 	private static final Logger log = LoggerFactory.getLogger(InitializerFactory.class);
 
-	private final Map<String, InitEntityMetadata> aliasToInitEntity = new HashMap<>();
-	private final Map<Class<?>, InitEntityMetadata> classToInitEntity = new HashMap<>();
+	private final Map<String, InitEntityMetaData> aliasToInitEntity = new HashMap<>();
+	private final Map<Class<?>, InitEntityMetaData> classToInitEntity = new HashMap<>();
 
 	private ExpressionFactory expressionFactory;
 	private boolean incremental = false;
@@ -74,7 +74,7 @@ public class InitializerFactory {
 	}
 
 	protected void processEntityClasses(List<Class<?>> entityClasses) {
-		new AnnotationMetadataReader(this).processEntityClasses(entityClasses);
+		new AnnotationMetaDataReader(this).processEntityClasses(entityClasses);
 	}
 
 	/**
@@ -101,7 +101,7 @@ public class InitializerFactory {
 
 	protected void processMetadataFile(InputStream input, boolean autoClose) throws Exception {
 		try {
-			new XmlMetadataReader(this).processMetadata(input);
+			new XmlMetaDataReader(this).processMetadata(input);
 		} finally {
 			if (autoClose) {
 				input.close();
@@ -146,7 +146,7 @@ public class InitializerFactory {
 	 * 
 	 * @param initEntity
 	 */
-	public void addInitEntity(InitEntityMetadata initEntity) {
+	public void addInitEntity(InitEntityMetaData initEntity) {
 		Validate.notNull(initEntity);
 
 		String alias = initEntity.getAlias();
@@ -203,17 +203,17 @@ public class InitializerFactory {
 	}
 
 	/**
-	 * @return the InitEntityMetadata with the given alias.
+	 * @return the InitEntityMetaData with the given alias.
 	 */
-	public InitEntityMetadata getInitEntityByAlias(String alias) {
+	public InitEntityMetaData getInitEntityByAlias(String alias) {
 		// null key is allowed
 		return aliasToInitEntity.get(alias);
 	}
 
 	/**
-	 * @return the InitEntityMetadata corresponding to the entityClass provided
+	 * @return the InitEntityMetaData corresponding to the entityClass provided
 	 */
-	public InitEntityMetadata getInitEntityByClass(Class<?> entityClass) {
+	public InitEntityMetaData getInitEntityByClass(Class<?> entityClass) {
 		// null key is allowed
 		return classToInitEntity.get(entityClass);
 

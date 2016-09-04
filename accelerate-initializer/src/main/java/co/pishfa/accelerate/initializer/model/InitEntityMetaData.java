@@ -16,18 +16,18 @@ import java.util.Map;
  * @author Taha Ghasemi
  * 
  */
-public class InitEntityMetadata {
+public class InitEntityMetaData {
 
-	private static final Logger log = LoggerFactory.getLogger(InitEntityMetadata.class);
+	private static final Logger log = LoggerFactory.getLogger(InitEntityMetaData.class);
 
 	private String alias;
 	private Class<?> entityClass;
 	private String key;
-	private Map<String, InitPropertyMetadata> propertiesByAlias = new HashMap<>();
+	private Map<String, InitPropertyMetaData> propertiesByAlias = new HashMap<>();
 
-	private final List<InitPropertyMetadata> properties = new ArrayList<>();
+	private final List<InitPropertyMetaData> properties = new ArrayList<>();
 
-	public InitEntityMetadata(String alias, Class<?> entityClass, String key) {
+	public InitEntityMetaData(String alias, Class<?> entityClass, String key) {
 		Validate.notNull(entityClass);
 
 		this.entityClass = entityClass;
@@ -51,11 +51,11 @@ public class InitEntityMetadata {
 		this.entityClass = entityClass;
 	}
 
-	public InitPropertyMetadata getProperty(String propertyAlias) {
+	public InitPropertyMetaData getProperty(String propertyAlias) {
 		return propertiesByAlias.get(propertyAlias);
 	}
 
-	public void setPropertiesByAlias(Map<String, InitPropertyMetadata> properties) {
+	public void setPropertiesByAlias(Map<String, InitPropertyMetaData> properties) {
 		this.propertiesByAlias = properties;
 	}
 
@@ -67,7 +67,7 @@ public class InitEntityMetadata {
 		this.key = unique;
 	}
 
-	public List<InitPropertyMetadata> getProperties() {
+	public List<InitPropertyMetaData> getProperties() {
 		return properties;
 	}
 
@@ -75,8 +75,8 @@ public class InitEntityMetadata {
 	 * Adds a new property. Override the previous one with the same alias, if any.
 	 * 
 	 */
-	public void addProperty(InitPropertyMetadata property) {
-		InitPropertyMetadata prevProperty = propertiesByAlias.get(property.getAlias());
+	public void addProperty(InitPropertyMetaData property) {
+		InitPropertyMetaData prevProperty = propertiesByAlias.get(property.getAlias());
 		if (prevProperty != null) {
 			log.warn("Overriding the property with alias {} in {}", property.getAlias(), entityClass);
 			properties.remove(prevProperty);
