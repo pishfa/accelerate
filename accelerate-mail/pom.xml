@@ -3,11 +3,11 @@
   <parent>
     <groupId>co.pishfa.accelerate</groupId>
     <artifactId>accelerate-parent</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
   </parent>
   <groupId>co.pishfa.accelerate</groupId>
   <artifactId>accelerate-mail</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <dependencies>
   	<!-- Mail -->
 	  <dependency>
@@ -38,7 +38,11 @@
 		<dependency>
 			<groupId>co.pishfa.accelerate</groupId>
 			<artifactId>accelerate-core</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
+			<version>1.0.0</version>
 		</dependency>
   </dependencies>
+
+  <scm>
+    <tag>accelerate-mail-1.0.0</tag>
+  </scm>
 </project>
