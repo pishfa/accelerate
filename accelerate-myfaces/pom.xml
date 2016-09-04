@@ -8,7 +8,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>accelerate-myfaces</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <properties>
         <juel.version>2.2.7</juel.version>
@@ -28,10 +28,4 @@
             <scope>provided</scope> <!-- Provided in tomcat -->
         </dependency>
     </dependencies>
-
-
-
-  <scm>
-    <tag>accelerate-myfaces-1.0.0</tag>
-  </scm>
 </project>
