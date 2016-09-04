@@ -7,7 +7,7 @@
   </parent>
   <groupId>co.pishfa.accelerate</groupId>
   <artifactId>accelerate-service</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
 	<properties>
 			<cxf.version>3.1.6</cxf.version>
 	</properties>
@@ -55,7 +55,7 @@
 	  <dependency>
 			<groupId>co.pishfa.accelerate</groupId>
 			<artifactId>accelerate-core</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 
 	  <dependency>
@@ -65,8 +65,4 @@
 		  <scope>provided</scope>
 	  </dependency>
   </dependencies>
-
-  <scm>
-    <tag>accelerate-service-1.0.0</tag>
-  </scm>
 </project>
