@@ -9,13 +9,13 @@
     </parent>
     <groupId>co.pishfa.accelerate</groupId>
     <artifactId>accelerate-fa</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
             <groupId>co.pishfa.accelerate</groupId>
             <artifactId>accelerate-core</artifactId>
-            <version>1.0.0</version>
+            <version>1.0.1-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.persistence</groupId>
@@ -41,11 +41,12 @@
             <version>2.1.7</version>
         </dependency>
 
+        <dependency>
+            <groupId>javax.enterprise</groupId>
+            <artifactId>cdi-api</artifactId>
+            <version>1.1</version>
+            <scope>provided</scope>
+        </dependency>
+
     </dependencies>
-
-
-
-  <scm>
-    <tag>accelerate-fa-1.0.0</tag>
-  </scm>
 </project>
