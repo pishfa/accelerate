@@ -3,19 +3,19 @@ package co.pishfa.accelerate.portal.service;
 import co.pishfa.accelerate.cdi.CdiUtils;
 import co.pishfa.accelerate.core.FrameworkExtension;
 import co.pishfa.accelerate.core.FrameworkStartedEvent;
-import co.pishfa.accelerate.service.Service;
 import co.pishfa.accelerate.initializer.api.InitializerFactory;
 import co.pishfa.accelerate.initializer.core.BaseInitListener;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
-import co.pishfa.accelerate.portal.service.PageMetadata.PageControllerMetadata;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 import co.pishfa.accelerate.portal.entity.Page;
+import co.pishfa.accelerate.portal.service.PageMetadata.PageControllerMetadata;
 import co.pishfa.accelerate.resource.ResourceUtils;
+import co.pishfa.accelerate.service.Service;
 import co.pishfa.accelerate.ui.UiExtention;
 import co.pishfa.accelerate.ui.UiUtils;
 import co.pishfa.accelerate.ui.controller.UiController;
 import co.pishfa.accelerate.utility.StrUtils;
-import co.pishfa.security.service.AuthorizationService;
 import co.pishfa.security.entity.authorization.Action;
+import co.pishfa.security.service.AuthorizationService;
 import org.apache.commons.lang3.StringUtils;
 import org.omnifaces.cdi.ViewScoped;
 import org.slf4j.Logger;
@@ -55,7 +55,7 @@ public class PageMetadataService {
 
 	private class PagesListener extends BaseInitListener {
 		@Override
-		public void entityCreated(InitEntityMetadata initEntity, Object entityObj) {
+		public void entityCreated(InitEntityMetaData initEntity, Object entityObj) {
 			if (entityObj instanceof Page) {
 				Page page = (Page) entityObj;
 				// If title is not explicitly defined, try to guess it from title of its original view action

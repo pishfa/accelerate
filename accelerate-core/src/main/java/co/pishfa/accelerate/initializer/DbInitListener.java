@@ -3,9 +3,9 @@
  */
 package co.pishfa.accelerate.initializer;
 
-import co.pishfa.accelerate.initializer.core.BaseInitListener;
-import co.pishfa.accelerate.initializer.model.InitEntityMetadata;
 import co.pishfa.accelerate.entity.common.Entity;
+import co.pishfa.accelerate.initializer.core.BaseInitListener;
+import co.pishfa.accelerate.initializer.model.InitEntityMetaData;
 import co.pishfa.accelerate.persistence.Primary;
 import co.pishfa.accelerate.persistence.query.JpaQueryBuilder;
 import org.slf4j.Logger;
@@ -32,7 +32,7 @@ public class DbInitListener extends BaseInitListener {
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public void entityCreated(final InitEntityMetadata initEntity, final Object entityObj) {
+	public void entityCreated(final InitEntityMetaData initEntity, final Object entityObj) {
 		Entity obj = (Entity) entityObj;
 		if (obj.getId() == null) {
 			entityManager.persist(obj);
@@ -42,12 +42,12 @@ public class DbInitListener extends BaseInitListener {
 	}
 
 	@Override
-	public void entityFinished(final InitEntityMetadata initEntity, final Object entityObj) {
+	public void entityFinished(final InitEntityMetaData initEntity, final Object entityObj) {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	public Object findEntity(final InitEntityMetadata initEntity, Map<String, Object> propValues) {
+	public Object findEntity(final InitEntityMetaData initEntity, Map<String, Object> propValues) {
 		JpaQueryBuilder<Entity> q = new JpaQueryBuilder(entityManager, initEntity.getEntityClass(), "");
 		q.select().whereTrue();
 

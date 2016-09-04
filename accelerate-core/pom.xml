@@ -294,7 +294,7 @@
 		<dependency>
 			<groupId>co.pishfa.accelerate</groupId>
 			<artifactId>accelerate-initializer</artifactId>
-			<version>0.0.2-SNAPSHOT</version>
+			<version>1.0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
 
