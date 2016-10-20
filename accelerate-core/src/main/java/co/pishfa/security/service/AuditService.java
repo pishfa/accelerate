@@ -18,6 +18,7 @@ import co.pishfa.accelerate.schedule.Scheduled;
 import co.pishfa.accelerate.service.Service;
 import co.pishfa.accelerate.ui.UiService;
 import co.pishfa.accelerate.utility.CommonUtils;
+import co.pishfa.accelerate.utility.StrUtils;
 import co.pishfa.accelerate.utility.UriUtils;
 import co.pishfa.security.entity.audit.Audit;
 import co.pishfa.security.entity.audit.AuditLevel;
@@ -182,8 +183,8 @@ public class AuditService implements Serializable {
 			user = identity.getUser();
 		} catch (Exception e) {} //sometimes SessionContext is not available
 		if (user != null) {
-			audit.setCreatedBy(identity.getUser());
-			audit.setDomain(identity.getUser().getDomain());
+			audit.setCreatedBy(user);
+			audit.setDomain(user.getDomain());
 		} else {
 			audit.setCreatedBy(userRepo.findSystemUser());
 			audit.setDomain(domainRepo.getMainDomain());
@@ -212,7 +213,8 @@ public class AuditService implements Serializable {
 				notification.setFrom("audit");
 				notification.setTitle(audit.getAction().getTitle());
 				notification.setMessage("notification.audit");
-				notification.setParameters(audit.getAction().getTitle(), audit.getCreatedBy()!=null?audit.getCreatedBy().getTitle():"", audit.getTargetTitle(), audit.getMessage()==null?"":audit.getMessage());
+
+				notification.setParameters(audit.getAction().getTitle(),audit.getCreatedBy()!=null?audit.getCreatedBy().getTitle():"", StrUtils.defaultIfNull(audit.getTargetTitle(),""), StrUtils.defaultIfNull(audit.getMessage(),""));
 				notificationService.notify(notification,notificationConfig.getNotifier());
 			}
 		}

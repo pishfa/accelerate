@@ -277,7 +277,7 @@ public abstract class EntityChildMgmt<T extends Entity<Long>, P extends Entity<L
 	 */
 	@UiAction
 	public String cancel() {
-		if (getCurrent() != null)
+		if (getEditMode() != null && getEditMode() == false && getCurrent() != null)
 			deleteCurrent();
 		return null;
 	}
