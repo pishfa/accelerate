@@ -328,7 +328,7 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         }
     }
 
-    public void onDrop(TreeDragDropEvent event) {
+    public Object onDrop(TreeDragDropEvent event) {
         TreeNode dragNode = event.getDragNode();
         TreeNode dropNode = event.getDropNode();
         int dropIndex = event.getDropIndex();
@@ -357,6 +357,8 @@ public class HierarchicalEntityMgmt<T extends HierarchicalEntity<T,K>, K> extend
         setData(dragNode, source);
         setCurrentNode(dragNode);
         setData(dropNode, source.getParent());
+
+        return null;
     }
 
     protected void updateRank(T newParent, int dropIndex, T source) {
