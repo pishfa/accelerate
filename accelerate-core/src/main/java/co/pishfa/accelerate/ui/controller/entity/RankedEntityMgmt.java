@@ -34,6 +34,12 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	}
 
 	@Override
+	public String load() {
+		setMaxRank(null);
+		return super.load();
+	}
+
+	@Override
 	public RankedEntityService<T,K> getEntityService() {
 		return (RankedEntityService<T,K>) super.getEntityService();
 	}
