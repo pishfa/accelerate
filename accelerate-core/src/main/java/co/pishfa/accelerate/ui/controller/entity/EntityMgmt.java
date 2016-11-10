@@ -336,9 +336,8 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	}
 
 	/**
-	 * Deletes the given entity by first checking for security permission by calling {@link #checkDeletePermission(co.pishfa.accelerate.entity.common.Entity)} and then calling {@link #deleteEntity(Entity)}
-	 * .
-	 * 
+	 * Deletes the given entity by first checking for security permission by calling {@link #checkDeletePermission(co.pishfa.accelerate.entity.common.Entity)} and then calling {@link #deleteEntity(Entity)}.
+	 *
 	 * @return null
 	 */
 	@UiAction

@@ -54,7 +54,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 
 	@UiAction
 	public String up() {
-		if(getData().get(0) == getCurrent()) {
+		if(hasPagination() && getData().get(0) == getCurrent()) {
 			setCurrentPage(getCurrentPage()-1);
 		}
 		setPrevCurrent(upEntity(getCurrent()));
@@ -111,7 +111,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 		String res = super.save();
 		//due to buck inc,dec we must clear pc
 		getEntityService().clear();
-		if(getCurrent() != null)
+		if(hasPagination() && getCurrent() != null)
 			setCurrentPage(1 + (getCurrent().getRank()-1) / getPageSize());
 		return res;
 	}
