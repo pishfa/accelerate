@@ -5,30 +5,27 @@ import co.pishfa.accelerate.async.RescheduleType;
 import co.pishfa.accelerate.cdi.CdiUtils;
 import co.pishfa.accelerate.core.ConfigAppliedEvent;
 import co.pishfa.accelerate.persistence.repository.EntityRepository;
-import co.pishfa.accelerate.service.BaseEntityService;
+import co.pishfa.accelerate.schedule.ScheduleTrigger;
+import co.pishfa.accelerate.schedule.Scheduled;
+import co.pishfa.accelerate.schedule.SchedulerService;
 import co.pishfa.accelerate.service.Action;
+import co.pishfa.accelerate.service.BaseEntityService;
 import co.pishfa.accelerate.service.Service;
-import co.pishfa.accelerate.schedule.*;
 import co.pishfa.accelerate.storage.model.Folder;
 import co.pishfa.accelerate.storage.model.UploadedFile;
 import co.pishfa.accelerate.storage.service.FileService;
-import co.pishfa.accelerate.storage.model.File;
 import co.pishfa.accelerate.template.ExpressionInterpolator;
 import co.pishfa.accelerate.utility.StrUtils;
 import co.pishfa.security.entity.audit.AuditLevel;
 import co.pishfa.security.service.AuditService;
 import co.pishfa.security.service.RunAs;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.deltaspike.jpa.api.transaction.Transactional;
 import org.quartz.SchedulerException;
 import org.slf4j.Logger;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -77,7 +74,8 @@ public class BackupService extends BaseEntityService<Backup, Long> {
     public void onConfig(@Observes ConfigAppliedEvent event) throws SchedulerException {
         BackupConfig newConfig = event.getConfig().getObject(BackupConfig.class);
         boolean changed = backupConfig != null && !backupConfig.getSchedule().equals(newConfig);
-        schedulerService.schedule("backup", changed? RescheduleType.DELETE_PREV:RescheduleType.SKIP, newConfig.getSchedule());
+        if(newConfig != null && !StrUtils.isEmpty(newConfig.getSchedule()))
+            schedulerService.schedule("backup", changed? RescheduleType.DELETE_PREV:RescheduleType.SKIP, newConfig.getSchedule());
         backupConfig = newConfig;
     }
 

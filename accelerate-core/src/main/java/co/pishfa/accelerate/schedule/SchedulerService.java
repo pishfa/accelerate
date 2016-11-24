@@ -33,6 +33,7 @@ public class SchedulerService {
 
     private static final String EVERY_MONTH_CRON = "0 0 0 1 * ?";
     public static final String QUARTZ_PERSISTENT_PROPERTIES = "quartz.persistent.properties";
+    public static final String QUARTZ_PROPERTIES = "quartz.properties";
     public static final String OBSERVER_NAME = "observer.name";
     public static final String EVERY_MONTH = "every.month";
 
@@ -74,6 +75,13 @@ public class SchedulerService {
 
     @PostConstruct
     public void init() {
+        if (ResourceUtils.getResource(QUARTZ_PROPERTIES) != null) {
+            try {
+                inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
+            } catch (SchedulerException e) {
+                log.error("", e);
+            }
+        }
         if (ResourceUtils.getResource(QUARTZ_PERSISTENT_PROPERTIES) != null) {
             try {
                 //be sure that quartz tables are created
@@ -87,13 +95,15 @@ public class SchedulerService {
     }
 
     public void startup(@Observes FrameworkStartedEvent event) throws SchedulerException {
-        getInMemoryScheduler().start();
+        if (inMemoryScheduler != null)
+            inMemoryScheduler.start();
         if (persistedScheduler != null)
             persistedScheduler.start();
     }
 
     public void shutdown(@Observes final FrameworkShutdownEvent event) throws SchedulerException {
-        inMemoryScheduler.shutdown();
+        if (inMemoryScheduler != null)
+            inMemoryScheduler.shutdown();
         if (persistedScheduler != null)
             persistedScheduler.shutdown();
     }
@@ -102,9 +112,6 @@ public class SchedulerService {
     @ApplicationScoped
     @InMemory
     public Scheduler getInMemoryScheduler() throws SchedulerException {
-        if (inMemoryScheduler == null) {
-            inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        }
         return inMemoryScheduler;
     }
 
@@ -112,26 +119,29 @@ public class SchedulerService {
     @ApplicationScoped
     @Persisted
     public Scheduler getPersistedScheduler() throws SchedulerException {
-        return persistedScheduler == null ? getInMemoryScheduler() : persistedScheduler;
+        return persistedScheduler == null ? inMemoryScheduler : persistedScheduler;
     }
 
     /**
      * Schedules a persistent schedule using the provided cron expression. To notify, an event will be fired.
      */
     public void schedule(String name, RescheduleType rescheduleType, String cron) throws SchedulerException {
+        Scheduler scheduler = getPersistedScheduler();
+        if(scheduler == null)
+            return;
         JobKey jobKey = new JobKey(name);
-        if (getPersistedScheduler().getJobDetail(jobKey) != null) {
+        if (scheduler.getJobDetail(jobKey) != null) {
             if (rescheduleType == RescheduleType.SKIP)
                 return;
             if (rescheduleType == RescheduleType.DELETE_PREV)
-                getPersistedScheduler().deleteJob(jobKey);
+                scheduler.deleteJob(jobKey);
         }
 
         JobBuilder jobBuilder = JobBuilder.newJob().ofType(EventFiringJob.class).usingJobData(OBSERVER_NAME, name);
         JobDetail jobDetail = rescheduleType==RescheduleType.NEW? jobBuilder.build() : jobBuilder.withIdentity(jobKey).build();
         Trigger trigger = TriggerBuilder.newTrigger().startNow()
                 .withSchedule(CronScheduleBuilder.cronSchedule(cron)).build();
-        getPersistedScheduler().scheduleJob(jobDetail, trigger);
+        scheduler.scheduleJob(jobDetail, trigger);
     }
 
 }

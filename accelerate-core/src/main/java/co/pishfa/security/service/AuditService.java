@@ -9,7 +9,6 @@ import co.pishfa.accelerate.cdi.CdiUtils;
 import co.pishfa.accelerate.common.AuditableEvent;
 import co.pishfa.accelerate.core.ConfigAppliedEvent;
 import co.pishfa.accelerate.i18n.domain.Locale;
-import co.pishfa.accelerate.i18n.model.ExtendedLocaleTime;
 import co.pishfa.accelerate.notification.Notification;
 import co.pishfa.accelerate.notification.service.NotificationService;
 import co.pishfa.accelerate.schedule.ScheduleInterval;
@@ -23,7 +22,6 @@ import co.pishfa.accelerate.utility.UriUtils;
 import co.pishfa.security.entity.audit.Audit;
 import co.pishfa.security.entity.audit.AuditLevel;
 import co.pishfa.security.entity.audit.Auditable;
-import co.pishfa.security.entity.authentication.Domain;
 import co.pishfa.security.entity.authentication.Identity;
 import co.pishfa.security.entity.authentication.User;
 import co.pishfa.security.entity.authorization.Action;
@@ -214,7 +212,7 @@ public class AuditService implements Serializable {
 				notification.setTitle(audit.getAction().getTitle());
 				notification.setMessage("notification.audit");
 
-				notification.setParameters(audit.getAction().getTitle(),audit.getCreatedBy()!=null?audit.getCreatedBy().getTitle():"", StrUtils.defaultIfNull(audit.getTargetTitle(),""), StrUtils.defaultIfNull(audit.getMessage(),""));
+				notification.setParameters(audit.getAction().getTitle(),audit.getCreatedBy()!=null?audit.getCreatedBy().getTitle():"", audit.getTargetTitle()==null?"":(" " + audit.getTargetTitle()), StrUtils.defaultIfNull(audit.getMessage(),""));
 				notificationService.notify(notification,notificationConfig.getNotifier());
 			}
 		}
