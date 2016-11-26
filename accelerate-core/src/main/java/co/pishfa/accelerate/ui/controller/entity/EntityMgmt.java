@@ -95,12 +95,6 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	}
 
 	@Override
-	public List<T> getSelected() {
-		loadCurrent();
-		return super.getSelected();
-	}
-
-	@Override
 	public void onViewLoaded() throws Exception {
 		clean();
 		super.onViewLoaded();
@@ -325,6 +319,8 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@UiMessage
 	public String delete()  throws Exception {
 		if (hasOption(EntityControllerOption.DELETE)) {
+			if (!hasOption(EntityControllerOption.MULTI_SELECT))
+				loadCurrent();
 			for (T selected : getSelected()) {
                 checkDeletePermission(selected);
 				deleteEntity(selected);

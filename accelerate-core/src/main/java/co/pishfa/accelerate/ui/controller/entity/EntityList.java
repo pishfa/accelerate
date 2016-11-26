@@ -174,6 +174,10 @@ public class EntityList<T extends Entity<K>, K> extends EntityController<T,K> im
 
 	public void setCurrents(List<T> currents) {
 		this.currents = currents;
+		if(currents == null || currents.size() != 1)
+			setCurrent(null);
+		else
+			setCurrent(currents.get(0));
 	}
 
 	public boolean hasPagination() {
