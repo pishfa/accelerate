@@ -357,8 +357,9 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@UiAction
 	public String cancel() {
 		setEditMode(null);
-		setCurrent(hasOption(EntityControllerOption.PRESERVE_SELECTED)?prevCurrent:null);
 		setCurrents(null);
+        //must be after setCurrents
+        setCurrent(hasOption(EntityControllerOption.PRESERVE_SELECTED)?prevCurrent:null);
 		return null;
 	}
 

@@ -1,8 +1,8 @@
 package co.pishfa.accelerate.ui.controller.entity;
 
+import co.pishfa.accelerate.entity.common.RankedEntity;
 import co.pishfa.accelerate.persistence.filter.Filter;
 import co.pishfa.accelerate.service.RankedEntityService;
-import co.pishfa.accelerate.entity.common.RankedEntity;
 import co.pishfa.accelerate.ui.UiAction;
 import co.pishfa.accelerate.ui.UiMessage;
 

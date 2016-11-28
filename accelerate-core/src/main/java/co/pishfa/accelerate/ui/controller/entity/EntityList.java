@@ -45,8 +45,8 @@ public class EntityList<T extends Entity<K>, K> extends EntityController<T,K> im
 	@Override
 	public String load() {
         setData(null);
-        setCurrent(null);
 		setCurrents(null);
+        setCurrent(null);
 		return null;
 	}
 
