@@ -212,7 +212,7 @@ public class AuditService implements Serializable {
 				notification.setTitle(audit.getAction().getTitle());
 				notification.setMessage("notification.audit");
 
-				notification.setParameters(audit.getAction().getTitle(),audit.getCreatedBy()!=null?StrUtils.defaultIfNull(audit.getCreatedBy().getTitle(),""):"", audit.getTargetTitle()==null?"":(" " + audit.getTargetTitle()), StrUtils.defaultIfNull(audit.getMessage(),""));
+				notification.setParameters(audit.getAction().getTitle(),audit.getCreatedBy()!=null?StrUtils.defaultIfNull(audit.getCreatedBy().getTitle(),""):"", StrUtils.defaultIfNull(audit.getTargetTitle(),""), StrUtils.defaultIfNull(audit.getMessage(),""));
 				notificationService.notify(notification,notificationConfig.getNotifier());
 			}
 		}
