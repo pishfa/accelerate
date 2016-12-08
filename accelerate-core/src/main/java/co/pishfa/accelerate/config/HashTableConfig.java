@@ -26,7 +26,10 @@ public class HashTableConfig extends AbstractConfig {
 
 	@Override
 	public void setObject(String key, Object value) {
-		entries.put(key, value);
+		if(value != null)
+			entries.put(key, value);
+		else
+			entries.remove(key);
 	}
 
 	public HashTableConfig addAll(HashTableConfig src) {

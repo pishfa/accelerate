@@ -20,6 +20,11 @@ public class BackupRepo extends BaseJpaRepo<Backup, Long> {
         return null;
     }
 
+    @QueryRunner(maxResults = 1, value = "select e.creationDate from Backup e where e.status = ?1 order by e.creationDate desc")
+    public Date findLastDate(Backup.BackupStatus status) {
+        return null;
+    }
+
     @QueryRunner("delete from Backup where creationDate < ?1")
     public void deleteOlderThan(Date time) {
     }

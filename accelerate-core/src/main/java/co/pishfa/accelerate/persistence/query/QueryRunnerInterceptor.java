@@ -186,9 +186,12 @@ public class QueryRunnerInterceptor implements Serializable {
             return numRes.floatValue();
         } else if (returnType == Double.TYPE || returnType == Double.class) {
             Number numRes = (Number) query.getSingleResult();
-            if(numRes == null)
-                return returnType == Double.TYPE? 0d : null;
+            if (numRes == null)
+                return returnType == Double.TYPE ? 0d : null;
             return numRes.doubleValue();
+        } else if(query.getMaxResults() == 1) {
+            List res = query.getResultList();
+            return res.size()==0?null:res.get(0);
         } else {
             if (!qr.nullOnNoResult()) {
                 return query.getSingleResult();

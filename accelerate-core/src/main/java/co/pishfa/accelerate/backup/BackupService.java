@@ -26,10 +26,7 @@ import org.slf4j.Logger;
 
 import javax.enterprise.event.Observes;
 import javax.inject.Inject;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static co.pishfa.accelerate.utility.TimeUtils.*;
@@ -84,6 +81,14 @@ public class BackupService extends BaseEntityService<Backup, Long> {
         getInstance().perform();
     }
 
+    public void performIfRequired() {
+        if(backupConfig.getBackupPeriod() != null) {
+            Date last = backupRepository.findLastDate(Backup.BackupStatus.COMPLETED);
+            if (last == null || last.before(toDate(since(toMilliSecond(backupConfig.getBackupPeriod(), TimeUnit.SECONDS))))) {
+                perform();
+            }
+        }
+    }
     @Action
     public void perform() {
         Backup backup = new Backup();

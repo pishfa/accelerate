@@ -407,4 +407,8 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	public void setPrevCurrent(T prevCurrent) {
 		this.prevCurrent = prevCurrent;
 	}
+
+	public String noop() {
+		return null;
+	}
 }

@@ -80,9 +80,10 @@ public class HierarchicalEntityView<T extends HierarchicalEntity<T,K>, K> extend
         this.rootNode = rootNode;
     }
 
-    public void onNodeExpand(NodeExpandEvent event) {
+    public Object onNodeExpand(NodeExpandEvent event) {
         TreeNode node = event.getTreeNode();
         expandNode((DefaultTreeNode) node);
+        return null;
     }
 
     protected void expandNode(TreeNode node) {

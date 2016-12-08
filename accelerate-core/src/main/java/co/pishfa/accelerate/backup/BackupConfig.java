@@ -9,6 +9,7 @@ import co.pishfa.accelerate.config.ConfigEntity;
 public class BackupConfig {
 
     private String schedule;
+    private Integer backupPeriod; //simpler than schedule in seconds
     private String executorCommand;
     private Integer deletePeriod;
     private String storage;
@@ -43,5 +44,13 @@ public class BackupConfig {
 
     public void setStorage(String storage) {
         this.storage = storage;
+    }
+
+    public Integer getBackupPeriod() {
+        return backupPeriod;
+    }
+
+    public void setBackupPeriod(Integer backupPeriod) {
+        this.backupPeriod = backupPeriod;
     }
 }
