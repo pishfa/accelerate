@@ -59,6 +59,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 			setCurrentPage(getCurrentPage()-1);
 		}
 		setPrevCurrent(upEntity(getCurrent()));
+		getEntityService().clear();
 		load();
 		return null;
 	}
@@ -78,6 +79,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 			setCurrentPage(getCurrentPage()+1);
 		}
 		setPrevCurrent(downEntity(getCurrent()));
+		getEntityService().clear();
 		load();
 		return null;
 	}
@@ -90,6 +92,7 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 	protected void deleteEntity(T entity) {
 		super.deleteEntity(entity);
 		getEntityService().decrement(getRankFilter(), entity.getRank());
+        getEntityService().clear();
 		maxRank = getMaxRank() - 1;
 	}
 

@@ -37,7 +37,6 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 	@Transactional
 	public void increment(Filter<T> filter, int fromRank) {
 		head(filter, "set e.rank = e.rank + 1").and("e.rank >= :rank").with("rank", fromRank).run();
-		getEntityManager().clear();
 	}
 
 	@Override
@@ -45,14 +44,12 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 	public void increment(Filter<T> filter, int fromRank, int toRank) {
 		head(filter, "set e.rank = e.rank + 1").and("e.rank >= :rankStart and e.rank < :rankEnd")
 				.with("rankStart", fromRank).with("rankEnd", toRank).run();
-		getEntityManager().clear();
 	}
 
 	@Override
 	@Transactional
 	public void decrement(Filter<T> filter, int fromRank) {
 		head(filter, "set e.rank = e.rank - 1").and("e.rank >= :rank").with("rank", fromRank).run();
-		getEntityManager().clear();
 	}
 
 	@Override
@@ -60,7 +57,6 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 	public void decrement(Filter<T> filter, int fromRank, int toRank) {
 		head(filter, "set e.rank = e.rank - 1").and("e.rank >= :rankStart and e.rank < :rankEnd")
 				.with("rankStart", fromRank).with("rankEnd", toRank).run();
-		getEntityManager().clear();
 	}
 
 	protected QueryBuilder<T> head(Filter<T> filter, String head) {
