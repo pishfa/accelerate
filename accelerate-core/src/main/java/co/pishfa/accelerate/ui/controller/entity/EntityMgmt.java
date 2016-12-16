@@ -12,6 +12,7 @@ import co.pishfa.accelerate.ui.phase.UiPhaseAction;
 import co.pishfa.security.entity.authorization.SecuredEntity;
 import org.apache.commons.lang3.Validate;
 
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -104,8 +105,12 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	public String load() {
 		setEditMode(null);
 		super.load();
-		if(hasOption(EntityControllerOption.PRESERVE_SELECTED))
-			setCurrent(prevCurrent);
+		if(hasOption(EntityControllerOption.PRESERVE_SELECTED)) {
+			if(hasOption(EntityControllerOption.MULTI_SELECT))
+				setCurrents(Arrays.asList(prevCurrent));
+			else
+				setCurrent(prevCurrent);
+		}
 		return null;
 	}
 
@@ -228,15 +233,18 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@UiAction
 	@UiMessage
 	public String next() {
-		int index = getData().indexOf(getCurrent());
-		if(index >= 0) {
-			if(index < getData().size() - 1) {
-				edit(getData().get(index + 1));
-			} else if(hasNextPage()) {
-				nextPage();
-				edit(getData().get(0));
-			} else if(!isEditMode())
-				add();
+		if(!isEditMode())
+			add();
+		else {
+			int index = getData().indexOf(getCurrent());
+			if (index >= 0) {
+				if (index < getData().size() - 1) {
+					edit(getData().get(index + 1));
+				} else if (hasNextPage()) {
+					nextPage();
+					edit(getData().get(0));
+				}
+			}
 		}
 		return null;
 	}
@@ -356,10 +364,15 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	 */
 	@UiAction
 	public String cancel() {
+		if(prevCurrent != null &&hasOption(EntityControllerOption.PRESERVE_SELECTED)) {
+			if(hasOption(EntityControllerOption.MULTI_SELECT))
+				setCurrents(Arrays.asList(findEntity(prevCurrent.getId())));
+			else
+				loadCurrent(prevCurrent.getId());
+		} else {
+			setCurrents(null);
+		}
 		setEditMode(null);
-		setCurrents(null);
-        //must be after setCurrents
-        setCurrent(hasOption(EntityControllerOption.PRESERVE_SELECTED)?prevCurrent:null);
 		return null;
 	}
 
@@ -375,8 +388,10 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 			} else
 				add();
 			return null;
-		} else
+		} else {
+			setPrevCurrent(null);
 			return super.reset();
+		}
 	}
 
 	public Boolean getEditMode() {

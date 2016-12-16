@@ -50,7 +50,7 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 		FacesContext facesContext = FacesContext.getCurrentInstance();
 		UserMessages userMessages = UserMessages.getInstance();
 
-		if (facesContext.getExternalContext().isResponseCommitted()) {
+		if (facesContext == null || facesContext.getResponseComplete()) {
 			return;
 		}
 

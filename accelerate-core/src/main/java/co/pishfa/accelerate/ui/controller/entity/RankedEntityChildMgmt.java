@@ -7,13 +7,16 @@ import co.pishfa.accelerate.ui.UiAction;
 import java.util.List;
 
 /**
- * Keeps non-continues rank among child
+ * Keeps continues rank among child
  * @author Taha Ghasemi.
  */
 abstract public class RankedEntityChildMgmt<T extends RankedEntity<Long>, P extends Entity<Long>> extends EntityChildMgmt<T,P> {
 
-    private int maxRank;
+    private int maxRank,prevRank; //keep track of rank change
 
+    public int getMaxRank() {
+        return maxRank;
+    }
 
     @Override
     protected List<T> findData() {
@@ -26,9 +29,26 @@ abstract public class RankedEntityChildMgmt<T extends RankedEntity<Long>, P exte
     }
 
     @Override
+    protected T newEntity() {
+        T entity = super.newEntity();
+        entity.setRank(++maxRank);
+        return entity;
+    }
+
+    @Override
+    protected void addEdit() {
+        super.addEdit();
+        prevRank = getCurrent().getRank();
+    }
+
+    @Override
     public String save() {
-        if(!getEditMode()) {
-            getCurrent().setRank(++maxRank);
+        if(prevRank != getCurrent().getRank()) {
+            getData().remove(getCurrent());
+            getData().add(getCurrent().getRank()-1,getCurrent());
+            for(int i = 0; i < getData().size(); i++)
+                getData().get(i).setRank(i+1);
+            maxRank = getData().size();
         }
         return super.save();
     }
@@ -65,5 +85,16 @@ abstract public class RankedEntityChildMgmt<T extends RankedEntity<Long>, P exte
         getData().set(pos, des);
         getData().set(pos + 1, getCurrent());
         return null;
+    }
+
+    @Override
+    protected void deleteEntity(T entity) {
+        super.deleteEntity(entity);
+        //reset ranks
+        if(getData() != null) {
+            for(int i = 0; i < getData().size(); i++)
+                getData().get(i).setRank(i+1);
+        }
+        maxRank = getData().size();
     }
 }

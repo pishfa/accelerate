@@ -34,6 +34,16 @@ public abstract class BaseRankedEntityJpaRepo<T extends RankedEntity<K>,K> exten
 	}
 
 	@Override
+	public List<T> findOrderByRank(Filter<T> filter,Integer fromRank, Integer toRank) {
+		QueryBuilder<T> builder = query("").select().where(filter);
+		if(fromRank != null)
+			builder.and("e.rank >= :rankStart").with("rankStart", fromRank);
+		if(toRank != null)
+			builder.and("e.rank < :rankEnd").with("rankEnd", toRank);
+		return builder.sortBy("e.rank").list();
+	}
+
+	@Override
 	@Transactional
 	public void increment(Filter<T> filter, int fromRank) {
 		head(filter, "set e.rank = e.rank + 1").and("e.rank >= :rank").with("rank", fromRank).run();

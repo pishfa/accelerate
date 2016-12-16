@@ -6,6 +6,8 @@ import co.pishfa.accelerate.service.RankedEntityService;
 import co.pishfa.accelerate.ui.UiAction;
 import co.pishfa.accelerate.ui.UiMessage;
 
+import java.util.List;
+
 /**
  * Keeps continues ranks
  * @author Taha Ghasemi <taha.ghasemi@gmail.com>
@@ -90,10 +92,17 @@ public class RankedEntityMgmt<T extends RankedEntity<K>, K> extends EntityMgmt<T
 
 	@Override
 	protected void deleteEntity(T entity) {
+		entity = findEntity(entity.getId()); //get up-to-date rank (e.g in case of multiple deletes)
 		super.deleteEntity(entity);
-		getEntityService().decrement(getRankFilter(), entity.getRank());
-        getEntityService().clear();
-		maxRank = getMaxRank() - 1;
+		//getEntityService().decrement(getRankFilter(), entity.getRank()+1);
+        //getEntityService().clear();
+		int rank = entity.getRank();
+		List<T> list = getEntityService().findOrderByRank(getRankFilter(), rank+1, null);
+		for(T e : list) {
+			e.setRank(rank++);
+			getEntityService().edit(e); //TODO required?
+		}
+		maxRank = rank - 1;
 	}
 
 	@Override
