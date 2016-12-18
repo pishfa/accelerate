@@ -69,6 +69,7 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 			if (uiException != null) {
 				if (!StrUtils.isEmpty(uiException.message)) {
 					userMessages.error(uiException.message);
+					userMessages.keepMessages();
 				}
 				if (!StrUtils.isEmpty(uiException.page) && !navigatedToPage) {
 					try {

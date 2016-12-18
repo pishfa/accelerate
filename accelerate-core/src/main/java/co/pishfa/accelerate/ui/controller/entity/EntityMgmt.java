@@ -219,14 +219,18 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 	@UiAction
 	@UiMessage
 	public String applyAndNext() throws Exception {
+		Boolean edit = getEditMode(); //keep edit state
 		apply();
+		setEditMode(edit);
 		return next();
 	}
 
 	@UiAction
 	@UiMessage
 	public String applyAndPrev() throws Exception {
+		Boolean edit = getEditMode(); //keep edit state
 		apply();
+		setEditMode(edit);
 		return prev();
 	}
 
@@ -243,7 +247,8 @@ public class EntityMgmt<T extends Entity<K>, K> extends EntityPagedList<T, K> {
 				} else if (hasNextPage()) {
 					nextPage();
 					edit(getData().get(0));
-				}
+				} else
+					add();
 			}
 		}
 		return null;
