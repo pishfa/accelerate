@@ -321,11 +321,11 @@ public class AuthorizationService implements Serializable {
 				return handler.check(identity, target, action);
 			}
 			// check action is defined or not...
+			//TODO might be generalized action
 			try {
 				actionRepo.findByName(action);
 			} catch (Exception e) {
-				throw new IllegalArgumentException(
-						"Action " + action + " is undefined and no suitable action handler can be found.");
+				log.warn("Action " + action + " is undefined and no suitable action handler can be found.");
 			}
 			return false;
 		}

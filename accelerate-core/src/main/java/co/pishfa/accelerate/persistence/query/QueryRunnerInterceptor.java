@@ -160,8 +160,9 @@ public class QueryRunnerInterceptor implements Serializable {
             return null;
         } else if (List.class.isAssignableFrom(returnType)) {
             return query.getResultList();
-        } else if (returnType == Boolean.TYPE || returnType == Boolean.class) {
-            Object result = query.getSingleResult();
+        }
+        Object result = getSingle(query, qr.nullOnNoResult());
+        if (returnType == Boolean.TYPE || returnType == Boolean.class) {
             if(result == null)
                 return returnType == Boolean.TYPE? false : null;
             if (result instanceof Long)
@@ -170,37 +171,40 @@ public class QueryRunnerInterceptor implements Serializable {
                 return (Integer) result > 0;
             return result;
         } else if (returnType == Long.TYPE || returnType == Long.class) {
-            Number numRes = (Number) query.getSingleResult();
+            Number numRes = (Number) result;
             if(numRes == null)
                 return returnType == Long.TYPE? 0L : null;
             return numRes.longValue();
         } else if (returnType == Integer.TYPE || returnType == Integer.class) {
-            Number numRes = (Number) query.getSingleResult();
+            Number numRes = (Number) result;
             if(numRes == null)
                 return returnType == Integer.TYPE? 0 : null;
             return numRes.intValue();
         } else if (returnType == Float.TYPE || returnType == Float.class) {
-            Number numRes = (Number) query.getSingleResult();
+            Number numRes = (Number) result;
             if(numRes == null)
                 return returnType == Float.TYPE? 0f : null;
             return numRes.floatValue();
         } else if (returnType == Double.TYPE || returnType == Double.class) {
-            Number numRes = (Number) query.getSingleResult();
+            Number numRes = (Number) result;
             if (numRes == null)
                 return returnType == Double.TYPE ? 0d : null;
             return numRes.doubleValue();
-        } else if(query.getMaxResults() == 1) {
+        } else
+            return result;
+    }
+
+    private Object getSingle(Query query, boolean nullOnNoResult) {
+        if(query.getMaxResults() == 1) {
             List res = query.getResultList();
             return res.size()==0?null:res.get(0);
-        } else {
-            if (!qr.nullOnNoResult()) {
-                return query.getSingleResult();
-            }
-            try {
-                return query.getSingleResult();
-            } catch (NoResultException e) {
-                return null;
-            }
+        } else if (!nullOnNoResult) {
+            return query.getSingleResult();
+        }
+        try {
+            return query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
         }
     }
 

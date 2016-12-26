@@ -184,6 +184,12 @@ public abstract class EntityChildMgmt<T extends Entity<Long>, P extends Entity<L
 		return null;
 	}
 
+	public void edit(T entity) {
+		editMode = true;
+		setCurrent(entity);
+		addEdit();
+	}
+
 	/**
 	 * Called after either add or edit operations. Whether it is called from add or edit is determined by
 	 * {@link #getEditMode()}. The entity under operation can be obtained via {@link #getCurrent()}.
