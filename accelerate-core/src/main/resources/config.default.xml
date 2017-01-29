@@ -9,8 +9,8 @@
 	<init incremental="false" />
 	<ui header="header2.png">
 		<exceptions>
-			<javax.faces.application.ViewExpiredException page="ac:this" message="pages.error.view-expired" />
-			<javax.enterprise.context.ContextNotActiveException page="ac:this" message="pages.error.view-expired" />
+			<javax.faces.application.ViewExpiredException page="/login.xhtml" message="pages.error.view-expired" />
+			<javax.enterprise.context.ContextNotActiveException page="/login.xhtml" message="pages.error.view-expired" />
 			<not-handeled page="ac:error" message="pages.error.general-error-msg" />
 		</exceptions>
 	</ui>

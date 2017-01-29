@@ -5,6 +5,7 @@ import java.util.Iterator;
 import javax.enterprise.context.ContextNotActiveException;
 import javax.faces.FacesException;
 import javax.faces.application.ProjectStage;
+import javax.faces.application.ViewExpiredException;
 import javax.faces.context.ExceptionHandler;
 import javax.faces.context.ExceptionHandlerWrapper;
 import javax.faces.context.FacesContext;
@@ -13,6 +14,7 @@ import javax.faces.event.PhaseId;
 
 import co.pishfa.accelerate.config.cdi.ConfigService;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.omnifaces.config.WebXml;
 import org.omnifaces.util.Exceptions;
 import org.omnifaces.util.Faces;
 import org.slf4j.Logger;
@@ -72,12 +74,19 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 					userMessages.keepMessages();
 				}
 				if (!StrUtils.isEmpty(uiException.page) && !navigatedToPage) {
-					try {
-						Faces.navigate(uiException.page);
-					} catch (ContextNotActiveException e) {
-						Faces.navigate("ac:login");
+					if(exception instanceof ViewExpiredException || exception instanceof ContextNotActiveException) {
+						facesContext.setViewRoot(facesContext.getApplication().getViewHandler().createView(facesContext, uiException.page));
+						facesContext.getPartialViewContext().setRenderAll(true);
+						facesContext.renderResponse();
+						navigatedToPage = true;
+					} else {
+						try {
+							Faces.navigate(uiException.page);
+							navigatedToPage = true; // can not handle any more errors
+						} catch (Exception e) { //view expired or has error page has some problems
+							log.error("Could not navigate to " + uiException.page, e);
+						}
 					}
-					navigatedToPage = true; // can not handle any more errors
 				}
 				i.remove();
 			} else {
@@ -90,6 +99,7 @@ public class AccelerateExceptionHandler extends ExceptionHandlerWrapper {
 		}
 		if (inError && isProduction) {
 			userMessages.error(config.getString("ui.exceptions.not-handeled.message"));
+			userMessages.keepMessages();
 			Faces.navigate(config.getString("ui.exceptions.not-handeled.page"));
 		} else {
 			wrapped.handle();
